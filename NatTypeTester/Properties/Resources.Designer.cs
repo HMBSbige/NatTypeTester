@@ -59,15 +59,5 @@ namespace NatTypeTester.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] LumiSoft_Net {
-            get {
-                object obj = ResourceManager.GetObject("LumiSoft_Net", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }

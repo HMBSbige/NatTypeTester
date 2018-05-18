@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace NatTypeTester
@@ -12,15 +11,6 @@ namespace NatTypeTester
 		[STAThread]
 		static void Main()
 		{
-			AppDomain.CurrentDomain.AssemblyResolve += (sender, arg) =>
-			{
-				if (arg.Name.StartsWith(@"LumiSoft.Net"))
-				{
-					return Assembly.Load(Properties.Resources.LumiSoft_Net);
-				}
-
-				return null;
-			};
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new MainForm());
