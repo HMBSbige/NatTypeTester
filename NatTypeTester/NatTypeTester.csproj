@@ -85,4 +85,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>ILMerge.exe /target:winexe /targetplatform:"v4,%25SystemRoot%25\Microsoft.NET\Framework\v4.0.30319" /out:NatTypeTester_release.exe NatTypeTester.exe LumiSoft.Net.dll</PostBuildEvent>
+  </PropertyGroup>
 </Project>
