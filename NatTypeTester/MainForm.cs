@@ -58,7 +58,7 @@ namespace NatTypeTester
 				{
 					BeginInvoke(new VoidMethodDelegate(() =>
 					{
-						var res = Core(textBox1.Text, Convert.ToInt32(numericUpDown1.Value));
+						var res = Core(comboBox1.Text, Convert.ToInt32(numericUpDown1.Value));
 						if (res != null)
 						{
 							textBox2.Text = res[0];
@@ -81,6 +81,11 @@ namespace NatTypeTester
 				MessageBox.Show($@"Error: {ex}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				button1.Enabled = true;
 			}
+		}
+
+		private void MainForm_Load(object sender, EventArgs e)
+		{
+			comboBox1.SelectedIndex = 0;
 		}
 	}
 }
