@@ -10,9 +10,18 @@ namespace LumiSoft.Net.IO
     /// </summary>
     public class MemoryStreamEx : Stream
     {
+        private static int m_DefaultMemorySize = 64000;
+
         private bool   m_IsDisposed = false;
         private Stream m_pStream    = null;
-        private int    m_MaxMemSize = 32000;
+        private int    m_MaxMemSize = 64000;
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public MemoryStreamEx() : this(m_DefaultMemorySize)
+        {
+        }
 
         /// <summary>
         /// Default constructor.
@@ -175,6 +184,25 @@ namespace LumiSoft.Net.IO
 
 
         #region Properties Implementation
+
+        /// <summary>
+        /// Gets or sets default memory size in bytes, before switching to temp file.
+        /// </summary>
+        public static int DefaultMemorySize
+        {
+            get{
+                return m_DefaultMemorySize;
+            }
+
+            set{
+                if(value < 32000){
+                    throw new ArgumentException("Property 'DefaultMemorySize' value must be >= 32k.","value");
+                }
+
+                m_DefaultMemorySize = value;
+            }
+        }
+
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports reading.

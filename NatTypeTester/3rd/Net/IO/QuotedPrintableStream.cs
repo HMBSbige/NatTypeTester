@@ -240,8 +240,8 @@ namespace LumiSoft.Net.IO
 
                     // Encode byte.
                     m_pEncodedBuffer[m_EncodedCount++] = (byte)'=';
-                    m_pEncodedBuffer[m_EncodedCount++] = (byte)(b >> 4).ToString("x")[0];
-                    m_pEncodedBuffer[m_EncodedCount++] = (byte)(b & 0xF).ToString("x")[0];
+                    m_pEncodedBuffer[m_EncodedCount++] = (byte)(b >> 4).ToString("X")[0];
+                    m_pEncodedBuffer[m_EncodedCount++] = (byte)(b & 0xF).ToString("X")[0];
                 }                
             }
         }

@@ -914,21 +914,22 @@ namespace LumiSoft.Net
                 throw new ArgumentNullException("text");
             }
 
-            System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();			
-			byte[] hash = md5.ComputeHash(Encoding.Default.GetBytes(text));
+            using(System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider()) {
+                byte[] hash = md5.ComputeHash(Encoding.Default.GetBytes(text));
 
-            if(hex){
-			    return ToHex(hash).ToLower();
-            }
-            else{
-                return System.Text.Encoding.Default.GetString(hash);
+                if(hex){
+			        return ToHex(hash).ToLower();
+                }
+                else{
+                    return System.Text.Encoding.Default.GetString(hash);
+                }
             }
         }
 
         #endregion
 
 
-        //--- Obsolte ------------------------------------------------------------------
+        //--- Obsolete ------------------------------------------------------------------
         
         #region static method IsIoCompletionPortsSupported
 

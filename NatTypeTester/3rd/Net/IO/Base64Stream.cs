@@ -44,20 +44,21 @@ namespace LumiSoft.Net.IO
 
         #endregion
 
-        private bool        m_IsDisposed         = false;
-        private bool        m_IsFinished         = false;
-        private Stream      m_pStream            = null;
-        private bool        m_IsOwner            = false;
-        private bool        m_AddLineBreaks      = true;
-        private FileAccess  m_AccessMode         = FileAccess.ReadWrite;
-        private int         m_EncodeBufferOffset = 0;
+        private bool        m_IsDisposed             = false;
+        private bool        m_IsFinished             = false;
+        private Stream      m_pStream                = null;
+        private bool        m_IsOwner                = false;
+        private bool        m_AddLineBreaks          = true;
+        private FileAccess  m_AccessMode             = FileAccess.ReadWrite;
+        private int         m_EncodeBufferOffset     = 0;
         private int         m_OffsetInEncode3x8Block = 0;
-        private byte[]      m_pEncode3x8Block    = new byte[3];
-        private byte[]      m_pEncodeBuffer      = new byte[78];
-        private byte[]      m_pDecodedBlock      = null;
-        private int         m_DecodedBlockOffset = 0;
-        private int         m_DecodedBlockCount  = 0;
-        private Base64      m_pBase64            = null;
+        private byte[]      m_pEncode3x8Block        = new byte[3];
+        private byte[]      m_pEncodeBuffer          = new byte[78];
+        private byte[]      m_pDecodedBlock          = null;
+        private int         m_DecodedBlockOffset     = 0;
+        private int         m_DecodedBlockCount      = 0;
+        private Base64      m_pBase64                = null;
+        private bool        m_IgnoreInvalidPadding   = false;
 
         /// <summary>
         /// Default constructor.
@@ -230,7 +231,23 @@ namespace LumiSoft.Net.IO
                     int b = m_pStream.ReadByte();
                     // End of stream reached.
                     if(b == -1){
-                        break;
+                        // Add missing padding char(s) '='.
+                        if(m_IgnoreInvalidPadding){
+                            // Per speifiction base64 block must have 2 bytes block + 2 padding bytes.
+                            // Some x soft won't honour it, so add second block with 0-bits.
+                            if((base64Count % 4) == 1){
+                                readBuffer[readedCount++] = (byte)'A';
+                                base64Count++;
+                            }
+                            // Add missing paading char.
+                            else{
+                                readBuffer[readedCount++] = (byte)'=';
+                                base64Count++;
+                            }
+                        }
+                        else{
+                            break;
+                        }
                     }
                     else if(b == '=' || BASE64_DECODE_TABLE[b] != -1){
                         readBuffer[readedCount++] = (byte)b;
@@ -482,6 +499,16 @@ namespace LumiSoft.Net.IO
 
                 throw new NotSupportedException();
             }
+        }
+
+        /// <summary>
+        /// Gets or sets if invalid(missing '=' chars) base64 last block padding allowed.
+        /// </summary>
+        public bool IgnoreInvalidPadding
+        {
+            get{ return m_IgnoreInvalidPadding; }
+
+            set{ m_IgnoreInvalidPadding = value; }
         }
 
         #endregion

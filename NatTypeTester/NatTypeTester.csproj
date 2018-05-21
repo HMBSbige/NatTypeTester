@@ -47,18 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3rd\Net\AsyncOP.cs" />
     <Compile Include="3rd\Net\AsyncOP_State.cs" />
-    <Compile Include="3rd\Net\BalanceMode.cs" />
-    <Compile Include="3rd\Net\BindInfoProtocol.cs" />
-    <Compile Include="3rd\Net\ByteBuilder.cs" />
-    <Compile Include="3rd\Net\CircleCollection.cs" />
-    <Compile Include="3rd\Net\ErrorEventHandler.cs" />
-    <Compile Include="3rd\Net\Error_EventArgs.cs" />
     <Compile Include="3rd\Net\EventArgs.cs" />
-    <Compile Include="3rd\Net\ExceptionEventArgs.cs" />
-    <Compile Include="3rd\Net\HostEndPoint.cs" />
-    <Compile Include="3rd\Net\HostEntry.cs" />
     <Compile Include="3rd\Net\IAsyncOP.cs" />
     <Compile Include="3rd\Net\IO\Base64.cs" />
     <Compile Include="3rd\Net\IO\Base64Stream.cs" />
@@ -74,18 +64,12 @@
     <Compile Include="3rd\Net\IO\ReadWriteControlledStream.cs" />
     <Compile Include="3rd\Net\IO\SizeExceededAction.cs" />
     <Compile Include="3rd\Net\IO\SmartStream.cs" />
-    <Compile Include="3rd\Net\IPBindInfo.cs" />
-    <Compile Include="3rd\Net\KeyValueCollection.cs" />
     <Compile Include="3rd\Net\Log\LogEntry.cs" />
     <Compile Include="3rd\Net\Log\LogEntryType.cs" />
     <Compile Include="3rd\Net\Log\Logger.cs" />
     <Compile Include="3rd\Net\Log\WriteLogEventArgs.cs" />
     <Compile Include="3rd\Net\Net_Utils.cs" />
-    <Compile Include="3rd\Net\ParseException.cs" />
-    <Compile Include="3rd\Net\PortRange.cs" />
-    <Compile Include="3rd\Net\Range_long.cs" />
     <Compile Include="3rd\Net\SslMode.cs" />
-    <Compile Include="3rd\Net\StringReader.cs" />
     <Compile Include="3rd\Net\STUN\Client\STUN_Client.cs" />
     <Compile Include="3rd\Net\STUN\Client\STUN_NetType.cs" />
     <Compile Include="3rd\Net\STUN\Client\STUN_Result.cs" />
@@ -93,13 +77,6 @@
     <Compile Include="3rd\Net\STUN\Message\STUN_MessageType.cs" />
     <Compile Include="3rd\Net\STUN\Message\STUN_t_ChangeRequest.cs" />
     <Compile Include="3rd\Net\STUN\Message\STUN_t_ErrorCode.cs" />
-    <Compile Include="3rd\Net\TextUtils.cs" />
-    <Compile Include="3rd\Net\TimerEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="3rd\Net\WellKnownPorts.cs" />
-    <Compile Include="3rd\Net\_AsyncResultState.cs" />
-    <Compile Include="3rd\Net\_MD4.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

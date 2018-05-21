@@ -19,7 +19,7 @@ namespace LumiSoft.Net.STUN.Client
     /// socket.Bind(new IPEndPoint(IPAddress.Any,0));
     /// 
     /// // Query STUN server
-    /// STUN_Result result = STUN_Client.Query("stunserver.org",3478,socket);
+    /// STUN_Result result = STUN_Client.Query("stun.ekiga.net",3478,socket);
     /// if(result.NetType != STUN_NetType.UdpBlocked){
     ///     // UDP blocked or !!!! bad STUN server
     /// }
