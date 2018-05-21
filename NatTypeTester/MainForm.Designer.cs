@@ -137,8 +137,15 @@
 			// 
 			this.comboBox1.FormattingEnabled = true;
 			this.comboBox1.Items.AddRange(new object[] {
-            "stun.ekiga.net",
-            "stun.bige0.com"});
+            "stun.miwifi.com",
+            "stun.bige0.com",
+            "stun.stunprotocol.org",
+            "iphone-stun.strato-iphone.de",
+            "stun.voipstunt.com",
+            "stun.xten.com",
+            "stun.schlund.de",
+            "numb.viagenie.ca",
+            "stun.ekiga.net"});
 			this.comboBox1.Location = new System.Drawing.Point(95, 16);
 			this.comboBox1.Name = "comboBox1";
 			this.comboBox1.Size = new System.Drawing.Size(174, 20);

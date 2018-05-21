@@ -54,24 +54,24 @@ namespace NatTypeTester
 			try
 			{
 				button1.Enabled = false;
+				var server = comboBox1.Text;
+				var port = Convert.ToInt32(numericUpDown1.Value);
+				string[] res = null;
 				var t = new Task(() =>
 				{
-					BeginInvoke(new VoidMethodDelegate(() =>
-					{
-						var res = Core(comboBox1.Text, Convert.ToInt32(numericUpDown1.Value));
-						if (res != null)
-						{
-							textBox2.Text = res[0];
-							textBox3.Text = res[1];
-							textBox4.Text = res[2];
-						}
-					}));
+					res = Core(server, port);
 				});
 				t.Start();
 				t.ContinueWith(task =>
 				{
 					BeginInvoke(new VoidMethodDelegate(() =>
 					{
+						if (res != null)
+						{
+							textBox2.Text = res[0];
+							textBox3.Text = res[1];
+							textBox4.Text = res[2];
+						}
 						button1.Enabled = true;
 					}));
 				});
