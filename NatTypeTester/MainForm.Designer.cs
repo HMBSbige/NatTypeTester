@@ -169,6 +169,7 @@
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.MaximizeBox = false;
 			this.Name = "MainForm";
+			this.ShowIcon = false;
 			this.Text = "NatTypeTester";
 			this.Load += new System.EventHandler(this.MainForm_Load);
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
