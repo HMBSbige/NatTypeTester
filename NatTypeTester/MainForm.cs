@@ -16,9 +16,8 @@ namespace NatTypeTester
 
 		private delegate void VoidMethodDelegate();
 
-		private static string[] Core(string server, int port)
+		private static string[] Core(string local, string server, int port)
 		{
-			var socketv4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 			try
 			{
 				if (string.IsNullOrWhiteSpace(server))
@@ -27,16 +26,27 @@ namespace NatTypeTester
 					return null;
 				}
 
-				socketv4.Bind(new IPEndPoint(IPAddress.Any, 0));
-
-				var result = STUN_Client.Query(server, port, socketv4);
-
-				return new[]
+				using (var socketv4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
 				{
-					result.NetType.ToString(),
-					socketv4.LocalEndPoint.ToString(),
-					result.NetType != STUN_NetType.UdpBlocked ? result.PublicEndPoint.ToString() : string.Empty
-				};
+					if (local != string.Empty)
+					{
+						var ip_port = local.Split(':');
+						socketv4.Bind(new IPEndPoint(IPAddress.Parse(ip_port[0]), Convert.ToInt32(ip_port[1])));
+					}
+					else
+					{
+						socketv4.Bind(new IPEndPoint(IPAddress.Any, 0));
+					}
+
+					var result = STUN_Client.Query(server, port, socketv4);
+
+					return new[]
+					{
+							result.NetType.ToString(),
+							socketv4.LocalEndPoint.ToString(),
+							result.NetType != STUN_NetType.UdpBlocked ? result.PublicEndPoint.ToString() : string.Empty
+					};
+				}
 			}
 			catch (Exception ex)
 			{
@@ -45,7 +55,7 @@ namespace NatTypeTester
 			}
 			finally
 			{
-				socketv4.Close();
+
 			}
 		}
 
@@ -56,10 +66,11 @@ namespace NatTypeTester
 				button1.Enabled = false;
 				var server = comboBox1.Text;
 				var port = Convert.ToInt32(numericUpDown1.Value);
+				var local = textBox3.Text;
 				string[] res = null;
 				var t = new Task(() =>
 				{
-					res = Core(server, port);
+					res = Core(local, server, port);
 				});
 				t.Start();
 				t.ContinueWith(task =>
