@@ -47,36 +47,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3rd\Net\AsyncOP_State.cs" />
-    <Compile Include="3rd\Net\EventArgs.cs" />
-    <Compile Include="3rd\Net\IAsyncOP.cs" />
-    <Compile Include="3rd\Net\IO\Base64.cs" />
-    <Compile Include="3rd\Net\IO\Base64Stream.cs" />
-    <Compile Include="3rd\Net\IO\DataSizeExceededException.cs" />
-    <Compile Include="3rd\Net\IO\FifoBuffer.cs" />
-    <Compile Include="3rd\Net\IO\IncompleteDataException.cs" />
-    <Compile Include="3rd\Net\IO\JunkingStream.cs" />
-    <Compile Include="3rd\Net\IO\LineSizeExceededException.cs" />
-    <Compile Include="3rd\Net\IO\MemoryStreamEx.cs" />
-    <Compile Include="3rd\Net\IO\MultiStream.cs" />
-    <Compile Include="3rd\Net\IO\PartialStream.cs" />
-    <Compile Include="3rd\Net\IO\QuotedPrintableStream.cs" />
-    <Compile Include="3rd\Net\IO\ReadWriteControlledStream.cs" />
-    <Compile Include="3rd\Net\IO\SizeExceededAction.cs" />
-    <Compile Include="3rd\Net\IO\SmartStream.cs" />
-    <Compile Include="3rd\Net\Log\LogEntry.cs" />
-    <Compile Include="3rd\Net\Log\LogEntryType.cs" />
-    <Compile Include="3rd\Net\Log\Logger.cs" />
-    <Compile Include="3rd\Net\Log\WriteLogEventArgs.cs" />
-    <Compile Include="3rd\Net\Net_Utils.cs" />
-    <Compile Include="3rd\Net\SslMode.cs" />
-    <Compile Include="3rd\Net\STUN\Client\STUN_Client.cs" />
-    <Compile Include="3rd\Net\STUN\Client\STUN_NetType.cs" />
-    <Compile Include="3rd\Net\STUN\Client\STUN_Result.cs" />
-    <Compile Include="3rd\Net\STUN\Message\STUN_Message.cs" />
-    <Compile Include="3rd\Net\STUN\Message\STUN_MessageType.cs" />
-    <Compile Include="3rd\Net\STUN\Message\STUN_t_ChangeRequest.cs" />
-    <Compile Include="3rd\Net\STUN\Message\STUN_t_ErrorCode.cs" />
+    <Compile Include="Lumisoft.Net\Net\AsyncOP_State.cs" />
+    <Compile Include="Lumisoft.Net\Net\EventArgs.cs" />
+    <Compile Include="Lumisoft.Net\Net\IAsyncOP.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\Base64.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\Base64Stream.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\DataSizeExceededException.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\FifoBuffer.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\IncompleteDataException.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\JunkingStream.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\LineSizeExceededException.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\MemoryStreamEx.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\MultiStream.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\PartialStream.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\QuotedPrintableStream.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\ReadWriteControlledStream.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\SizeExceededAction.cs" />
+    <Compile Include="Lumisoft.Net\Net\IO\SmartStream.cs" />
+    <Compile Include="Lumisoft.Net\Net\Log\LogEntry.cs" />
+    <Compile Include="Lumisoft.Net\Net\Log\LogEntryType.cs" />
+    <Compile Include="Lumisoft.Net\Net\Log\Logger.cs" />
+    <Compile Include="Lumisoft.Net\Net\Log\WriteLogEventArgs.cs" />
+    <Compile Include="Lumisoft.Net\Net\Net_Utils.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Client\STUN_Client.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Client\STUN_NetType.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Client\STUN_Result.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Message\STUN_Message.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Message\STUN_MessageType.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Message\STUN_t_ChangeRequest.cs" />
+    <Compile Include="Lumisoft.Net\Net\STUN\Message\STUN_t_ErrorCode.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,9 +109,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="3rd\Net\license.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
