@@ -1,0 +1,54 @@
+﻿<Window x:Class="NatTypeTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:NatTypeTester.Controls"
+        mc:Ignorable="d"
+        Title="NatTypeTester" Height="210" Width="385" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        KeyDown="MainWindow_OnKeyDown">
+
+	<Window.Resources>
+		<SolidColorBrush x:Key="DisabledBackgroundBrush" Color="LightGray" />
+		<Style TargetType="{x:Type TextBox}">
+			<Style.Triggers>
+				<Trigger Property="IsReadOnly" Value="True">
+					<Setter Property="Background" Value="{StaticResource DisabledBackgroundBrush}" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition />
+			<RowDefinition />
+			<RowDefinition />
+			<RowDefinition />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition />
+			<ColumnDefinition Width="65" />
+		</Grid.ColumnDefinitions>
+
+		<TextBlock Grid.Row="0" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="STUN Server" />
+		<TextBlock Grid.Row="1" Grid.Column="0" Margin="5,0" VerticalAlignment="Center"
+		           Text="NAT type" />
+		<TextBlock Grid.Row="2" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Local end" />
+		<TextBlock Grid.Row="3" Grid.Column="0" Margin="5,0" VerticalAlignment="Center"
+		           Text="Public end" />
+
+		<ComboBox x:Name="ServersComboBox" Grid.Row="0" Grid.Column="1" Height="23.24" IsEditable="True" VerticalContentAlignment="Center" />
+		<controls:NumberUpDown x:Name="PortNumber" Grid.Row="0" Grid.Column="2" Height="23.24" Margin="5,0" MinNum="1" MaxNum="65535" NumValue="3478"/>
+		<TextBox x:Name="NatTypeTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Height="23.24" Margin="0,5,5,0"
+		IsReadOnly="True" VerticalContentAlignment="Center" />
+		<TextBox x:Name="LocalEndTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Height="23.24" Margin="0,5,5,0" 
+		VerticalContentAlignment="Center"/>
+		<TextBox x:Name="PublicEndTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Height="23.24" Margin="0,5,5,0" 
+		IsReadOnly="True" VerticalContentAlignment="Center" />
+
+		<Button x:Name="TestButton" Grid.Row="4" Grid.Column="2" Content="Test" Margin="0,5,5,10" Click="TestButton_OnClick"/>
+	</Grid>
+</Window>
