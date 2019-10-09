@@ -16,7 +16,7 @@
 		BindingResponse = 0x0101,
 
 		/// <summary>
-		/// STUN message is binding requesr error response.
+		/// STUN message is binding request error response.
 		/// </summary>
 		BindingErrorResponse = 0x0111,
 

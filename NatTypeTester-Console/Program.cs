@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NatTypeTester_Console.Net;
+using System;
 
 namespace NatTypeTester_Console
 {
@@ -6,10 +7,19 @@ namespace NatTypeTester_Console
 	{
 		private static void Main(string[] args)
 		{
-			var res = Utils.NatTypeTestCore(Utils.DefaultLocalEnd, @"stun.miwifi.com", 3478);
-			Console.WriteLine(res.Item1);
-			Console.WriteLine(res.Item2);
-			Console.WriteLine(res.Item3);
+			var server = @"stun.miwifi.com";
+			ushort port = 3478;
+			if (args.Length > 0)
+			{
+				server = args[0];
+			}
+			if (args.Length > 1)
+			{
+				ushort.TryParse(args[1], out port);
+			}
+			var res = NetUtils.NatTypeTestCore(NetUtils.DefaultLocalEnd, server, port);
+			var natType = res.Item1;
+			Console.WriteLine(string.IsNullOrWhiteSpace(natType) ? @"Error" : natType);
 		}
 	}
 }

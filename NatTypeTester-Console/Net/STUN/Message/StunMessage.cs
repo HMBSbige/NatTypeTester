@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
@@ -41,8 +42,8 @@ namespace NatTypeTester_Console.Net.STUN.Message
 		/// </summary>
 		private enum IpFamily
 		{
-			Pv4 = 0x01,
-			Pv6 = 0x02
+			IPv4 = 0x01,
+			IPv6 = 0x02
 		}
 
 		#endregion
@@ -67,7 +68,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 		{
 			if (data == null)
 			{
-				throw new ArgumentNullException("data");
+				throw new ArgumentNullException(nameof(data));
 			}
 
 			/* RFC 5389 6.             
@@ -93,7 +94,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 
 			if (data.Length < 20)
 			{
-				throw new ArgumentException("Invalid STUN message value !");
+				throw new ArgumentException(@"Invalid STUN message value !");
 			}
 
 			var offset = 0;
@@ -128,7 +129,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 			}
 			else
 			{
-				throw new ArgumentException("Invalid STUN message type value !");
+				throw new ArgumentException(@"Invalid STUN message type value !");
 			}
 
 			// Message Length
@@ -199,7 +200,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 			msg[offset++] = (byte)((MagicCookie >> 24) & 0xFF);
 			msg[offset++] = (byte)((MagicCookie >> 16) & 0xFF);
 			msg[offset++] = (byte)((MagicCookie >> 8) & 0xFF);
-			msg[offset++] = (byte)((MagicCookie >> 0) & 0xFF);
+			msg[offset++] = (byte)(MagicCookie & 0xFF);
 
 			// Transaction ID (16 bytes)
 			Array.Copy(TransactionId, 0, msg, offset, 12);
@@ -322,7 +323,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 				msg[offset++] = 0;
 				msg[offset++] = 0;
 				// Class
-				msg[offset++] = (byte)Math.Floor((double)(ErrorCode.Code / 100));
+				msg[offset++] = (byte)Math.Floor(ErrorCode.Code / 100.0);
 				// Number
 				msg[offset++] = (byte)(ErrorCode.Code & 0xFF);
 				// ReasonPhrase
@@ -338,7 +339,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 			msg[2] = (byte)((offset - 20) >> 8);
 			msg[3] = (byte)((offset - 20) & 0xFF);
 
-			// Make reatval with actual size.
+			// Make retVal with actual size.
 			var retVal = new byte[offset];
 			Array.Copy(msg, retVal, retVal.Length);
 
@@ -492,12 +493,12 @@ namespace NatTypeTester_Console.Net.STUN.Message
 		#region method ParseEndPoint
 
 		/// <summary>
-		/// Pasrses IP endpoint attribute.
+		/// Parses IP endpoint attribute.
 		/// </summary>
 		/// <param name="data">STUN message data.</param>
 		/// <param name="offset">Offset in data.</param>
 		/// <returns>Returns parsed IP end point.</returns>
-		private IPEndPoint ParseEndPoint(byte[] data, ref int offset)
+		private static IPEndPoint ParseEndPoint(IReadOnlyList<byte> data, ref int offset)
 		{
 			/*
                 It consists of an eight bit address family, and a sixteen bit
@@ -540,7 +541,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 		/// <param name="endPoint">IP end point.</param>
 		/// <param name="message">Buffer where to store.</param>
 		/// <param name="offset">Offset in buffer.</param>
-		private void StoreEndPoint(AttributeType type, IPEndPoint endPoint, byte[] message, ref int offset)
+		private static void StoreEndPoint(AttributeType type, IPEndPoint endPoint, IList<byte> message, ref int offset)
 		{
 			/*
                 It consists of an eight bit address family, and a sixteen bit
@@ -564,7 +565,7 @@ namespace NatTypeTester_Console.Net.STUN.Message
 			// Unused
 			message[offset++] = 0;
 			// Family
-			message[offset++] = (byte)IpFamily.Pv4;
+			message[offset++] = (byte)IpFamily.IPv4;
 			// Port
 			message[offset++] = (byte)(endPoint.Port >> 8);
 			message[offset++] = (byte)(endPoint.Port & 0xFF);
