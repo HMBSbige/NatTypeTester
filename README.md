@@ -3,6 +3,9 @@
 - [x] RFC 3489
 - [ ] RFC 5389
 
+- [x] IPv4
+- [ ] IPv6
+
 ## Preview
 ![](pic/1.png)
 
