@@ -5,9 +5,14 @@ VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester", "NatTypeTester\NatTypeTester.csproj", "{B5104123-EB01-4079-8865-2A99DD91DC24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NatTypeTester_Console", "NatTypeTester-Console\NatTypeTester_Console.csproj", "{CC6BE2E2-81CB-4C0B-BA17-4BB48DD403AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester_Console", "NatTypeTester-Console\NatTypeTester_Console.csproj", "{CC6BE2E2-81CB-4C0B-BA17-4BB48DD403AC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Common", "Common\Common.shproj", "{0C2190CF-7A63-49F1-BB40-3B82BE5D037C}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Common\Common.projitems*{0c2190cf-7a63-49f1-bb40-3b82be5d037c}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

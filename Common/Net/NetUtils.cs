@@ -1,10 +1,10 @@
-﻿using NatTypeTester_Console.Net.STUN.Client;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using NatTypeTester.Net.STUN.Client;
 
-namespace NatTypeTester_Console.Net
+namespace NatTypeTester.Net
 {
 	public static class NetUtils
 	{

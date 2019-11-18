@@ -6,4 +6,6 @@
     <RootNamespace>NatTypeTester_Console</RootNamespace>
   </PropertyGroup>
 
+  <Import Project="..\Common\Common.projitems" Label="Shared" />
+
 </Project>

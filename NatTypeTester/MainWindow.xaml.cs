@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NatTypeTester.Net;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -10,17 +11,9 @@ namespace NatTypeTester
 		public MainWindow()
 		{
 			InitializeComponent();
-
-			foreach (var stunServer in StunServers)
-			{
-				ServersComboBox.Items.Add(stunServer);
-			}
-
-			ServersComboBox.SelectedIndex = 0;
-			LocalEndTextBox.Text = Utils.Utils.DefaultLocalEnd;
 		}
 
-		private static readonly string[] StunServers =
+		public static string[] StunServers { get; set; } =
 		{
 				@"stun.miwifi.com",
 				@"stun.bige0.com",
@@ -43,9 +36,9 @@ namespace NatTypeTester
 			var local = LocalEndTextBox.Text;
 			Task.Run(() =>
 			{
-				var (natType, localEnd, publicEnd) = Utils.Utils.NatTypeTestCore(local, server, port);
+				var (natType, localEnd, publicEnd) = NetUtils.NatTypeTestCore(local, server, port);
 
-				Dispatcher.BeginInvoke(new Action(() =>
+				Dispatcher?.BeginInvoke(new Action(() =>
 				{
 					NatTypeTextBox.Text = natType;
 					LocalEndTextBox.Text = localEnd;

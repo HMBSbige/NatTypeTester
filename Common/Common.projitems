@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>0c2190cf-7a63-49f1-bb40-3b82be5d037c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Common</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Net\NetUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Client\NatType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Client\StunClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Client\StunResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Message\StunChangeRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Message\StunErrorCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Message\StunMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\STUN\Message\StunMessageType.cs" />
+  </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-﻿using NatTypeTester_Console.Net;
+﻿using NatTypeTester.Net;
 using System;
 
 namespace NatTypeTester_Console

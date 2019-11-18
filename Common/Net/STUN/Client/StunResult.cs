@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace NatTypeTester_Console.Net.STUN.Client
+namespace NatTypeTester.Net.STUN.Client
 {
 	/// <summary>
 	/// This class holds STUN_Client.Query method return data.

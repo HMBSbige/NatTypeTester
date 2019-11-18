@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace NatTypeTester_Console.Net.STUN.Message
+namespace NatTypeTester.Net.STUN.Message
 {
 	/// <summary>
 	/// Implements STUN message. Defined in RFC 3489.
