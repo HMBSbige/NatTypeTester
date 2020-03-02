@@ -7,7 +7,7 @@ namespace NatTypeTester_Console
 	{
 		private static void Main(string[] args)
 		{
-			var server = @"stun.miwifi.com";
+			var server = @"stun.qq.com";
 			ushort port = 3478;
 			if (args.Length > 0)
 			{

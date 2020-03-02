@@ -1,5 +1,7 @@
-﻿using NatTypeTester.Net;
-using System;
+﻿using NatTypeTester.Model;
+using NatTypeTester.Net;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -11,41 +13,44 @@ namespace NatTypeTester
 		public MainWindow()
 		{
 			InitializeComponent();
+			LoadStunServer();
 		}
 
-		public static string[] StunServers { get; set; } =
+		public static HashSet<string> StunServers { get; set; } = new HashSet<string>
 		{
+				@"stun.qq.com",
 				@"stun.miwifi.com",
 				@"stun.bige0.com",
 				@"stun.syncthing.net",
-				@"stun.stunprotocol.org",
-				@"iphone-stun.strato-iphone.de",
-				@"stun.voipstunt.com",
-				@"stun.xten.com",
-				@"stun.schlund.de",
-				@"numb.viagenie.ca",
-				@"stun.ekiga.net",
-				@"stun.sipgate.net",
+				@"stun.stunprotocol.org"
 		};
 
-		private void TestButton_OnClick(object sender, RoutedEventArgs e)
+		private async void TestButton_OnClick(object sender, RoutedEventArgs e)
 		{
-			TestButton.IsEnabled = false;
-			var server = ServersComboBox.Text;
-			var port = PortNumber.NumValue;
-			var local = LocalEndTextBox.Text;
-			Task.Run(() =>
+			var stun = new StunServer();
+			if (stun.Parse(ServersComboBox.Text))
 			{
-				var (natType, localEnd, publicEnd) = NetUtils.NatTypeTestCore(local, server, port);
-
-				Dispatcher?.BeginInvoke(new Action(() =>
+				var server = stun.Hostname;
+				var port = stun.Port;
+				var local = LocalEndTextBox.Text;
+				TestButton.IsEnabled = false;
+				await Task.Run(() =>
 				{
-					NatTypeTextBox.Text = natType;
-					LocalEndTextBox.Text = localEnd;
-					PublicEndTextBox.Text = publicEnd;
-					TestButton.IsEnabled = true;
-				}));
-			});
+					var (natType, localEnd, publicEnd) = NetUtils.NatTypeTestCore(local, server, port);
+
+					Dispatcher?.InvokeAsync(() =>
+					{
+						NatTypeTextBox.Text = natType;
+						LocalEndTextBox.Text = localEnd;
+						PublicEndTextBox.Text = publicEnd;
+						TestButton.IsEnabled = true;
+					});
+				});
+			}
+			else
+			{
+				MessageBox.Show(@"Wrong Stun server!", @"NatTypeTester", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
 		private void MainWindow_OnKeyDown(object sender, KeyEventArgs e)
@@ -53,6 +58,24 @@ namespace NatTypeTester
 			if (e.Key == Key.Enter)
 			{
 				TestButton_OnClick(this, new RoutedEventArgs());
+			}
+		}
+
+		private async void LoadStunServer()
+		{
+			const string path = @"stun.txt";
+			if (File.Exists(path))
+			{
+				using var sw = new StreamReader(path);
+				string line;
+				var stun = new StunServer();
+				while ((line = await sw.ReadLineAsync()) != null)
+				{
+					if (!string.IsNullOrWhiteSpace(line) && stun.Parse(line))
+					{
+						StunServers.Add(stun.ToString());
+					}
+				}
 			}
 		}
 	}
