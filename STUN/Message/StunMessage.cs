@@ -1,21 +1,97 @@
-﻿using System;
+﻿using STUN.Message.Enums;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
-using STUN.Message.Enums;
 
 namespace STUN.Message
 {
     /// <summary>
-    /// Implements STUN message. Defined in RFC 3489.
+    /// Implements STUN message. Defined in RFC 3489, 5389.
     /// </summary>
+    /// <remarks>
+    /// https://tools.ietf.org/html/rfc3489#section-11.1
+    /// https://tools.ietf.org/html/rfc5389#section-6
+    /// </remarks>
     public class StunMessage
     {
+        #region Properties Implementation
+
+        /// <summary>
+        /// Gets STUN message type.
+        /// </summary>
+        public StunMessageType Type { get; set; } = StunMessageType.BindingRequest;
+
+        /// <summary>
+        /// Gets magic cookie value. This is always 0x2112A442.
+        /// </summary>
+        public int MagicCookie { get; private set; }
+
+        /// <summary>
+        /// Gets transaction ID.
+        /// </summary>
+        public byte[] TransactionId { get; private set; }
+
+        /// <summary>
+        /// Gets or sets IP end point what was actually connected to STUN server. Returns null if not specified.
+        /// </summary>
+        public IPEndPoint MappedAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets IP end point where to STUN client likes to receive response.
+        /// Value null means not specified.
+        /// </summary>
+        public IPEndPoint ResponseAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets how and where STUN server must send response back to STUN client.
+        /// Value null means not specified.
+        /// </summary>
+        public StunChangeRequest ChangeRequest { get; set; }
+
+        /// <summary>
+        /// Gets or sets STUN server IP end point what sent response to STUN client. Value null
+        /// means not specified.
+        /// </summary>
+        public IPEndPoint SourceAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets IP end point where STUN server will send response back to STUN client 
+        /// if the "change IP" and "change port" flags had been set in the ChangeRequest.
+        /// </summary>
+        public IPEndPoint ChangedAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets user name. Value null means not specified.
+        /// </summary>          
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// Gets or sets password. Value null means not specified.
+        /// </summary>
+        public string Password { get; set; }
+
+        //public MessageIntegrity
+
+        /// <summary>
+        /// Gets or sets error info. Returns null if not specified.
+        /// </summary>
+        public StunErrorCode ErrorCode { get; set; }
 
 
         /// <summary>
-        /// Default constructor.
+        /// Gets or sets IP endpoint from which IP end point STUN server got STUN client request.
+        /// Value null means not specified.
         /// </summary>
+        public IPEndPoint ReflectedFrom { get; set; }
+
+        /// <summary>
+        /// Gets or sets server name.
+        /// </summary>
+        public string ServerName { get; set; }
+
+        #endregion
+
         public StunMessage()
         {
             TransactionId = new byte[12];
@@ -544,83 +620,6 @@ namespace STUN.Message
 
         #endregion
 
-
-        #region Properties Implementation
-
-        /// <summary>
-        /// Gets STUN message type.
-        /// </summary>
-        public StunMessageType Type { get; set; } = StunMessageType.BindingRequest;
-
-        /// <summary>
-        /// Gets magic cookie value. This is always 0x2112A442.
-        /// </summary>
-        public int MagicCookie { get; private set; }
-
-        /// <summary>
-        /// Gets transaction ID.
-        /// </summary>
-        public byte[] TransactionId { get; private set; }
-
-        /// <summary>
-        /// Gets or sets IP end point what was actually connected to STUN server. Returns null if not specified.
-        /// </summary>
-        public IPEndPoint MappedAddress { get; set; }
-
-        /// <summary>
-        /// Gets or sets IP end point where to STUN client likes to receive response.
-        /// Value null means not specified.
-        /// </summary>
-        public IPEndPoint ResponseAddress { get; set; }
-
-        /// <summary>
-        /// Gets or sets how and where STUN server must send response back to STUN client.
-        /// Value null means not specified.
-        /// </summary>
-        public StunChangeRequest ChangeRequest { get; set; }
-
-        /// <summary>
-        /// Gets or sets STUN server IP end point what sent response to STUN client. Value null
-        /// means not specified.
-        /// </summary>
-        public IPEndPoint SourceAddress { get; set; }
-
-        /// <summary>
-        /// Gets or sets IP end point where STUN server will send response back to STUN client 
-        /// if the "change IP" and "change port" flags had been set in the ChangeRequest.
-        /// </summary>
-        public IPEndPoint ChangedAddress { get; set; }
-
-        /// <summary>
-        /// Gets or sets user name. Value null means not specified.
-        /// </summary>          
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// Gets or sets password. Value null means not specified.
-        /// </summary>
-        public string Password { get; set; }
-
-        //public MessageIntegrity
-
-        /// <summary>
-        /// Gets or sets error info. Returns null if not specified.
-        /// </summary>
-        public StunErrorCode ErrorCode { get; set; }
-
-
-        /// <summary>
-        /// Gets or sets IP endpoint from which IP end point STUN server got STUN client request.
-        /// Value null means not specified.
-        /// </summary>
-        public IPEndPoint ReflectedFrom { get; set; }
-
-        /// <summary>
-        /// Gets or sets server name.
-        /// </summary>
-        public string ServerName { get; set; }
-
-        #endregion
 
     }
 }

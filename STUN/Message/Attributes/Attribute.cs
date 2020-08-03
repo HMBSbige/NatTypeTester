@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using STUN.Message.Enums;
+﻿using STUN.Message.Enums;
 using STUN.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace STUN.Message.Attributes
 {
@@ -35,12 +36,49 @@ namespace STUN.Message.Attributes
 
             res.AddRange(Convert.ToUInt16(Type).ToBe());
             res.AddRange(Length.ToBe());
-            res.AddRange(Value.Value);
+            res.AddRange(Value.Bytes);
 
             var n = (4 - res.Count % 4) % 4; // 填充的字节数
             res.AddRange(BitUtils.GetRandomBytes(n));
 
             return res;
+        }
+
+        /// <returns>
+        /// Parse 成功字节，0 则表示 Parse 失败
+        /// </returns>
+        public int TryParse(byte[] bytes)
+        {
+            if (bytes.Length < 4) return 0;
+
+            Type = (AttributeType)BitUtils.FromBe(bytes[0], bytes[1]);
+
+            Length = BitUtils.FromBe(bytes[2], bytes[3]);
+
+            if (bytes.Length < 4 + Length) return 0;
+
+            var value = bytes.Skip(4).Take(Length).ToArray();
+
+            Value = null;
+            switch (Type)
+            {
+                case AttributeType.MappedAddress:
+                {
+                    var t = new MappedAddressAttribute();
+                    if (t.TryParse(value))
+                    {
+                        Value = t;
+                    }
+                    break;
+                }
+                //TODO:Parse
+                default:
+                    return 0;
+            }
+
+            if (Value == null) return 0;
+
+            return 4 + Length + (4 - Length % 4) % 4; // 对齐
         }
     }
 }

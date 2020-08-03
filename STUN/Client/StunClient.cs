@@ -404,7 +404,7 @@ namespace STUN.Client
                         response.Parse(receiveBuffer);
 
                         // Check that transaction ID matches or not response what we want.
-                        if (NetUtils.CompareArray(request.TransactionId, response.TransactionId))
+                        if (request.TransactionId.IsEqual(response.TransactionId))
                         {
                             return response;
                         }

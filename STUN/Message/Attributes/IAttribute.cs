@@ -4,6 +4,8 @@ namespace STUN.Message.Attributes
 {
     public interface IAttribute
     {
-        public IEnumerable<byte> Value { get; set; }
+        public IEnumerable<byte> Bytes { get; }
+
+        public bool TryParse(byte[] bytes);
     }
 }
