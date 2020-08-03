@@ -1,10 +1,10 @@
 ﻿using NatTypeTester.Model;
-using NatTypeTester.Net;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using STUN.Utils;
 
 namespace NatTypeTester
 {

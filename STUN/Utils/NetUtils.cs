@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using NatTypeTester.Net.STUN.Client;
+using STUN.Client;
 
-namespace NatTypeTester.Net
+namespace STUN.Utils
 {
 	public static class NetUtils
 	{

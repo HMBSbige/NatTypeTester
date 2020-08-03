@@ -1,4 +1,4 @@
-﻿namespace NatTypeTester.Net.STUN.Client
+﻿namespace STUN.Client
 {
 	/// <summary>
 	/// Specifies UDP network type.

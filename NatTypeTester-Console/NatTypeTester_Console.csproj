@@ -6,6 +6,8 @@
     <RootNamespace>NatTypeTester_Console</RootNamespace>
   </PropertyGroup>
 
-  <Import Project="..\Common\Common.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\STUN\STUN.csproj" />
+  </ItemGroup>
 
 </Project>

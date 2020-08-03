@@ -1,5 +1,5 @@
-﻿using NatTypeTester.Net;
-using System;
+﻿using System;
+using STUN.Utils;
 
 namespace NatTypeTester_Console
 {

@@ -2,9 +2,10 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using NatTypeTester.Net.STUN.Message;
+using STUN.Message;
+using STUN.Utils;
 
-namespace NatTypeTester.Net.STUN.Client
+namespace STUN.Client
 {
 	/// <summary>
 	/// This class implements STUN client. Defined in RFC 3489.

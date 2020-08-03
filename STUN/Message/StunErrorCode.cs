@@ -1,4 +1,4 @@
-﻿namespace NatTypeTester.Net.STUN.Message
+﻿namespace STUN.Message
 {
 	/// <summary>
 	/// This class implements STUN ERROR-CODE. Defined in RFC 3489 11.2.9.

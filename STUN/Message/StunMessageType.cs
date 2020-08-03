@@ -1,4 +1,4 @@
-﻿namespace NatTypeTester.Net.STUN.Message
+﻿namespace STUN.Message
 {
 	/// <summary>
 	/// This enum specifies STUN message type.
