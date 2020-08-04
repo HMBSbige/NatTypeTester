@@ -53,7 +53,7 @@ namespace STUN.Message.Attributes
                     return false;
             }
 
-            if (bytes.Length == length) return false;
+            if (bytes.Length != length) return false;
 
             Port = BitUtils.FromBe(bytes[2], bytes[3]);
 
