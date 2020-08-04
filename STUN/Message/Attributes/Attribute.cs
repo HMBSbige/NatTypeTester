@@ -30,6 +30,22 @@ namespace STUN.Message.Attributes
 
         public IAttribute Value { get; set; }
 
+
+        private byte[] _magicCookie;
+        private byte[] _transactionId;
+
+        public Attribute(byte[] magicCookie, byte[] transactionID)
+        {
+            if (magicCookie.Length != 4 || transactionID.Length != 12)
+            {
+                throw new ArgumentException(@"Wrong length");
+            }
+
+            _magicCookie = magicCookie;
+
+            _transactionId = transactionID;
+        }
+
         public IEnumerable<byte> ToBytes()
         {
             var res = new List<byte>();
@@ -65,6 +81,15 @@ namespace STUN.Message.Attributes
                 case AttributeType.MappedAddress:
                 {
                     var t = new MappedAddressAttribute();
+                    if (t.TryParse(value))
+                    {
+                        Value = t;
+                    }
+                    break;
+                }
+                case AttributeType.XorMappedAddress:
+                {
+                    var t = new XorMappedAddressAttribute(_magicCookie, _transactionId);
                     if (t.TryParse(value))
                     {
                         Value = t;

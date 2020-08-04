@@ -1,5 +1,6 @@
 ﻿using STUN.Message.Enums;
 using STUN.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,10 +12,14 @@ namespace STUN.Message.Attributes
     /// </summary>
     public class MappedAddressAttribute : IAttribute
     {
-        public IEnumerable<byte> Bytes
+        public virtual IEnumerable<byte> Bytes
         {
             get
             {
+                if (Address == null)
+                {
+                    return Array.Empty<byte>();
+                }
                 var res = new List<byte> { 0, (byte)Family };
                 res.AddRange(Port.ToBe());
                 res.AddRange(Address.GetAddressBytes());
@@ -28,7 +33,7 @@ namespace STUN.Message.Attributes
 
         public IPAddress Address { get; set; }
 
-        public bool TryParse(byte[] bytes)
+        public virtual bool TryParse(byte[] bytes)
         {
             var length = 4;
 
