@@ -75,34 +75,32 @@ namespace STUN.Message.Attributes
 
             var value = bytes.Skip(4).Take(Length).ToArray();
 
-            Value = null;
+            IAttribute t;
             switch (Type)
             {
                 case AttributeType.MappedAddress:
                 {
-                    var t = new MappedAddressAttribute();
-                    if (t.TryParse(value))
-                    {
-                        Value = t;
-                    }
+                    t = new MappedAddressAttribute();
                     break;
                 }
                 case AttributeType.XorMappedAddress:
                 {
-                    var t = new XorMappedAddressAttribute(_magicCookie, _transactionId);
-                    if (t.TryParse(value))
-                    {
-                        Value = t;
-                    }
+                    t = new XorMappedAddressAttribute(_magicCookie, _transactionId);
                     break;
                 }
                 case AttributeType.ResponseAddress:
                 {
-                    var t = new ResponseAddressAttribute();
-                    if (t.TryParse(value))
-                    {
-                        Value = t;
-                    }
+                    t = new ResponseAddressAttribute();
+                    break;
+                }
+                case AttributeType.ChangeRequest:
+                {
+                    t = new ChangeRequestAttribute();
+                    break;
+                }
+                case AttributeType.SourceAddress:
+                {
+                    t = new SourceAddressAttribute();
                     break;
                 }
                 //TODO:Parse
@@ -110,7 +108,14 @@ namespace STUN.Message.Attributes
                     return 0;
             }
 
-            if (Value == null) return 0;
+            if (t.TryParse(value))
+            {
+                Value = t;
+            }
+            else
+            {
+                return 0;
+            }
 
             return 4 + Length + (4 - Length % 4) % 4; // 对齐
         }
