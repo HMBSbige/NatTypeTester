@@ -1,10 +1,11 @@
-﻿using STUN.Message.Enums;
+﻿using STUN.Message.Attributes;
+using STUN.Message.Enums;
 using STUN.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace STUN.Message.Attributes
+namespace STUN.Message
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5389#section-15
@@ -29,7 +30,6 @@ namespace STUN.Message.Attributes
         public ushort Length { get; set; }
 
         public IAttribute Value { get; set; }
-
 
         private byte[] _magicCookie;
         private byte[] _transactionId;
@@ -75,47 +75,22 @@ namespace STUN.Message.Attributes
 
             var value = bytes.Skip(4).Take(Length).ToArray();
 
-            IAttribute t;
-            switch (Type)
+            IAttribute t = Type switch
             {
-                case AttributeType.MappedAddress:
-                {
-                    t = new MappedAddressAttribute();
-                    break;
-                }
-                case AttributeType.XorMappedAddress:
-                {
-                    t = new XorMappedAddressAttribute(_magicCookie, _transactionId);
-                    break;
-                }
-                case AttributeType.ResponseAddress:
-                {
-                    t = new ResponseAddressAttribute();
-                    break;
-                }
-                case AttributeType.ChangeRequest:
-                {
-                    t = new ChangeRequestAttribute();
-                    break;
-                }
-                case AttributeType.SourceAddress:
-                {
-                    t = new SourceAddressAttribute();
-                    break;
-                }
-                //TODO:Parse
-                default:
-                    return 0;
-            }
+                AttributeType.MappedAddress => new MappedAddressAttribute(),
+                AttributeType.XorMappedAddress => new XorMappedAddressAttribute(_magicCookie, _transactionId),
+                AttributeType.ResponseAddress => new ResponseAddressAttribute(),
+                AttributeType.ChangeRequest => new ChangeRequestAttribute(),
+                AttributeType.SourceAddress => new SourceAddressAttribute(),
+                AttributeType.ChangedAddress => new ChangedAddressAttribute(),
+                AttributeType.OtherAddress => new OtherAddressAttribute(),
+                AttributeType.ReflectedFrom => new ReflectedFromAttribute(),
+                AttributeType.ErrorCode => new ErrorCodeAttribute(),
+                _ => new UselessAttribute()
+            };
 
-            if (t.TryParse(value))
-            {
-                Value = t;
-            }
-            else
-            {
-                return 0;
-            }
+            //TODO:Parse
+            Value = t.TryParse(value) ? t : null;
 
             return 4 + Length + (4 - Length % 4) % 4; // 对齐
         }

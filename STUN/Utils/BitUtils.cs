@@ -18,6 +18,11 @@ namespace STUN.Utils
             return BitConverter.ToUInt16(BitConverter.IsLittleEndian ? new[] { b2, b1 } : new[] { b1, b2 }, 0);
         }
 
+        public static ushort FromBe(IEnumerable<byte> b)
+        {
+            return BitConverter.ToUInt16(BitConverter.IsLittleEndian ? b.Reverse().ToArray() : b.ToArray(), 0);
+        }
+
         public static IEnumerable<byte> GetRandomBytes(int n)
         {
             var temp = new byte[n];
