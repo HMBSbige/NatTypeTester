@@ -96,6 +96,15 @@ namespace STUN.Message.Attributes
                     }
                     break;
                 }
+                case AttributeType.ResponseAddress:
+                {
+                    var t = new ResponseAddressAttribute();
+                    if (t.TryParse(value))
+                    {
+                        Value = t;
+                    }
+                    break;
+                }
                 //TODO:Parse
                 default:
                     return 0;

@@ -9,7 +9,7 @@ namespace STUN.Message.Attributes
     /// <summary>
     /// https://tools.ietf.org/html/rfc5389#section-15.2
     /// </summary>
-    public class XorMappedAddressAttribute : MappedAddressAttribute
+    public class XorMappedAddressAttribute : AddressAttribute
     {
         private readonly byte[] _magicCookie;
         private readonly byte[] _transactionId;
