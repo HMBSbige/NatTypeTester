@@ -1,7 +1,7 @@
 ﻿namespace STUN.Message.Enums
 {
     /// <summary>
-    /// Specifies IP address family.
+    /// https://tools.ietf.org/html/rfc5389#section-15.1
     /// </summary>
     public enum IpFamily : byte
     {

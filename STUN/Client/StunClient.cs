@@ -2,7 +2,6 @@
 using STUN.Message.Enums;
 using STUN.Utils;
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
@@ -31,31 +30,6 @@ namespace STUN.Client
     public static class StunClient
     {
         #region static method Query
-
-        /// <summary>
-        /// Gets NAT info from STUN server.
-        /// </summary>
-        /// <param name="host">STUN server name or IP.</param>
-        /// <param name="port">STUN server port. Default port is 3478.</param>
-        /// <param name="localEP">Local IP end point.</param>
-        /// <returns>Returns UDP network info.</returns>
-        /// <exception cref="Exception">Is raised when <b>host</b> or <b>localEP</b> is null reference.</exception>
-        /// <exception cref="ArgumentNullException">Throws exception if unexpected error happens.</exception>
-        public static StunResult Query(string host, int port, IPEndPoint localEP)
-        {
-            if (host == null)
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
-            if (localEP == null)
-            {
-                throw new ArgumentNullException(nameof(localEP));
-            }
-
-            using var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            s.Bind(localEP);
-            return Query(host, port, s);
-        }
 
         /// <summary>
         /// Gets NAT info from STUN server.
@@ -233,126 +207,6 @@ namespace STUN.Client
                         }
                     }
                 }
-            }
-            finally
-            {
-                // Junk all late responses.
-                var startTime = DateTime.Now;
-                while (startTime.AddMilliseconds(200) > DateTime.Now)
-                {
-                    // We got response.
-                    if (socket.Poll(1, SelectMode.SelectRead))
-                    {
-                        var receiveBuffer = new byte[512];
-                        socket.Receive(receiveBuffer);
-                    }
-                }
-            }
-        }
-
-        #endregion
-
-        #region method GetPublicIP
-
-        /// <summary>
-        /// Resolves local IP to public IP using STUN.
-        /// </summary>
-        /// <param name="stunServer">STUN server.</param>
-        /// <param name="port">STUN server port. Default port is 3478.</param>
-        /// <param name="localIP">Local IP address.</param>
-        /// <returns>Returns public IP address.</returns>
-        /// <exception cref="ArgumentNullException">Is raised when <b>stunServer</b> or <b>localIP</b> is null reference.</exception>
-        /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
-        /// <exception cref="IOException">Is raised when no connection to STUN server.</exception>
-        public static IPAddress GetPublicIP(string stunServer, int port, IPAddress localIP)
-        {
-            if (stunServer == null)
-            {
-                throw new ArgumentNullException(nameof(stunServer));
-            }
-            if (stunServer == string.Empty)
-            {
-                throw new ArgumentException(@"Argument 'stunServer' value must be specified.");
-            }
-            if (port < 1)
-            {
-                throw new ArgumentException(@"Invalid argument 'port' value.");
-            }
-            if (localIP == null)
-            {
-                throw new ArgumentNullException(nameof(localIP));
-            }
-
-            if (!NetUtils.IsPrivateIP(localIP))
-            {
-                return localIP;
-            }
-
-            var result = Query(stunServer, port, NetUtils.CreateSocket(new IPEndPoint(localIP, 0), ProtocolType.Udp));
-            if (result.PublicEndPoint != null)
-            {
-                return result.PublicEndPoint.Address;
-            }
-
-            throw new IOException(@"Failed to STUN public IP address. STUN server name is invalid or firewall blocks STUN.");
-        }
-
-        #endregion
-
-        #region method GetPublicEP
-
-        /// <summary>
-        /// Resolves socket local end point to public end point.
-        /// </summary>
-        /// <param name="stunServer">STUN server.</param>
-        /// <param name="port">STUN server port. Default port is 3478.</param>
-        /// <param name="socket">UDP socket to use.</param>
-        /// <returns>Returns public IP end point.</returns>
-        /// <exception cref="ArgumentNullException">Is raised when <b>stunServer</b> or <b>socket</b> is null reference.</exception>
-        /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
-        /// <exception cref="IOException">Is raised when no connection to STUN server.</exception>
-        public static IPEndPoint GetPublicEP(string stunServer, int port, Socket socket)
-        {
-            if (stunServer == null)
-            {
-                throw new ArgumentNullException(nameof(stunServer));
-            }
-            if (stunServer == string.Empty)
-            {
-                throw new ArgumentException(@"Argument 'stunServer' value must be specified.");
-            }
-            if (port < 1)
-            {
-                throw new ArgumentException(@"Invalid argument 'port' value.");
-            }
-            if (socket == null)
-            {
-                throw new ArgumentNullException(nameof(socket));
-            }
-            if (socket.ProtocolType != ProtocolType.Udp)
-            {
-                throw new ArgumentException(@"Socket must be UDP socket !");
-            }
-
-            var remoteEndPoint = new IPEndPoint(Dns.GetHostAddresses(stunServer)[0], port);
-
-            try
-            {
-                // Test I
-                var test1 = new StunMessage { Type = StunMessageType.BindingRequest };
-                var test1response = DoTransaction(test1, socket, remoteEndPoint, 1000);
-
-                // UDP blocked.
-                if (test1response == null)
-                {
-                    throw new IOException(@"Failed to STUN public IP address. STUN server name is invalid or firewall blocks STUN.");
-                }
-
-                return test1response.SourceAddress;
-            }
-            catch
-            {
-                throw new IOException(@"Failed to STUN public IP address. STUN server name is invalid or firewall blocks STUN.");
             }
             finally
             {

@@ -7,10 +7,9 @@ using System.Text;
 namespace STUN.Message
 {
     /// <summary>
-    /// Implements STUN message. Defined in RFC 3489, 5389.
+    /// Implements STUN message. Defined in RFC 5389.
     /// </summary>
     /// <remarks>
-    /// https://tools.ietf.org/html/rfc3489#section-11.1
     /// https://tools.ietf.org/html/rfc5389#section-6
     /// </remarks>
     public class StunMessage
