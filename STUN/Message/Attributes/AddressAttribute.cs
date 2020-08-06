@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 
 namespace STUN.Message.Attributes
 {
@@ -60,6 +61,16 @@ namespace STUN.Message.Attributes
             Address = new IPAddress(bytes.Skip(4).ToArray());
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            return Address?.AddressFamily switch
+            {
+                AddressFamily.InterNetwork => $@"{Address}:{Port}",
+                AddressFamily.InterNetworkV6 => $@"[{Address}]:{Port}",
+                _ => base.ToString()
+            };
         }
     }
 }

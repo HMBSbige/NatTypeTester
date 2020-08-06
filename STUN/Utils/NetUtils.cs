@@ -121,7 +121,7 @@ namespace STUN.Utils
             return null;
         }
 
-        public static (string, string, string) NatTypeTestCore(string local, string server, int port)
+        public static (string, string, string) NatTypeTestCore(string local, string server, ushort port)
         {
             try
             {
@@ -131,15 +131,14 @@ namespace STUN.Utils
                     return (string.Empty, DefaultLocalEnd, string.Empty);
                 }
 
-                using var socketV4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                var ipe = ParseEndpoint(local) ?? new IPEndPoint(IPAddress.Any, 0);
-                socketV4.Bind(ipe);
-                var result = StunClient.Query(server, port, socketV4);
+                using var client = new StunClient3489(server, port, ParseEndpoint(local));
+
+                var result = (ClassicStunResult)client.Query();
 
                 return (
                         result.NatType.ToString(),
-                        socketV4.LocalEndPoint.ToString(),
-                        result.NatType != NatType.UdpBlocked ? result.PublicEndPoint.ToString() : string.Empty
+                        client.LocalEndPoint.ToString(),
+                        $@"{result.PublicEndPoint}"
                 );
             }
             catch (Exception ex)

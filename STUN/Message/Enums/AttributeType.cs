@@ -11,6 +11,7 @@
     /// </remarks>
     public enum AttributeType : ushort
     {
+        Useless = 0x0000,
         MappedAddress = 0x0001,
         ResponseAddress = 0x0002,
         ChangeRequest = 0x0003,

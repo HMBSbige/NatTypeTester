@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace STUN.Message.Attributes
@@ -8,16 +9,7 @@ namespace STUN.Message.Attributes
     /// </summary>
     public class ChangeRequestAttribute : IAttribute
     {
-        public IEnumerable<byte> Bytes
-        {
-            get
-            {
-                var bits = new BitArray(32, false) { [29] = ChangeIp, [30] = ChangePort };
-                var res = new byte[4];
-                bits.CopyTo(res, 0);
-                return res;
-            }
-        }
+        public IEnumerable<byte> Bytes => new byte[] { 0, 0, 0, (byte)(Convert.ToInt32(ChangeIp) << 2 | Convert.ToInt32(ChangePort) << 1) };
 
         public bool ChangeIp { get; set; }
 

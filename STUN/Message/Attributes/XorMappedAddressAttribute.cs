@@ -14,10 +14,10 @@ namespace STUN.Message.Attributes
         private readonly byte[] _magicCookie;
         private readonly byte[] _transactionId;
 
-        public XorMappedAddressAttribute(byte[] magicCookie, byte[] transactionID)
+        public XorMappedAddressAttribute(byte[] magicCookie, byte[] transactionId)
         {
             _magicCookie = magicCookie;
-            _transactionId = transactionID;
+            _transactionId = transactionId;
         }
 
         public override IEnumerable<byte> Bytes

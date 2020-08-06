@@ -25,25 +25,29 @@ namespace STUN.Message
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
          */
 
-        public AttributeType Type { get; set; }
+        public AttributeType Type { get; set; } = AttributeType.Useless;
 
         public ushort Length { get; set; }
 
+        public int RealLength => Type == AttributeType.Useless ? 0 : 4 + Length + (4 - Length % 4) % 4;
+
         public IAttribute Value { get; set; }
 
-        private byte[] _magicCookie;
-        private byte[] _transactionId;
+        private readonly byte[] _magicCookie;
+        private readonly byte[] _transactionId;
 
-        public Attribute(byte[] magicCookie, byte[] transactionID)
+        public Attribute() { }
+
+        public Attribute(byte[] magicCookie, byte[] transactionId)
         {
-            if (magicCookie.Length != 4 || transactionID.Length != 12)
+            if (magicCookie.Length != 4 || transactionId.Length != 12)
             {
-                throw new ArgumentException(@"Wrong length");
+                throw new ArgumentException(@"Wrong Transaction ID length");
             }
 
             _magicCookie = magicCookie;
 
-            _transactionId = transactionID;
+            _transactionId = transactionId;
         }
 
         public IEnumerable<byte> ToBytes()
@@ -86,10 +90,9 @@ namespace STUN.Message
                 AttributeType.OtherAddress => new OtherAddressAttribute(),
                 AttributeType.ReflectedFrom => new ReflectedFromAttribute(),
                 AttributeType.ErrorCode => new ErrorCodeAttribute(),
+                //TODO:more
                 _ => new UselessAttribute()
             };
-
-            //TODO:Parse
             Value = t.TryParse(value) ? t : null;
 
             return 4 + Length + (4 - Length % 4) % 4; // 对齐
