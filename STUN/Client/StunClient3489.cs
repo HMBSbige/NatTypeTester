@@ -70,7 +70,6 @@ namespace STUN.Client
             // test II
             var (response2, remote2) = Test(test2);
             var mappedAddress2 = AttributeExtensions.GetMappedAddressAttribute(response2);
-            var changedAddress2 = AttributeExtensions.GetChangedAddressAttribute(response2);
 
             if (Equals(mappedAddress1, LocalEndPoint))
             {
