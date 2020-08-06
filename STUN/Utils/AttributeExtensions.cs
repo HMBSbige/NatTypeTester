@@ -20,7 +20,7 @@ namespace STUN.Utils
 
         public static IPEndPoint GetMappedAddressAttribute(StunMessage5389 response)
         {
-            var mappedAddressAttribute = response?.Attributes.First(t => t.Type == AttributeType.MappedAddress);
+            var mappedAddressAttribute = response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
 
             if (mappedAddressAttribute == null) return null;
 
@@ -30,7 +30,7 @@ namespace STUN.Utils
 
         public static IPEndPoint GetChangedAddressAttribute(StunMessage5389 response)
         {
-            var changedAddressAttribute = response?.Attributes.First(t => t.Type == AttributeType.ChangedAddress);
+            var changedAddressAttribute = response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
 
             if (changedAddressAttribute == null) return null;
 

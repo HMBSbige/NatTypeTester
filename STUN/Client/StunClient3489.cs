@@ -49,11 +49,15 @@ namespace STUN.Client
             var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
             var (response1, remote1) = Test(test1);
+            if (response1 == null)
+            {
+                return new ClassicStunResult(NatType.UdpBlocked, null);
+            }
             var mappedAddress1 = AttributeExtensions.GetMappedAddressAttribute(response1);
             var changedAddress1 = AttributeExtensions.GetChangedAddressAttribute(response1);
             if (mappedAddress1 == null || changedAddress1 == null)
             {
-                return new ClassicStunResult(NatType.UdpBlocked, null);
+                return new ClassicStunResult(NatType.UnsupportedServer, null);
             }
 
             var test2 = new StunMessage5389
@@ -71,12 +75,12 @@ namespace STUN.Client
             if (Equals(mappedAddress1, LocalEndPoint))
             {
                 // No NAT
-                var type = mappedAddress2 == null ? NatType.SymmetricUdpFirewall : NatType.OpenInternet;
+                var type = response2 == null ? NatType.SymmetricUdpFirewall : NatType.OpenInternet;
                 return new ClassicStunResult(type, mappedAddress2);
             }
 
             // NAT
-            if (mappedAddress2 != null && changedAddress2 != null)
+            if (response2 != null)
             {
                 // 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
                 var type = Equals(remote1.Address, remote2.Address) || Equals(remote1.Port, remote2.Port) ? NatType.UnsupportedServer : NatType.FullCone;
@@ -121,27 +125,41 @@ namespace STUN.Client
             try
             {
                 var b1 = sendMessage.Bytes.ToArray();
+                var t = DateTime.Now;
 
-                if (remote == null)
+                // Simple retransmissions
+                //https://tools.ietf.org/html/rfc3489#section-9.3
+                while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
                 {
-                    Debug.WriteLine($@"{LocalEndPoint} => {_server}:{_port} {b1.Length} 字节");
-                    _udpClient.Send(b1, b1.Length, _server, _port);
-                }
-                else
-                {
-                    Debug.WriteLine($@"{LocalEndPoint} => {remote} {b1.Length} 字节");
-                    _udpClient.Send(b1, b1.Length, remote);
-                }
+                    try
+                    {
+                        if (remote == null)
+                        {
+                            Debug.WriteLine($@"{LocalEndPoint} => {_server}:{_port} {b1.Length} 字节");
+                            _udpClient.Send(b1, b1.Length, _server, _port);
+                        }
+                        else
+                        {
+                            Debug.WriteLine($@"{LocalEndPoint} => {remote} {b1.Length} 字节");
+                            _udpClient.Send(b1, b1.Length, remote);
+                        }
 
-                IPEndPoint ipe = null;
+                        IPEndPoint ipe = null;
 
-                var receive1 = _udpClient.Receive(ref ipe);
+                        var receive1 = _udpClient.Receive(ref ipe);
 
-                var message = new StunMessage5389();
-                if (message.TryParse(receive1) && message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
-                {
-                    Debug.WriteLine($@"收到 {ipe} {receive1.Length} 字节");
-                    return (message, ipe);
+                        var message = new StunMessage5389();
+                        if (message.TryParse(receive1) &&
+                            message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
+                        {
+                            Debug.WriteLine($@"收到 {ipe} {receive1.Length} 字节");
+                            return (message, ipe);
+                        }
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
             catch (Exception ex)
