@@ -1,13 +1,14 @@
-﻿using STUN.Message;
+﻿using STUN.Enums;
+using STUN.Interfaces;
+using STUN.Message;
+using STUN.StunResult;
 using STUN.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using STUN.Enums;
-using STUN.Interfaces;
-using STUN.StunResult;
+using System.Threading.Tasks;
 
 namespace STUN.Client
 {
@@ -129,7 +130,7 @@ namespace STUN.Client
             return new ClassicStunResult(NatType.PortRestrictedCone, mappedAddress12);
         }
 
-        public IStunResult QueryAsync()
+        public Task<IStunResult> QueryAsync()
         {
             throw new NotImplementedException();
         }
