@@ -1,4 +1,4 @@
-﻿using STUN.Client.Enums;
+using STUN.Client.Enums;
 using STUN.Client.Interfaces;
 using STUN.Message;
 using STUN.Message.Enums;
@@ -74,8 +74,11 @@ namespace STUN.Client
             if (Equals(mappedAddress1, LocalEndPoint))
             {
                 // No NAT
-                var type = response2 == null ? NatType.SymmetricUdpFirewall : NatType.OpenInternet;
-                return new ClassicStunResult(type, mappedAddress2);
+                if (response2 == null)
+                {
+                    return new ClassicStunResult(NatType.SymmetricUdpFirewall, mappedAddress1);
+                }
+                return new ClassicStunResult(NatType.OpenInternet, mappedAddress2);
             }
 
             // NAT
@@ -91,27 +94,27 @@ namespace STUN.Client
             var (response12, _) = Test(test12, changedAddress1);
             var mappedAddress12 = AttributeExtensions.GetMappedAddressAttribute(response12);
 
-            if (mappedAddress12 != null)
-            {
-                if (!Equals(mappedAddress12, mappedAddress1))
-                {
-                    return new ClassicStunResult(NatType.Symmetric, mappedAddress12);
-                }
+            if (mappedAddress12 == null) return new ClassicStunResult(NatType.Unknown, null);
 
-                // Test III
-                var test3 = new StunMessage5389
-                {
-                    StunMessageType = StunMessageType.BindingRequest,
-                    MagicCookie = 0,
-                    Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
-                };
-                var (response3, _) = Test(test3, changedAddress1);
-                var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
-                var type = mappedAddress3 != null ? NatType.RestrictedCone : NatType.PortRestrictedCone;
-                return new ClassicStunResult(type, mappedAddress3);
+            if (!Equals(mappedAddress12, mappedAddress1))
+            {
+                return new ClassicStunResult(NatType.Symmetric, mappedAddress12);
             }
 
-            return new ClassicStunResult(NatType.Unknown, null);
+            // Test III
+            var test3 = new StunMessage5389
+            {
+                StunMessageType = StunMessageType.BindingRequest,
+                MagicCookie = 0,
+                Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
+            };
+            var (response3, _) = Test(test3, changedAddress1);
+            var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
+            if (mappedAddress3 != null)
+            {
+                return new ClassicStunResult(NatType.RestrictedCone, mappedAddress3);
+            }
+            return new ClassicStunResult(NatType.PortRestrictedCone, mappedAddress12);
         }
 
         public IStunResult QueryAsync()
