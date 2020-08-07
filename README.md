@@ -1,10 +1,21 @@
 # NatTypeTester
 
-- [x] RFC 3489
-- [ ] RFC 5389
+- [x] [RFC 3489](https://tools.ietf.org/html/rfc3489)
+- [x] [RFC 5389](https://tools.ietf.org/html/rfc5389)
+- [x] [RFC 5769](https://tools.ietf.org/html/rfc5769)
+- [ ] [RFC 5780](https://tools.ietf.org/html/rfc5780)
+- [ ] [RFC 7350](https://tools.ietf.org/html/rfc7350)
+- [ ] [RFC 7443](https://tools.ietf.org/html/rfc7443)
+- [ ] [RFC 7635](https://tools.ietf.org/html/rfc7635)
+- [ ] [RFC 8489](https://tools.ietf.org/html/rfc8489)
 
 - [x] IPv4
-- [ ] IPv6
+- [x] IPv6
+
+- [x] UDP
+- [ ] TCP
+- [ ] TLS-over-TCP
+- [ ] DTLS-over-UDP
 
 ## Preview
 ![](pic/1.png)
