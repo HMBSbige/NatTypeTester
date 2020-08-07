@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace NatTypeTester.Model
 {
@@ -17,7 +18,7 @@ namespace NatTypeTester.Model
         {
             var ipPort = str.Trim().Split(':', '：');
             var host = ipPort[0].Trim();
-            if (Uri.CheckHostName(host) != UriHostNameType.Dns)
+            if (Uri.CheckHostName(host) != UriHostNameType.Dns && !IPAddress.TryParse(host, out _))
             {
                 return false;
             }

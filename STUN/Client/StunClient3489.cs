@@ -1,4 +1,4 @@
-using STUN.Client.Enums;
+﻿using STUN.Client.Enums;
 using STUN.Client.Interfaces;
 using STUN.Message;
 using STUN.Message.Enums;
@@ -17,8 +17,15 @@ namespace STUN.Client
     /// </summary>
     public class StunClient3489 : IStunClient
     {
-        private readonly UdpClient _udpClient;
         public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
+
+        public TimeSpan Timeout
+        {
+            get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
+            set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+        }
+
+        private readonly UdpClient _udpClient;
 
         private readonly string _server;
         private readonly ushort _port;
@@ -40,7 +47,7 @@ namespace STUN.Client
 
             _udpClient = local == null ? new UdpClient() : new UdpClient(local);
 
-            _udpClient.Client.ReceiveTimeout = TimeSpan.FromSeconds(1.6).Milliseconds;
+            Timeout = TimeSpan.FromSeconds(1.6);
         }
 
         public IStunResult Query()
@@ -55,7 +62,12 @@ namespace STUN.Client
             }
             var mappedAddress1 = AttributeExtensions.GetMappedAddressAttribute(response1);
             var changedAddress1 = AttributeExtensions.GetChangedAddressAttribute(response1);
-            if (mappedAddress1 == null || changedAddress1 == null)
+
+            // 某些单 IP 服务器的迷惑操作
+            if (mappedAddress1 == null
+            || changedAddress1 == null
+            || Equals(changedAddress1.Address, remote1.Address)
+            || changedAddress1.Port == remote1.Port)
             {
                 return new ClassicStunResult(NatType.UnsupportedServer, null);
             }
@@ -85,7 +97,7 @@ namespace STUN.Client
             if (response2 != null)
             {
                 // 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
-                var type = Equals(remote1.Address, remote2.Address) || Equals(remote1.Port, remote2.Port) ? NatType.UnsupportedServer : NatType.FullCone;
+                var type = Equals(remote1.Address, remote2.Address) || remote1.Port == remote2.Port ? NatType.UnsupportedServer : NatType.FullCone;
                 return new ClassicStunResult(type, mappedAddress2);
             }
 
@@ -166,7 +178,7 @@ namespace STUN.Client
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Debug.WriteLine(ex);
             }
             return (null, null);
         }
