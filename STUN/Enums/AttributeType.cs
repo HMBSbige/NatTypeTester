@@ -1,4 +1,4 @@
-﻿namespace STUN.Message.Enums
+﻿namespace STUN.Enums
 {
     /// <summary>
     /// STUN Attribute Registry

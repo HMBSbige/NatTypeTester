@@ -1,13 +1,13 @@
-﻿using STUN.Client.Enums;
-using STUN.Client.Interfaces;
-using STUN.Message;
-using STUN.Message.Enums;
+﻿using STUN.Message;
 using STUN.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using STUN.Enums;
+using STUN.Interfaces;
+using STUN.StunResult;
 
 namespace STUN.Client
 {

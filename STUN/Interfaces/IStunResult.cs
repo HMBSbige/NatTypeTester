@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace STUN.Client.Interfaces
+namespace STUN.Interfaces
 {
     public interface IStunResult
     {

@@ -1,8 +1,8 @@
 ﻿using STUN.Message;
 using STUN.Message.Attributes;
-using STUN.Message.Enums;
 using System.Linq;
 using System.Net;
+using STUN.Enums;
 
 namespace STUN.Utils
 {

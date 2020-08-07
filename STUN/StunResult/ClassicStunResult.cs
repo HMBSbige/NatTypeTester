@@ -1,8 +1,8 @@
-﻿using STUN.Client.Enums;
-using STUN.Client.Interfaces;
-using System.Net;
+﻿using System.Net;
+using STUN.Enums;
+using STUN.Interfaces;
 
-namespace STUN.Client
+namespace STUN.StunResult
 {
     public class ClassicStunResult : IStunResult
     {

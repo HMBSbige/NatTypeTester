@@ -1,4 +1,4 @@
-﻿namespace STUN.Message.Enums
+﻿namespace STUN.Enums
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5389#section-15.1

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace STUN.Client.Interfaces
+namespace STUN.Interfaces
 {
     public interface IStunClient : IDisposable
     {

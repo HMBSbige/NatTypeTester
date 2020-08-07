@@ -1,9 +1,9 @@
-﻿using STUN.Message.Enums;
-using STUN.Utils;
+﻿using STUN.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using STUN.Enums;
 
 namespace STUN.Message
 {
