@@ -127,11 +127,11 @@ namespace STUN.Client
             try
             {
                 var b1 = sendMessage.Bytes.ToArray();
-                var t = DateTime.Now;
+                //var t = DateTime.Now;
 
                 // Simple retransmissions
                 //https://tools.ietf.org/html/rfc3489#section-9.3
-                while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
+                //while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
                 {
                     try
                     {
