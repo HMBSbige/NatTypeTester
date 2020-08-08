@@ -28,11 +28,14 @@ namespace STUN.Client
 
         private readonly UdpClient _udpClient;
 
-        private readonly string _server;
+        private readonly IPAddress _server;
         private readonly ushort _port;
 
-        public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null)
+        public IPEndPoint RemoteEndPoint => _server == null ? null : new IPEndPoint(_server, _port);
+
+        public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
         {
+            Func<string, IPAddress> dnsQuery1;
             if (string.IsNullOrEmpty(server))
             {
                 throw new ArgumentException(@"Please specify STUN server !");
@@ -43,7 +46,20 @@ namespace STUN.Client
                 throw new ArgumentException(@"Port value must be >= 1 !");
             }
 
-            _server = server;
+            if (dnsQuery != null)
+            {
+                dnsQuery1 = dnsQuery.Query;
+            }
+            else
+            {
+                dnsQuery1 = new DefaultDnsQuery().Query;
+            }
+
+            _server = dnsQuery1(server);
+            if (_server == null)
+            {
+                throw new ArgumentException(@"Wrong STUN server !");
+            }
             _port = port;
 
             _udpClient = local == null ? new UdpClient() : new UdpClient(local);
@@ -56,7 +72,7 @@ namespace STUN.Client
             // test I
             var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
-            var (response1, remote1) = Test(test1);
+            var (response1, remote1, local1) = Test(test1, RemoteEndPoint, RemoteEndPoint);
             if (response1 == null)
             {
                 return new ClassicStunResult(NatType.UdpBlocked, null);
@@ -81,10 +97,10 @@ namespace STUN.Client
             };
 
             // test II
-            var (response2, remote2) = Test(test2);
+            var (response2, remote2, _) = Test(test2, RemoteEndPoint, changedAddress1);
             var mappedAddress2 = AttributeExtensions.GetMappedAddressAttribute(response2);
 
-            if (Equals(mappedAddress1, LocalEndPoint))
+            if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
             {
                 // No NAT
                 if (response2 == null)
@@ -104,7 +120,7 @@ namespace STUN.Client
 
             // Test I(#2)
             var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
-            var (response12, _) = Test(test12, changedAddress1);
+            var (response12, _, _) = Test(test12, changedAddress1, changedAddress1);
             var mappedAddress12 = AttributeExtensions.GetMappedAddressAttribute(response12);
 
             if (mappedAddress12 == null) return new ClassicStunResult(NatType.Unknown, null);
@@ -121,7 +137,7 @@ namespace STUN.Client
                 MagicCookie = 0,
                 Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
             };
-            var (response3, _) = Test(test3, changedAddress1);
+            var (response3, _, _) = Test(test3, changedAddress1, changedAddress1);
             var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
             if (mappedAddress3 != null)
             {
@@ -135,7 +151,11 @@ namespace STUN.Client
             throw new NotImplementedException();
         }
 
-        private (StunMessage5389, IPEndPoint) Test(StunMessage5389 sendMessage, IPEndPoint remote = null)
+
+        /// <returns>
+        /// (StunMessage, Remote, Local)
+        /// </returns>
+        private (StunMessage5389, IPEndPoint, IPAddress) Test(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
         {
             try
             {
@@ -148,32 +168,18 @@ namespace STUN.Client
                 {
                     try
                     {
-                        if (remote == null)
-                        {
-                            Debug.WriteLine($@"{LocalEndPoint} => {_server}:{_port} {b1.Length} 字节");
-                            _udpClient.Send(b1, b1.Length, _server, _port);
-                        }
-                        else
-                        {
-                            Debug.WriteLine($@"{LocalEndPoint} => {remote} {b1.Length} 字节");
-                            _udpClient.Send(b1, b1.Length, remote);
-                        }
-
-                        IPEndPoint ipe = null;
-
-                        var receive1 = _udpClient.Receive(ref ipe);
+                        var (receive1, ipe, local) = _udpClient.UdpReceive(b1, remote, receive);
 
                         var message = new StunMessage5389();
                         if (message.TryParse(receive1) &&
                             message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
                         {
-                            Debug.WriteLine($@"收到 {ipe} {receive1.Length} 字节");
-                            return (message, ipe);
+                            return (message, ipe, local);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignored
+                        Debug.WriteLine(ex);
                     }
                 }
             }
@@ -181,7 +187,7 @@ namespace STUN.Client
             {
                 Debug.WriteLine(ex);
             }
-            return (null, null);
+            return (null, null, null);
         }
 
         public void Dispose()

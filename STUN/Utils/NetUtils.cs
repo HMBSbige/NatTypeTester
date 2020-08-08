@@ -1,8 +1,10 @@
 ﻿using STUN.Client;
+using STUN.StunResult;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
-using STUN.StunResult;
+using System.Net.Sockets;
 
 namespace STUN.Utils
 {
@@ -44,7 +46,7 @@ namespace STUN.Utils
 
                 return (
                         result.NatType.ToString(),
-                        client.LocalEndPoint.ToString(),
+                        $@"{client.LocalEndPoint}",
                         $@"{result.PublicEndPoint}"
                 );
             }
@@ -53,6 +55,28 @@ namespace STUN.Utils
                 Debug.WriteLine($@"[ERROR]: {ex}");
                 return (string.Empty, DefaultLocalEnd, string.Empty);
             }
+        }
+
+        public static (byte[], IPEndPoint, IPAddress) UdpReceive(this UdpClient client, byte[] bytes, IPEndPoint remote, EndPoint receive)
+        {
+            var localEndPoint = (IPEndPoint)client.Client.LocalEndPoint;
+
+            Debug.WriteLine($@"{localEndPoint} => {remote} {bytes.Length} 字节");
+
+            client.Send(bytes, bytes.Length, remote);
+
+            var res = new byte[ushort.MaxValue];
+            var flag = SocketFlags.None;
+
+            var length = client.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref receive, out var ipPacketInformation);
+
+            var local = ipPacketInformation.Address;
+
+            Debug.WriteLine($@"{(IPEndPoint)receive} => {local} {length} 字节");
+
+            return (res.Take(length).ToArray(),
+                    (IPEndPoint)receive
+                    , local);
         }
     }
 }
