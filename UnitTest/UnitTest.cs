@@ -1,10 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Message.Attributes;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using STUN.StunResult;
 using STUN.Utils;
 
 namespace UnitTest
@@ -84,12 +86,29 @@ namespace UnitTest
         public async Task BindingTest()
         {
             var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-            var result = await client.BindingTestAsync();
+            var result = (StunResult5389)await client.QueryAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
             Assert.IsNotNull(result.LocalEndPoint);
             Assert.IsNotNull(result.PublicEndPoint);
             Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+        }
+
+        [TestMethod]
+        public async Task MappingBehaviorTest()
+        {
+            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            var result = await client.MappingBehaviorTestAsync();
+
+            Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
+            Assert.IsNotNull(result.LocalEndPoint);
+            Assert.IsNotNull(result.PublicEndPoint);
+            Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+            Assert.IsTrue(result.MappingBehavior == MappingBehavior.Direct
+            || result.MappingBehavior == MappingBehavior.EndpointIndependent
+            || result.MappingBehavior == MappingBehavior.AddressDependent
+            || result.MappingBehavior == MappingBehavior.AddressAndPortDependent
+            );
         }
     }
 }

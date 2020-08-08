@@ -100,7 +100,15 @@ namespace STUN.Utils
             await client.SendAsync(bytes, bytes.Length, remote);
             var res = new ArraySegment<byte>(new byte[ushort.MaxValue]);
 
-            var result = await client.Client.ReceiveMessageFromAsync(res, SocketFlags.None, receive);
+            var task = client.Client.ReceiveMessageFromAsync(res, SocketFlags.None, receive);
+
+            var resTask = await Task.WhenAny(Task.Delay(client.Client.ReceiveTimeout), task);
+            if (resTask != task)
+            {
+                throw new Exception(@"Receive timeout");
+            }
+
+            var result = task.Result;
 
             var local = result.PacketInformation.Address;
 

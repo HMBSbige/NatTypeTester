@@ -7,10 +7,15 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace STUN.Client
 {
+    /// <summary>
+    /// https://tools.ietf.org/html/rfc5389#section-7.2.1
+    /// https://tools.ietf.org/html/rfc5780#section-4.2
+    /// </summary>
     public class StunClient5389UDP : StunClient3489
     {
         public StunClient5389UDP(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
@@ -26,16 +31,18 @@ namespace STUN.Client
 
         public override async Task<IStunResult> QueryAsync()
         {
-            return await BindingTestAsync();
+            var (result, _) = await BindingTestAsync(RemoteEndPoint);
+            return result;
         }
 
-        public async Task<StunResult5389> BindingTestAsync()
+        public async Task<(StunResult5389, IPEndPoint)> BindingTestAsync(IPEndPoint remote)
         {
             BindingTestResult res;
 
             var test = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest };
-            var (response1, _, local1) = await TestAsync(test, RemoteEndPoint, RemoteEndPoint);
+            var (response1, _, local1) = await TestAsync(test, remote, remote);
             var mappedAddress1 = AttributeExtensions.GetXorMappedAddressAttribute(response1);
+            var otherAddress = AttributeExtensions.GetOtherAddressAttribute(response1);
 
             if (response1 == null)
             {
@@ -50,12 +57,63 @@ namespace STUN.Client
                 res = BindingTestResult.Success;
             }
 
-            return new StunResult5389
+            return (new StunResult5389
             {
                 BindingTestResult = res,
                 LocalEndPoint = local1 == null ? null : new IPEndPoint(local1, LocalEndPoint.Port),
                 PublicEndPoint = mappedAddress1
-            };
+            }, otherAddress);
+        }
+
+        public async Task<StunResult5389> MappingBehaviorTestAsync()
+        {
+            // test I
+            var (result1, otherAddress) = await BindingTestAsync(RemoteEndPoint);
+
+            if (result1.BindingTestResult != BindingTestResult.Success)
+            {
+                return result1;
+            }
+
+            if (otherAddress == null
+            || Equals(otherAddress.Address, RemoteEndPoint.Address)
+            || otherAddress.Port == RemoteEndPoint.Port)
+            {
+                result1.MappingBehavior = MappingBehavior.UnsupportedServer;
+                return result1;
+            }
+
+            if (Equals(result1.PublicEndPoint, result1.LocalEndPoint))
+            {
+                result1.MappingBehavior = MappingBehavior.Direct;
+                return result1;
+            }
+
+            // test II
+            var (result2, _) = await BindingTestAsync(new IPEndPoint(otherAddress.Address, RemoteEndPoint.Port));
+            if (result2.BindingTestResult != BindingTestResult.Success)
+            {
+                result1.MappingBehavior = MappingBehavior.Fail;
+                return result1;
+            }
+
+            if (Equals(result2.PublicEndPoint, result1.PublicEndPoint))
+            {
+                result1.MappingBehavior = MappingBehavior.EndpointIndependent;
+                return result1;
+            }
+
+            // test III
+            var (result3, _) = await BindingTestAsync(otherAddress);
+            if (result3.BindingTestResult != BindingTestResult.Success)
+            {
+                result1.MappingBehavior = MappingBehavior.Fail;
+                return result1;
+            }
+
+            result1.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
+
+            return result1;
         }
 
         private async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
