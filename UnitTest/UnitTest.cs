@@ -109,6 +109,24 @@ namespace UnitTest
             || result.MappingBehavior == MappingBehavior.AddressDependent
             || result.MappingBehavior == MappingBehavior.AddressAndPortDependent
             );
+            Assert.AreEqual(result.FilteringBehavior, FilteringBehavior.Unknown);
+        }
+
+        [TestMethod]
+        public async Task FilteringBehaviorTest()
+        {
+            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            var result = await client.FilteringBehaviorTestAsync();
+
+            Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
+            Assert.IsNotNull(result.LocalEndPoint);
+            Assert.IsNotNull(result.PublicEndPoint);
+            Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+            Assert.AreEqual(result.MappingBehavior, MappingBehavior.Unknown);
+            Assert.IsTrue(result.FilteringBehavior == FilteringBehavior.EndpointIndependent
+            || result.FilteringBehavior == FilteringBehavior.AddressDependent
+            || result.FilteringBehavior == FilteringBehavior.AddressAndPortDependent
+            );
         }
     }
 }

@@ -116,6 +116,63 @@ namespace STUN.Client
             return result1;
         }
 
+        public async Task<StunResult5389> FilteringBehaviorTestAsync()
+        {
+            // test I
+            var (result1, otherAddress) = await BindingTestAsync(RemoteEndPoint);
+
+            if (result1.BindingTestResult != BindingTestResult.Success)
+            {
+                return result1;
+            }
+
+            if (otherAddress == null
+                || Equals(otherAddress.Address, RemoteEndPoint.Address)
+                || otherAddress.Port == RemoteEndPoint.Port)
+            {
+                result1.FilteringBehavior = FilteringBehavior.UnsupportedServer;
+                return result1;
+            }
+
+            // test II
+            var test2 = new StunMessage5389
+            {
+                StunMessageType = StunMessageType.BindingRequest,
+                Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
+            };
+            var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, otherAddress);
+
+            if (response2 != null)
+            {
+                result1.FilteringBehavior = FilteringBehavior.EndpointIndependent;
+                return result1;
+            }
+
+            // test III
+            var test3 = new StunMessage5389
+            {
+                StunMessageType = StunMessageType.BindingRequest,
+                Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
+            };
+            var (response3, remote3, _) = await TestAsync(test3, RemoteEndPoint, RemoteEndPoint);
+
+            if (response3 == null)
+            {
+                result1.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
+                return result1;
+            }
+
+            if (Equals(remote3.Address, RemoteEndPoint.Address) && remote3.Port != RemoteEndPoint.Port)
+            {
+                result1.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
+            }
+            else
+            {
+                result1.FilteringBehavior = FilteringBehavior.UnsupportedServer;
+            }
+            return result1;
+        }
+
         private async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
         {
             try

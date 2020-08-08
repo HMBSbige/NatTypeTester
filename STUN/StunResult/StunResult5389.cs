@@ -10,6 +10,6 @@ namespace STUN.StunResult
         public IPEndPoint LocalEndPoint { get; set; }
         public BindingTestResult BindingTestResult { get; set; } = BindingTestResult.Unknown;
         public MappingBehavior MappingBehavior { get; set; } = MappingBehavior.Unknown;
-
+        public FilteringBehavior FilteringBehavior { get; set; } = FilteringBehavior.Unknown;
     }
 }
