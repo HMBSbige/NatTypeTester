@@ -7,7 +7,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace STUN.Client
@@ -31,11 +30,54 @@ namespace STUN.Client
 
         public override async Task<IStunResult> QueryAsync()
         {
-            var (result, _) = await BindingTestAsync(RemoteEndPoint);
+            var result = await FilteringBehaviorTestAsync();
+            if (result.BindingTestResult != BindingTestResult.Success
+            || result.FilteringBehavior == FilteringBehavior.UnsupportedServer
+            )
+            {
+                return result;
+            }
+
+            if (Equals(result.PublicEndPoint, result.LocalEndPoint))
+            {
+                result.MappingBehavior = MappingBehavior.Direct;
+                return result;
+            }
+
+            // MappingBehaviorTest test II
+            var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port));
+            if (result2.BindingTestResult != BindingTestResult.Success)
+            {
+                result.MappingBehavior = MappingBehavior.Fail;
+                return result;
+            }
+
+            if (Equals(result2.PublicEndPoint, result.PublicEndPoint))
+            {
+                result.MappingBehavior = MappingBehavior.EndpointIndependent;
+                return result;
+            }
+
+            // MappingBehaviorTest test III
+            var result3 = await BindingTestBaseAsync(result.OtherEndPoint);
+            if (result3.BindingTestResult != BindingTestResult.Success)
+            {
+                result.MappingBehavior = MappingBehavior.Fail;
+                return result;
+            }
+
+            result.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
+
             return result;
         }
 
-        public async Task<(StunResult5389, IPEndPoint)> BindingTestAsync(IPEndPoint remote)
+        public async Task<StunResult5389> BindingTestAsync()
+        {
+            var result = await BindingTestBaseAsync(RemoteEndPoint);
+            return result;
+        }
+
+        private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote)
         {
             BindingTestResult res;
 
@@ -57,27 +99,28 @@ namespace STUN.Client
                 res = BindingTestResult.Success;
             }
 
-            return (new StunResult5389
+            return new StunResult5389
             {
                 BindingTestResult = res,
                 LocalEndPoint = local1 == null ? null : new IPEndPoint(local1, LocalEndPoint.Port),
-                PublicEndPoint = mappedAddress1
-            }, otherAddress);
+                PublicEndPoint = mappedAddress1,
+                OtherEndPoint = otherAddress
+            };
         }
 
         public async Task<StunResult5389> MappingBehaviorTestAsync()
         {
             // test I
-            var (result1, otherAddress) = await BindingTestAsync(RemoteEndPoint);
+            var result1 = await BindingTestBaseAsync(RemoteEndPoint);
 
             if (result1.BindingTestResult != BindingTestResult.Success)
             {
                 return result1;
             }
 
-            if (otherAddress == null
-            || Equals(otherAddress.Address, RemoteEndPoint.Address)
-            || otherAddress.Port == RemoteEndPoint.Port)
+            if (result1.OtherEndPoint == null
+                || Equals(result1.OtherEndPoint.Address, RemoteEndPoint.Address)
+                || result1.OtherEndPoint.Port == RemoteEndPoint.Port)
             {
                 result1.MappingBehavior = MappingBehavior.UnsupportedServer;
                 return result1;
@@ -90,7 +133,7 @@ namespace STUN.Client
             }
 
             // test II
-            var (result2, _) = await BindingTestAsync(new IPEndPoint(otherAddress.Address, RemoteEndPoint.Port));
+            var result2 = await BindingTestBaseAsync(new IPEndPoint(result1.OtherEndPoint.Address, RemoteEndPoint.Port));
             if (result2.BindingTestResult != BindingTestResult.Success)
             {
                 result1.MappingBehavior = MappingBehavior.Fail;
@@ -104,7 +147,7 @@ namespace STUN.Client
             }
 
             // test III
-            var (result3, _) = await BindingTestAsync(otherAddress);
+            var result3 = await BindingTestBaseAsync(result1.OtherEndPoint);
             if (result3.BindingTestResult != BindingTestResult.Success)
             {
                 result1.MappingBehavior = MappingBehavior.Fail;
@@ -119,16 +162,16 @@ namespace STUN.Client
         public async Task<StunResult5389> FilteringBehaviorTestAsync()
         {
             // test I
-            var (result1, otherAddress) = await BindingTestAsync(RemoteEndPoint);
+            var result1 = await BindingTestBaseAsync(RemoteEndPoint);
 
             if (result1.BindingTestResult != BindingTestResult.Success)
             {
                 return result1;
             }
 
-            if (otherAddress == null
-                || Equals(otherAddress.Address, RemoteEndPoint.Address)
-                || otherAddress.Port == RemoteEndPoint.Port)
+            if (result1.OtherEndPoint == null
+                || Equals(result1.OtherEndPoint.Address, RemoteEndPoint.Address)
+                || result1.OtherEndPoint.Port == RemoteEndPoint.Port)
             {
                 result1.FilteringBehavior = FilteringBehavior.UnsupportedServer;
                 return result1;
@@ -140,7 +183,7 @@ namespace STUN.Client
                 StunMessageType = StunMessageType.BindingRequest,
                 Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
             };
-            var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, otherAddress);
+            var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, result1.OtherEndPoint);
 
             if (response2 != null)
             {

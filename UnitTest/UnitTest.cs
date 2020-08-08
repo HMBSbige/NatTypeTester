@@ -86,12 +86,15 @@ namespace UnitTest
         public async Task BindingTest()
         {
             var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-            var result = (StunResult5389)await client.QueryAsync();
+            var result = await client.BindingTestAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
             Assert.IsNotNull(result.LocalEndPoint);
             Assert.IsNotNull(result.PublicEndPoint);
+            Assert.IsNotNull(result.OtherEndPoint);
             Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+            Assert.AreEqual(result.MappingBehavior, MappingBehavior.Unknown);
+            Assert.AreEqual(result.FilteringBehavior, FilteringBehavior.Unknown);
         }
 
         [TestMethod]
@@ -103,6 +106,7 @@ namespace UnitTest
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
             Assert.IsNotNull(result.LocalEndPoint);
             Assert.IsNotNull(result.PublicEndPoint);
+            Assert.IsNotNull(result.OtherEndPoint);
             Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
             Assert.IsTrue(result.MappingBehavior == MappingBehavior.Direct
             || result.MappingBehavior == MappingBehavior.EndpointIndependent
@@ -121,11 +125,34 @@ namespace UnitTest
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
             Assert.IsNotNull(result.LocalEndPoint);
             Assert.IsNotNull(result.PublicEndPoint);
+            Assert.IsNotNull(result.OtherEndPoint);
             Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
             Assert.AreEqual(result.MappingBehavior, MappingBehavior.Unknown);
             Assert.IsTrue(result.FilteringBehavior == FilteringBehavior.EndpointIndependent
             || result.FilteringBehavior == FilteringBehavior.AddressDependent
             || result.FilteringBehavior == FilteringBehavior.AddressAndPortDependent
+            );
+        }
+
+        [TestMethod]
+        public async Task CombiningTest()
+        {
+            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            var result = (StunResult5389)await client.QueryAsync();
+
+            Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
+            Assert.IsNotNull(result.LocalEndPoint);
+            Assert.IsNotNull(result.PublicEndPoint);
+            Assert.IsNotNull(result.OtherEndPoint);
+            Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+            Assert.IsTrue(result.MappingBehavior == MappingBehavior.Direct
+                          || result.MappingBehavior == MappingBehavior.EndpointIndependent
+                          || result.MappingBehavior == MappingBehavior.AddressDependent
+                          || result.MappingBehavior == MappingBehavior.AddressAndPortDependent
+            );
+            Assert.IsTrue(result.FilteringBehavior == FilteringBehavior.EndpointIndependent
+                          || result.FilteringBehavior == FilteringBehavior.AddressDependent
+                          || result.FilteringBehavior == FilteringBehavior.AddressAndPortDependent
             );
         }
     }

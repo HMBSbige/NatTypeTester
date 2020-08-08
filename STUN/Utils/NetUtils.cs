@@ -98,24 +98,18 @@ namespace STUN.Utils
             Debug.WriteLine($@"{localEndPoint} => {remote} {bytes.Length} 字节");
 
             await client.SendAsync(bytes, bytes.Length, remote);
-            var res = new ArraySegment<byte>(new byte[ushort.MaxValue]);
 
-            var task = client.Client.ReceiveMessageFromAsync(res, SocketFlags.None, receive);
+            var res = new byte[ushort.MaxValue];
+            var flag = SocketFlags.None;
 
-            var resTask = await Task.WhenAny(Task.Delay(client.Client.ReceiveTimeout), task);
-            if (resTask != task)
-            {
-                throw new Exception(@"Receive timeout");
-            }
+            var length = client.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref receive, out var ipPacketInformation);
 
-            var result = task.Result;
+            var local = ipPacketInformation.Address;
 
-            var local = result.PacketInformation.Address;
+            Debug.WriteLine($@"{(IPEndPoint) receive} => {local} {length} 字节");
 
-            Debug.WriteLine($@"{(IPEndPoint)result.RemoteEndPoint} => {local} {result.ReceivedBytes} 字节");
-
-            return (res.Take(result.ReceivedBytes).ToArray(),
-                    (IPEndPoint)result.RemoteEndPoint
+            return (res.Take(length).ToArray(),
+                    (IPEndPoint) receive
                     , local);
         }
     }
