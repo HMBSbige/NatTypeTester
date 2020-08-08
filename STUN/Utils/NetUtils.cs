@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace STUN.Utils
 {
@@ -76,6 +77,26 @@ namespace STUN.Utils
 
             return (res.Take(length).ToArray(),
                     (IPEndPoint)receive
+                    , local);
+        }
+
+        public static async Task<(byte[], IPEndPoint, IPAddress)> UdpReceiveAsync(this UdpClient client, byte[] bytes, IPEndPoint remote, EndPoint receive)
+        {
+            var localEndPoint = (IPEndPoint)client.Client.LocalEndPoint;
+
+            Debug.WriteLine($@"{localEndPoint} => {remote} {bytes.Length} 字节");
+
+            await client.SendAsync(bytes, bytes.Length, remote);
+            var res = new ArraySegment<byte>(new byte[ushort.MaxValue]);
+
+            var result = await client.Client.ReceiveMessageFromAsync(res, SocketFlags.None, receive);
+
+            var local = result.PacketInformation.Address;
+
+            Debug.WriteLine($@"{(IPEndPoint)result.RemoteEndPoint} => {local} {result.ReceivedBytes} 字节");
+
+            return (res.Take(result.ReceivedBytes).ToArray(),
+                    (IPEndPoint)result.RemoteEndPoint
                     , local);
         }
     }

@@ -18,20 +18,20 @@ namespace STUN.Client
     /// </summary>
     public class StunClient3489 : IStunClient
     {
-        public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
+        public IPEndPoint LocalEndPoint => (IPEndPoint)UdpClient.Client.LocalEndPoint;
 
         public TimeSpan Timeout
         {
-            get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
-            set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+            get => TimeSpan.FromMilliseconds(UdpClient.Client.ReceiveTimeout);
+            set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
         }
 
-        private readonly UdpClient _udpClient;
+        protected readonly UdpClient UdpClient;
 
-        private readonly IPAddress _server;
-        private readonly ushort _port;
+        protected readonly IPAddress Server;
+        protected readonly ushort Port;
 
-        public IPEndPoint RemoteEndPoint => _server == null ? null : new IPEndPoint(_server, _port);
+        public IPEndPoint RemoteEndPoint => Server == null ? null : new IPEndPoint(Server, Port);
 
         public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
         {
@@ -55,19 +55,19 @@ namespace STUN.Client
                 dnsQuery1 = new DefaultDnsQuery().Query;
             }
 
-            _server = dnsQuery1(server);
-            if (_server == null)
+            Server = dnsQuery1(server);
+            if (Server == null)
             {
                 throw new ArgumentException(@"Wrong STUN server !");
             }
-            _port = port;
+            Port = port;
 
-            _udpClient = local == null ? new UdpClient() : new UdpClient(local);
+            UdpClient = local == null ? new UdpClient() : new UdpClient(local);
 
             Timeout = TimeSpan.FromSeconds(1.6);
         }
 
-        public IStunResult Query()
+        public virtual IStunResult Query()
         {
             // test I
             var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
@@ -146,11 +146,10 @@ namespace STUN.Client
             return new ClassicStunResult(NatType.PortRestrictedCone, mappedAddress12);
         }
 
-        public Task<IStunResult> QueryAsync()
+        public virtual Task<IStunResult> QueryAsync()
         {
             throw new NotImplementedException();
         }
-
 
         /// <returns>
         /// (StunMessage, Remote, Local)
@@ -168,7 +167,7 @@ namespace STUN.Client
                 {
                     try
                     {
-                        var (receive1, ipe, local) = _udpClient.UdpReceive(b1, remote, receive);
+                        var (receive1, ipe, local) = UdpClient.UdpReceive(b1, remote, receive);
 
                         var message = new StunMessage5389();
                         if (message.TryParse(receive1) &&
@@ -192,7 +191,7 @@ namespace STUN.Client
 
         public void Dispose()
         {
-            _udpClient?.Dispose();
+            UdpClient?.Dispose();
         }
     }
 }

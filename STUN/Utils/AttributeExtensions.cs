@@ -1,8 +1,8 @@
-﻿using STUN.Message;
+﻿using STUN.Enums;
+using STUN.Message;
 using STUN.Message.Attributes;
 using System.Linq;
 using System.Net;
-using STUN.Enums;
 
 namespace STUN.Utils
 {
@@ -35,6 +35,28 @@ namespace STUN.Utils
             if (changedAddressAttribute == null) return null;
 
             var address = (ChangedAddressAttribute)changedAddressAttribute.Value;
+            return new IPEndPoint(address.Address, address.Port);
+        }
+
+        public static IPEndPoint GetXorMappedAddressAttribute(StunMessage5389 response)
+        {
+            var mappedAddressAttribute = response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.XorMappedAddress) ??
+                                         response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
+
+            if (mappedAddressAttribute == null) return null;
+
+            var mapped = (AddressAttribute)mappedAddressAttribute.Value;
+            return new IPEndPoint(mapped.Address, mapped.Port);
+        }
+
+        public static IPEndPoint GetOtherAddressAttribute(StunMessage5389 response)
+        {
+            var addressAttribute = response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.OtherAddress)
+                                   ?? response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
+
+            if (addressAttribute == null) return null;
+
+            var address = (AddressAttribute)addressAttribute.Value;
             return new IPEndPoint(address.Address, address.Port);
         }
     }

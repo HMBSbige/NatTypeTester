@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using STUN.Client;
 using STUN.Enums;
 using STUN.Message.Attributes;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace UnitTest
 {
@@ -61,6 +63,18 @@ namespace UnitTest
             Assert.AreEqual(t.Address, IPv6);
 
             Assert.IsTrue(_ipv6Response.SequenceEqual(t.Bytes));
+        }
+
+        [TestMethod]
+        public async Task BindingTest()
+        {
+            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            var result = await client.BindingTestAsync();
+
+            Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
+            Assert.IsNotNull(result.LocalEndPoint);
+            Assert.IsNotNull(result.PublicEndPoint);
+            Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
         }
     }
 }
