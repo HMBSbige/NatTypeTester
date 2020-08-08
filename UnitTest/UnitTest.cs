@@ -85,7 +85,7 @@ namespace UnitTest
         [TestMethod]
         public async Task BindingTest()
         {
-            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
             var result = await client.BindingTestAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
@@ -100,7 +100,7 @@ namespace UnitTest
         [TestMethod]
         public async Task MappingBehaviorTest()
         {
-            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
             var result = await client.MappingBehaviorTestAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
@@ -119,7 +119,7 @@ namespace UnitTest
         [TestMethod]
         public async Task FilteringBehaviorTest()
         {
-            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
             var result = await client.FilteringBehaviorTestAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
@@ -137,7 +137,7 @@ namespace UnitTest
         [TestMethod]
         public async Task CombiningTest()
         {
-            var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+            using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
             var result = (StunResult5389)await client.QueryAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);

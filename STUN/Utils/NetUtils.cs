@@ -69,6 +69,12 @@ namespace STUN.Utils
             }
         }
 
+        public static async Task<StunResult5389> NatBehaviorDiscovery(string server, ushort port, IPEndPoint local)
+        {
+            using var client = new StunClient5389UDP(server, port, local);
+            return (StunResult5389)await client.QueryAsync();
+        }
+
         public static (byte[], IPEndPoint, IPAddress) UdpReceive(this UdpClient client, byte[] bytes, IPEndPoint remote, EndPoint receive)
         {
             var localEndPoint = (IPEndPoint)client.Client.LocalEndPoint;
@@ -106,10 +112,10 @@ namespace STUN.Utils
 
             var local = ipPacketInformation.Address;
 
-            Debug.WriteLine($@"{(IPEndPoint) receive} => {local} {length} 字节");
+            Debug.WriteLine($@"{(IPEndPoint)receive} => {local} {length} 字节");
 
             return (res.Take(length).ToArray(),
-                    (IPEndPoint) receive
+                    (IPEndPoint)receive
                     , local);
         }
     }
