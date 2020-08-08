@@ -5,6 +5,7 @@ using STUN.Message.Attributes;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using STUN.Utils;
 
 namespace UnitTest
 {
@@ -63,6 +64,20 @@ namespace UnitTest
             Assert.AreEqual(t.Address, IPv6);
 
             Assert.IsTrue(_ipv6Response.SequenceEqual(t.Bytes));
+        }
+
+        [TestMethod]
+        public void ParseEndpointTest()
+        {
+            Assert.IsNull(NetUtils.ParseEndpoint(@"1.2.3.4"));
+            Assert.IsNull(NetUtils.ParseEndpoint(@"1.2.256.5:80"));
+            Assert.AreEqual(NetUtils.ParseEndpoint(@"0.0.0.0:123"), IPEndPoint.Parse(@"0.0.0.0:123"));
+            Assert.AreEqual(NetUtils.ParseEndpoint(@"192.168.1.1:2136"), IPEndPoint.Parse(@"192.168.1.1:2136"));
+            Assert.AreEqual(NetUtils.ParseEndpoint(@"[2001:db8:1234:5678:11:2233:4455:6677]:32853"), IPEndPoint.Parse(@"[2001:db8:1234:5678:11:2233:4455:6677]:32853"));
+            Assert.IsNull(NetUtils.ParseEndpoint(@"2001:db8:1234:5678:11:2233:4455:6677:32853"));
+            Assert.IsNull(NetUtils.ParseEndpoint(@"2001:db8:1234:5678:11:2233:4455:6677"));
+            Assert.AreEqual(NetUtils.ParseEndpoint(@"[2001:db8:1234:5678:11:2233:4455:6677]:0"), IPEndPoint.Parse(@"[2001:db8:1234:5678:11:2233:4455:6677]:0"));
+            Assert.AreEqual(NetUtils.ParseEndpoint(@"[::1]:0"), IPEndPoint.Parse(@"[::1]:0"));
         }
 
         [TestMethod]

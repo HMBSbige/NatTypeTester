@@ -90,7 +90,6 @@ namespace STUN.Message
                 AttributeType.OtherAddress => new OtherAddressAttribute(),
                 AttributeType.ReflectedFrom => new ReflectedFromAttribute(),
                 AttributeType.ErrorCode => new ErrorCodeAttribute(),
-                //TODO:more
                 _ => new UselessAttribute()
             };
             Value = t.TryParse(value) ? t : null;
