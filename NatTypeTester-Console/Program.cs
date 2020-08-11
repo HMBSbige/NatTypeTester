@@ -12,7 +12,7 @@ namespace NatTypeTester_Console
         /// </summary>
         private static async Task Main(string[] args)
         {
-            var server = @"stun.qq.com";
+            var server = @"stun.syncthing.net";
             ushort port = 3478;
             IPEndPoint local = null;
             if (args.Length > 0 && (Uri.CheckHostName(args[0]) == UriHostNameType.Dns || IPAddress.TryParse(args[0], out _)))
