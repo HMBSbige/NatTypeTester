@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
+    <PackageReference Include="ReactiveUI.WPF" Version="11.5.17" />
   </ItemGroup>
 
   <ItemGroup>

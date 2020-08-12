@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 
 namespace NatTypeTester.Model
 {
     public class StunServer
     {
-        public string Hostname;
-        public ushort Port;
+        public string Hostname { get; set; }
+        public ushort Port { get; set; }
 
         public StunServer()
         {
-            Hostname = @"stun.qq.com";
+            Hostname = @"stun.syncthing.net";
             Port = 3478;
         }
 
@@ -47,9 +48,17 @@ namespace NatTypeTester.Model
 
         public override string ToString()
         {
+            if (string.IsNullOrEmpty(Hostname))
+            {
+                return string.Empty;
+            }
             if (Port == 3478)
             {
                 return Hostname;
+            }
+            if (IPAddress.TryParse(Hostname, out var ip) && ip.AddressFamily != AddressFamily.InterNetwork)
+            {
+                return $@"[{Hostname}]:{Port}";
             }
             return $@"{Hostname}:{Port}";
         }

@@ -1,35 +1,24 @@
 ﻿using System.Net;
+using ReactiveUI;
 using STUN.Enums;
-using STUN.Interfaces;
 
 namespace STUN.StunResult
 {
-    public class ClassicStunResult : IStunResult
+    public class ClassicStunResult : ReactiveObject
     {
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        /// <param name="natType">Specifies UDP network type.</param>
-        /// <param name="publicEndPoint">Public IP end point.</param>
-        public ClassicStunResult(NatType natType, IPEndPoint publicEndPoint)
+        private NatType _natType = NatType.Unknown;
+        private IPEndPoint _publicEndPoint;
+
+        public NatType NatType
         {
-            NatType = natType;
-            PublicEndPoint = publicEndPoint;
+            get => _natType;
+            set => this.RaiseAndSetIfChanged(ref _natType, value);
         }
 
-        #region Properties Implementation
-
-        /// <summary>
-        /// Gets UDP network type.
-        /// </summary>
-        public NatType NatType { get; }
-
-        /// <summary>
-        /// Gets public IP end point. This value is null if failed to get network type.
-        /// </summary>
-        public IPEndPoint PublicEndPoint { get; }
-
-        #endregion
-
+        public IPEndPoint PublicEndPoint
+        {
+            get => _publicEndPoint;
+            set => this.RaiseAndSetIfChanged(ref _publicEndPoint, value);
+        }
     }
 }

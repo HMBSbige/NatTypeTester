@@ -1,10 +1,10 @@
 ﻿using STUN.Enums;
-using STUN.Interfaces;
 using System.Net;
+using ReactiveUI;
 
 namespace STUN.StunResult
 {
-    public class StunResult5389 : IStunResult
+    public class StunResult5389 : ReactiveObject
     {
         public IPEndPoint PublicEndPoint { get; set; }
         public IPEndPoint LocalEndPoint { get; set; }

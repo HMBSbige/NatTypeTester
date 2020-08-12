@@ -54,7 +54,7 @@ namespace STUN.Utils
 
                 using var client = new StunClient3489(server, port, ParseEndpoint(local));
 
-                var result = (ClassicStunResult)client.Query();
+                var result = client.Query();
 
                 return (
                         result.NatType.ToString(),
@@ -72,7 +72,7 @@ namespace STUN.Utils
         public static async Task<StunResult5389> NatBehaviorDiscovery(string server, ushort port, IPEndPoint local)
         {
             using var client = new StunClient5389UDP(server, port, local);
-            return (StunResult5389)await client.QueryAsync();
+            return await client.QueryAsync();
         }
 
         public static (byte[], IPEndPoint, IPAddress) UdpReceive(this UdpClient client, byte[] bytes, IPEndPoint remote, EndPoint receive)

@@ -23,12 +23,7 @@ namespace STUN.Client
             Timeout = TimeSpan.FromSeconds(3);
         }
 
-        public override IStunResult Query()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override async Task<IStunResult> QueryAsync()
+        public async Task<StunResult5389> QueryAsync()
         {
             var result = await FilteringBehaviorTestAsync();
             if (result.BindingTestResult != BindingTestResult.Success

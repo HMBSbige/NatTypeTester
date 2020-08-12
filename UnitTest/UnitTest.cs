@@ -1,12 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Message.Attributes;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using STUN.StunResult;
 using STUN.Utils;
 
 namespace UnitTest
@@ -138,7 +136,7 @@ namespace UnitTest
         public async Task CombiningTest()
         {
             using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-            var result = (StunResult5389)await client.QueryAsync();
+            var result = await client.QueryAsync();
 
             Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
             Assert.IsNotNull(result.LocalEndPoint);
