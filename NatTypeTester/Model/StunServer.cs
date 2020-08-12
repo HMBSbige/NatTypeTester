@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -18,15 +19,27 @@ namespace NatTypeTester.Model
         public bool Parse(string str)
         {
             var ipPort = str.Trim().Split(':', '：');
-            var host = ipPort[0].Trim();
-            if (Uri.CheckHostName(host) != UriHostNameType.Dns && !IPAddress.TryParse(host, out _))
-            {
-                return false;
-            }
             switch (ipPort.Length)
             {
+                case 0: return false;
+                case 1:
+                {
+                    var host = ipPort[0].Trim();
+                    if (Uri.CheckHostName(host) != UriHostNameType.Dns && !IPAddress.TryParse(host, out _))
+                    {
+                        return false;
+                    }
+                    Hostname = host;
+                    Port = 3478;
+                    return true;
+                }
                 case 2:
                 {
+                    var host = ipPort[0].Trim();
+                    if (Uri.CheckHostName(host) != UriHostNameType.Dns && !IPAddress.TryParse(host, out _))
+                    {
+                        return false;
+                    }
                     if (ushort.TryParse(ipPort[1], out var port))
                     {
                         Hostname = host;
@@ -35,11 +48,28 @@ namespace NatTypeTester.Model
                     }
                     break;
                 }
-                case 1:
+                default:
                 {
-                    Hostname = host;
-                    Port = 3478;
-                    return true;
+                    if (IPAddress.TryParse(str.Trim(), out var ipv6))
+                    {
+                        Hostname = $@"{ipv6}";
+                        Port = ushort.TryParse(ipPort.Last(), out var portV6) ? portV6 : (ushort)3478;
+                        return true;
+                    }
+
+                    var ipStr = string.Join(@":", ipPort, 0, ipPort.Length - 1);
+                    if (!ipStr.StartsWith(@"[") || !ipStr.EndsWith(@"]") || !IPAddress.TryParse(ipStr, out _))
+                    {
+                        return false;
+                    }
+
+                    if (ushort.TryParse(ipPort.Last(), out var port))
+                    {
+                        Port = port;
+                        return true;
+                    }
+
+                    break;
                 }
             }
 
