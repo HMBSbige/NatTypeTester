@@ -1,4 +1,9 @@
-﻿using System.Reactive.Disposables;
+﻿using System;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Input;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
 
@@ -41,6 +46,11 @@ namespace NatTypeTester
                 this.BindCommand(ViewModel,
                                 viewModel => viewModel.TestClassicNatType,
                                 view => view.TestButton)
+                        .DisposeWith(disposableRegistration);
+
+                this.Events().KeyDown
+                        .Where(x => x.Key == Key.Enter && TestButton.IsEnabled)
+                        .Subscribe(y => { TestButton.Command.Execute(Unit.Default); })
                         .DisposeWith(disposableRegistration);
             });
         }

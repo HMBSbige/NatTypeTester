@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows;
 using DynamicData;
 using DynamicData.Binding;
 using NatTypeTester.Model;
@@ -73,7 +74,7 @@ namespace NatTypeTester.ViewModels
                 .ObserveOnDispatcher()
                 .Bind(StunServers)
                 .Subscribe();
-            TestClassicNatType = ReactiveCommand.CreateFromObservable(TestClassicNatTypeImp);
+            TestClassicNatType = ReactiveCommand.CreateFromObservable(TestClassicNatTypeImpl);
         }
 
         private async void LoadStunServer()
@@ -100,22 +101,31 @@ namespace NatTypeTester.ViewModels
             }
         }
 
-        private IObservable<Unit> TestClassicNatTypeImp()
+        private IObservable<Unit> TestClassicNatTypeImpl()
         {
             return Observable.Start(() =>
             {
-                var server = new StunServer();
-                if (server.Parse(StunServer))
+                try
                 {
-                    using var client = new StunClient3489(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalEnd));
-                    client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => ClassicNatType = $@"{t}");
-                    client.PubChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => PublicEnd = $@"{t}");
-                    client.LocalChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => LocalEnd = $@"{t}");
-                    client.Query();
+                    var server = new StunServer();
+                    if (server.Parse(StunServer))
+                    {
+                        using var client = new StunClient3489(server.Hostname, server.Port,
+                                NetUtils.ParseEndpoint(LocalEnd));
+                        client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler)
+                                .Subscribe(t => ClassicNatType = $@"{t}");
+                        client.PubChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => PublicEnd = $@"{t}");
+                        client.LocalChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => LocalEnd = $@"{t}");
+                        client.Query();
+                    }
+                    else
+                    {
+                        throw new Exception(@"Wrong STUN Server!");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-
+                    MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             });
         }
