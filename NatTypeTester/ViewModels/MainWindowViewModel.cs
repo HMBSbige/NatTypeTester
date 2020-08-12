@@ -25,7 +25,7 @@ namespace NatTypeTester.ViewModels
             set => this.RaiseAndSetIfChanged(ref _classicNatType, value);
         }
 
-        private string _localEnd;
+        private string _localEnd = NetUtils.DefaultLocalEnd;
         public string LocalEnd
         {
             get => _localEnd;
@@ -40,6 +40,47 @@ namespace NatTypeTester.ViewModels
         }
 
         public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
+
+        #endregion
+
+        #region RFC5780
+
+        private string _bindingTest;
+        public string BindingTest
+        {
+            get => _bindingTest;
+            set => this.RaiseAndSetIfChanged(ref _bindingTest, value);
+        }
+
+        private string _mappingBehavior;
+        public string MappingBehavior
+        {
+            get => _mappingBehavior;
+            set => this.RaiseAndSetIfChanged(ref _mappingBehavior, value);
+        }
+
+        private string _filteringBehavior;
+        public string FilteringBehavior
+        {
+            get => _filteringBehavior;
+            set => this.RaiseAndSetIfChanged(ref _filteringBehavior, value);
+        }
+
+        private string _localAddress = NetUtils.DefaultLocalEnd;
+        public string LocalAddress
+        {
+            get => _localAddress;
+            set => this.RaiseAndSetIfChanged(ref _localAddress, value);
+        }
+
+        private string _mappingAddress;
+        public string MappingAddress
+        {
+            get => _mappingAddress;
+            set => this.RaiseAndSetIfChanged(ref _mappingAddress, value);
+        }
+
+        public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
 
         #endregion
 
@@ -75,6 +116,7 @@ namespace NatTypeTester.ViewModels
                 .Bind(StunServers)
                 .Subscribe();
             TestClassicNatType = ReactiveCommand.CreateFromObservable(TestClassicNatTypeImpl);
+            DiscoveryNatType = ReactiveCommand.CreateFromObservable(DiscoveryNatTypeImpl);
         }
 
         private async void LoadStunServer()
@@ -128,6 +170,51 @@ namespace NatTypeTester.ViewModels
                     MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             });
+        }
+
+        private IObservable<Unit> DiscoveryNatTypeImpl()
+        {
+            return Observable.Defer(() => Observable.StartAsync(async () =>
+            {
+                try
+                {
+                    var server = new StunServer();
+                    if (server.Parse(StunServer))
+                    {
+                        using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress));
+
+                        client.BindingTestResultChanged
+                                .ObserveOn(RxApp.MainThreadScheduler)
+                                .Subscribe(t => BindingTest = $@"{t}");
+
+                        client.MappingBehaviorChanged
+                                .ObserveOn(RxApp.MainThreadScheduler)
+                                .Subscribe(t => MappingBehavior = $@"{t}");
+
+                        client.FilteringBehaviorChanged
+                                .ObserveOn(RxApp.MainThreadScheduler)
+                                .Subscribe(t => FilteringBehavior = $@"{t}");
+
+                        client.PubChanged
+                                .ObserveOn(RxApp.MainThreadScheduler)
+                                .Subscribe(t => MappingAddress = $@"{t}");
+
+                        client.LocalChanged
+                                .ObserveOn(RxApp.MainThreadScheduler)
+                                .Subscribe(t => LocalAddress = $@"{t}");
+
+                        await client.QueryAsync();
+                    }
+                    else
+                    {
+                        throw new Exception(@"Wrong STUN Server!");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            })).SubscribeOn(RxApp.TaskpoolScheduler);
         }
     }
 }

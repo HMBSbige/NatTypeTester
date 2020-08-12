@@ -18,6 +18,8 @@ namespace NatTypeTester
 
             this.WhenActivated(disposableRegistration =>
             {
+                #region Server
+
                 this.Bind(ViewModel,
                         vm => vm.StunServer,
                         v => v.ServersComboBox.Text
@@ -27,6 +29,10 @@ namespace NatTypeTester
                         vm => vm.StunServers,
                         v => v.ServersComboBox.ItemsSource
                 ).DisposeWith(disposableRegistration);
+
+                #endregion
+
+                #region RFC3489
 
                 this.OneWayBind(ViewModel,
                         vm => vm.ClassicNatType,
@@ -48,10 +54,51 @@ namespace NatTypeTester
                                 view => view.TestButton)
                         .DisposeWith(disposableRegistration);
 
-                this.Events().KeyDown
+                RFC3489Tab.Events().KeyDown
                         .Where(x => x.Key == Key.Enter && TestButton.IsEnabled)
                         .Subscribe(y => { TestButton.Command.Execute(Unit.Default); })
                         .DisposeWith(disposableRegistration);
+
+                #endregion
+
+                #region RFC5780
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.BindingTest,
+                        v => v.BindingTestTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.MappingBehavior,
+                        v => v.MappingBehaviorTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.FilteringBehavior,
+                        v => v.FilteringBehaviorTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                        vm => vm.LocalAddress,
+                        v => v.LocalAddressTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.MappingAddress,
+                        v => v.MappingAddressTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.BindCommand(ViewModel,
+                                viewModel => viewModel.DiscoveryNatType,
+                                view => view.DiscoveryButton)
+                        .DisposeWith(disposableRegistration);
+
+                RFC5780Tab.Events().KeyDown
+                        .Where(x => x.Key == Key.Enter && DiscoveryButton.IsEnabled)
+                        .Subscribe(y => { DiscoveryButton.Command.Execute(Unit.Default); })
+                        .DisposeWith(disposableRegistration);
+
+                #endregion
             });
         }
     }

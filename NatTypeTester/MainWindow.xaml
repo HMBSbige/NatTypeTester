@@ -42,9 +42,10 @@
 				</ComboBox>
 			</Grid>
 			<TabControl>
-				<TabItem Header="RFC 3489">
+				<TabItem Header="RFC 5780" x:Name="RFC5780Tab">
 					<Grid>
 						<Grid.RowDefinitions>
+							<RowDefinition />
 							<RowDefinition />
 							<RowDefinition />
 							<RowDefinition />
@@ -56,27 +57,61 @@
 							<ColumnDefinition />
 							<ColumnDefinition Width="65" />
 						</Grid.ColumnDefinitions>
+						<TextBlock Grid.Row="0" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Binding test" />
+						<TextBlock Grid.Row="1" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Mapping behavior" />
+						<TextBlock Grid.Row="2" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Filtering behavior" />
+						<TextBlock Grid.Row="3" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Local end" />
+						<TextBlock Grid.Row="4" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Public end" />
 
-						<TextBlock Grid.Row="1" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="NAT type" />
-						<TextBlock Grid.Row="2" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Local end" />
-						<TextBlock Grid.Row="3" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Public end" />
+						<TextBox x:Name="BindingTestTextBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+						         Height="23.24" Margin="5" IsReadOnly="True"
+						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
+						<TextBox x:Name="MappingBehaviorTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+						         Height="23.24" Margin="5" IsReadOnly="True"
+						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
+						<TextBox x:Name="FilteringBehaviorTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+						         Height="23.24" Margin="5" IsReadOnly="True"
+						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
+						<TextBox x:Name="LocalAddressTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+						         Height="23.24" Margin="5" IsReadOnly="False"
+						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
+						<TextBox x:Name="MappingAddressTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+						         Height="23.24" Margin="5" IsReadOnly="True"
+						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
 
-						<TextBox x:Name="NatTypeTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+						<Button x:Name="DiscoveryButton" Grid.Row="5" Grid.Column="2" Content="Test" Margin="5" />
+					</Grid>
+				</TabItem>
+				<TabItem Header="RFC 3489" x:Name="RFC3489Tab">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition />
+							<ColumnDefinition Width="65" />
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Grid.Row="0" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="NAT type" />
+						<TextBlock Grid.Row="1" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Local end" />
+						<TextBlock Grid.Row="2" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Public end" />
+
+						<TextBox x:Name="NatTypeTextBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
 						Height="23.24" Margin="5" IsReadOnly="True"
 						VerticalContentAlignment="Center" VerticalAlignment="Center"/>
-						<TextBox x:Name="LocalEndTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+						<TextBox x:Name="LocalEndTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
 						Height="23.24" Margin="5"
-						VerticalContentAlignment="Center" VerticalAlignment="Center"
-						Text="0.0.0.0:0" />
-						<TextBox x:Name="PublicEndTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+						VerticalContentAlignment="Center" VerticalAlignment="Center" />
+						<TextBox x:Name="PublicEndTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
 						Height="23.24" Margin="5" IsReadOnly="True"
 						VerticalContentAlignment="Center" VerticalAlignment="Center" />
 
-						<Button x:Name="TestButton" Grid.Row="4" Grid.Column="2" Content="Test" Margin="5"/>
+						<Button x:Name="TestButton" Grid.Row="3" Grid.Column="2" Content="Test" Margin="5"/>
 					</Grid>
-				</TabItem>
-				<TabItem Header="RFC 5780">
-
 				</TabItem>
 			</TabControl>
 		</StackPanel>

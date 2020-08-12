@@ -24,11 +24,11 @@ namespace STUN.Client
         private readonly Subject<NatType> _natTypeSubj = new Subject<NatType>();
         public IObservable<NatType> NatTypeChanged => _natTypeSubj.AsObservable();
 
-        private readonly Subject<IPEndPoint> _pubSubj = new Subject<IPEndPoint>();
-        public IObservable<IPEndPoint> PubChanged => _pubSubj.AsObservable();
+        protected readonly Subject<IPEndPoint> PubSubj = new Subject<IPEndPoint>();
+        public IObservable<IPEndPoint> PubChanged => PubSubj.AsObservable();
 
-        private readonly Subject<IPEndPoint> _localSubj = new Subject<IPEndPoint>();
-        public IObservable<IPEndPoint> LocalChanged => _localSubj.AsObservable();
+        protected readonly Subject<IPEndPoint> LocalSubj = new Subject<IPEndPoint>();
+        public IObservable<IPEndPoint> LocalChanged => LocalSubj.AsObservable();
 
         #endregion
 
@@ -85,7 +85,7 @@ namespace STUN.Client
         {
             var res = new ClassicStunResult();
             _natTypeSubj.OnNext(res.NatType);
-            _pubSubj.OnNext(res.PublicEndPoint);
+            PubSubj.OnNext(res.PublicEndPoint);
 
             try
             {
@@ -101,7 +101,7 @@ namespace STUN.Client
 
                 if (local1 != null)
                 {
-                    _localSubj.OnNext(LocalEndPoint);
+                    LocalSubj.OnNext(LocalEndPoint);
                 }
 
                 var mappedAddress1 = AttributeExtensions.GetMappedAddressAttribute(response1);
@@ -117,7 +117,7 @@ namespace STUN.Client
                     return res;
                 }
 
-                _pubSubj.OnNext(mappedAddress1); // 显示 test I 得到的映射地址
+                PubSubj.OnNext(mappedAddress1); // 显示 test I 得到的映射地址
 
                 var test2 = new StunMessage5389
                 {
@@ -194,7 +194,7 @@ namespace STUN.Client
             finally
             {
                 _natTypeSubj.OnNext(res.NatType);
-                _pubSubj.OnNext(res.PublicEndPoint);
+                PubSubj.OnNext(res.PublicEndPoint);
             }
         }
 
@@ -236,11 +236,12 @@ namespace STUN.Client
             return (null, null, null);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             UdpClient?.Dispose();
             _natTypeSubj.OnCompleted();
-            _pubSubj.OnCompleted();
+            PubSubj.OnCompleted();
+            LocalSubj.OnCompleted();
         }
     }
 }
