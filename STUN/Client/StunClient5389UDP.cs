@@ -126,9 +126,9 @@ namespace STUN.Client
             if (notifyChanged)
             {
                 _bindingSubj.OnNext(res);
+                PubSubj.OnNext(mappedAddress1);
             }
             LocalSubj.OnNext(LocalEndPoint);
-            PubSubj.OnNext(mappedAddress1);
 
             return new StunResult5389
             {
