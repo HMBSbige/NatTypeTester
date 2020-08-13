@@ -174,7 +174,7 @@ namespace NatTypeTester.ViewModels
 
         private IObservable<Unit> DiscoveryNatTypeImpl()
         {
-            return Observable.Defer(() => Observable.StartAsync(async () =>
+            return Observable.FromAsync(async () =>
             {
                 try
                 {
@@ -214,7 +214,7 @@ namespace NatTypeTester.ViewModels
                 {
                     MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            })).SubscribeOn(RxApp.TaskpoolScheduler);
+            }).SubscribeOn(RxApp.TaskpoolScheduler);
         }
     }
 }
