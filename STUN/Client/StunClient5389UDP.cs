@@ -259,42 +259,6 @@ namespace STUN.Client
             }
         }
 
-        private async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
-        {
-            try
-            {
-                var b1 = sendMessage.Bytes.ToArray();
-                //var t = DateTime.Now;
-
-                // Simple retransmissions
-                //https://tools.ietf.org/html/rfc5389#section-7.2.1
-                //while (t + TimeSpan.FromSeconds(6) > DateTime.Now)
-                {
-                    try
-                    {
-
-                        var (receive1, ipe, local) = await UdpClient.UdpReceiveAsync(b1, remote, receive);
-
-                        var message = new StunMessage5389();
-                        if (message.TryParse(receive1) &&
-                            message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
-                        {
-                            return (message, ipe, local);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-            return (null, null, null);
-        }
-
         public override void Dispose()
         {
             base.Dispose();

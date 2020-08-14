@@ -145,7 +145,7 @@ namespace NatTypeTester.ViewModels
 
         private IObservable<Unit> TestClassicNatTypeImpl()
         {
-            return Observable.Start(() =>
+            return Observable.FromAsync(async () =>
             {
                 try
                 {
@@ -158,7 +158,7 @@ namespace NatTypeTester.ViewModels
                                 .Subscribe(t => ClassicNatType = $@"{t}");
                         client.PubChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => PublicEnd = $@"{t}");
                         client.LocalChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => LocalEnd = $@"{t}");
-                        client.Query();
+                        await client.Query3489Async();
                     }
                     else
                     {
@@ -169,7 +169,7 @@ namespace NatTypeTester.ViewModels
                 {
                     MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            });
+            }).SubscribeOn(RxApp.TaskpoolScheduler);
         }
 
         private IObservable<Unit> DiscoveryNatTypeImpl()

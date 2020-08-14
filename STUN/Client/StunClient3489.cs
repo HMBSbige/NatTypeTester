@@ -1,6 +1,7 @@
 ﻿using STUN.Enums;
 using STUN.Interfaces;
 using STUN.Message;
+using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;
 using System;
@@ -10,6 +11,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace STUN.Client
 {
@@ -47,6 +49,8 @@ namespace STUN.Client
 
         public IPEndPoint RemoteEndPoint => Server == null ? null : new IPEndPoint(Server, Port);
 
+        protected IUdpProxy Proxy;
+
         public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
         {
             Func<string, IPAddress> dnsQuery1;
@@ -81,7 +85,7 @@ namespace STUN.Client
             Timeout = TimeSpan.FromSeconds(1.6);
         }
 
-        public ClassicStunResult Query()
+        public async Task<ClassicStunResult> Query3489Async()
         {
             var res = new ClassicStunResult();
             _natTypeSubj.OnNext(res.NatType);
@@ -92,7 +96,7 @@ namespace STUN.Client
                 // test I
                 var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
-                var (response1, remote1, local1) = Test(test1, RemoteEndPoint, RemoteEndPoint);
+                var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint);
                 if (response1 == null)
                 {
                     res.NatType = NatType.UdpBlocked;
@@ -127,7 +131,7 @@ namespace STUN.Client
                 };
 
                 // test II
-                var (response2, remote2, _) = Test(test2, RemoteEndPoint, changedAddress1);
+                var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1);
                 var mappedAddress2 = AttributeExtensions.GetMappedAddressAttribute(response2);
 
                 if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
@@ -156,7 +160,7 @@ namespace STUN.Client
 
                 // Test I(#2)
                 var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
-                var (response12, _, _) = Test(test12, changedAddress1, changedAddress1);
+                var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1);
                 var mappedAddress12 = AttributeExtensions.GetMappedAddressAttribute(response12);
 
                 if (mappedAddress12 == null)
@@ -179,7 +183,7 @@ namespace STUN.Client
                     MagicCookie = 0,
                     Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
                 };
-                var (response3, _, _) = Test(test3, changedAddress1, changedAddress1);
+                var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1);
                 var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
                 if (mappedAddress3 != null)
                 {
@@ -198,10 +202,7 @@ namespace STUN.Client
             }
         }
 
-        /// <returns>
-        /// (StunMessage, Remote, Local)
-        /// </returns>
-        private (StunMessage5389, IPEndPoint, IPAddress) Test(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
+        protected async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
         {
             try
             {
@@ -209,12 +210,13 @@ namespace STUN.Client
                 //var t = DateTime.Now;
 
                 // Simple retransmissions
-                //https://tools.ietf.org/html/rfc3489#section-9.3
-                //while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
+                //https://tools.ietf.org/html/rfc5389#section-7.2.1
+                //while (t + TimeSpan.FromSeconds(6) > DateTime.Now)
                 {
                     try
                     {
-                        var (receive1, ipe, local) = UdpClient.UdpReceive(b1, remote, receive);
+                        // var (receive1, ipe, local) = await Proxy.RecieveAsync(b1, remote, receive);
+                        var (receive1, ipe, local) = await UdpClient.UdpReceiveAsync(b1, remote, receive);
 
                         var message = new StunMessage5389();
                         if (message.TryParse(receive1) &&

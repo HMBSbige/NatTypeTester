@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -40,33 +41,6 @@ namespace STUN.Utils
             }
 
             return null;
-        }
-
-        public static (string, string, string) NatTypeTestCore(string local, string server, ushort port)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(server))
-                {
-                    Debug.WriteLine(@"[ERROR]: Please specify STUN server !");
-                    return (string.Empty, DefaultLocalEnd, string.Empty);
-                }
-
-                using var client = new StunClient3489(server, port, ParseEndpoint(local));
-
-                var result = client.Query();
-
-                return (
-                        result.NatType.ToString(),
-                        $@"{client.LocalEndPoint}",
-                        $@"{result.PublicEndPoint}"
-                );
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($@"[ERROR]: {ex}");
-                return (string.Empty, DefaultLocalEnd, string.Empty);
-            }
         }
 
         public static async Task<StunResult5389> NatBehaviorDiscovery(string server, ushort port, IPEndPoint local)
@@ -117,6 +91,14 @@ namespace STUN.Utils
             return (res.Take(length).ToArray(),
                     (IPEndPoint)receive
                     , local);
+        }
+
+        public static TcpState GetState(this TcpClient tcpClient)
+        {
+            var foo = IPGlobalProperties.GetIPGlobalProperties()
+              .GetActiveTcpConnections()
+              .SingleOrDefault(x => x.LocalEndPoint.Equals(tcpClient.Client.LocalEndPoint));
+            return foo != null ? foo.State : TcpState.Unknown;
         }
     }
 }
