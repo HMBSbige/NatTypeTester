@@ -51,7 +51,7 @@ namespace STUN.Client
 
         public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
         {
-            Proxy = new NoneUdpProxy(local, null);
+            Proxy = new Socks5UdpProxy(local, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1081));
             Func<string, IPAddress> dnsQuery1;
             if (string.IsNullOrEmpty(server))
             {
@@ -90,6 +90,7 @@ namespace STUN.Client
 
             try
             {
+                await Proxy.ConnectAsync();
                 // test I
                 var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
@@ -194,6 +195,7 @@ namespace STUN.Client
             }
             finally
             {
+                await Proxy.DisconnectAsync();
                 _natTypeSubj.OnNext(res.NatType);
                 PubSubj.OnNext(res.PublicEndPoint);
             }

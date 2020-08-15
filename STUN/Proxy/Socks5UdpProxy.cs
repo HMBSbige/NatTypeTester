@@ -108,7 +108,7 @@ namespace STUN.Proxy
                 buf[addrLen + 5] = (byte)(port % 256);
 
                 // 5 cmd(3=udpassoc) 0 atyp(1=v4 3=dns 4=v5) addr port
-                s.Write(buf, 0, addrLen + 4);
+                s.Write(buf, 0, addrLen + 6);
                 #endregion
 
                 #region UDP Assoc Response
@@ -129,7 +129,7 @@ namespace STUN.Proxy
                 }
 
                 byte[] addr = new byte[addrLen];
-                if (s.Read(buf, 0, addrLen) != addrLen) throw new ProtocolViolationException();
+                if (s.Read(addr, 0, addrLen) != addrLen) throw new ProtocolViolationException();
                 IPAddress assocIP = new IPAddress(addr);
                 if (s.Read(buf, 0, 2) != 2) throw new ProtocolViolationException();
                 int assocPort = buf[0] * 256 + buf[1];
@@ -151,14 +151,14 @@ namespace STUN.Proxy
 
             byte[] remoteBytes = GetEndPointByte(remote);
             byte[] proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
-            Array.Copy(remoteBytes, 0, proxyBytes, 3, proxyBytes.Length);
+            Array.Copy(remoteBytes, 0, proxyBytes, 3, remoteBytes.Length);
             Array.Copy(bytes, 0, proxyBytes, remoteBytes.Length + 3, bytes.Length);
 
             await UdpClient.SendAsync(proxyBytes, proxyBytes.Length, assocEndPoint);
             var res = new byte[ushort.MaxValue];
             var flag = SocketFlags.None;
-
-            var length = UdpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref receive, out var ipPacketInformation);
+            EndPoint ep = new IPEndPoint(0, 0);
+            var length = UdpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref ep, out var ipPacketInformation);
 
             if (res[0] != 0 || res[1] != 0 || res[2] != 0)
             {
@@ -205,7 +205,7 @@ namespace STUN.Proxy
         {
             byte[] ipbyte = ep.Address.GetAddressBytes();
             byte[] ret = new byte[ipbyte.Length + 3];
-            ret[0] = (byte)(ipbyte.Length == 1 ? 4 : 16);
+            ret[0] = (byte)(ipbyte.Length == 4 ? 1 : 4);
             Array.Copy(ipbyte, 0, ret, 1, ipbyte.Length);
             ret[ipbyte.Length + 1] = (byte)(ep.Port / 256);
             ret[ipbyte.Length + 2] = (byte)(ep.Port % 256);
