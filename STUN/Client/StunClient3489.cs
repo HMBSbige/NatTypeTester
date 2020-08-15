@@ -34,15 +34,13 @@ namespace STUN.Client
 
         #endregion
 
-        public IPEndPoint LocalEndPoint => (IPEndPoint)UdpClient.Client.LocalEndPoint;
+        public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
 
         public TimeSpan Timeout
         {
-            get => TimeSpan.FromMilliseconds(UdpClient.Client.ReceiveTimeout);
-            set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+            get => Proxy.Timeout;
+            set => Proxy.Timeout = value;
         }
-
-        protected readonly UdpClient UdpClient;
 
         protected readonly IPAddress Server;
         protected readonly ushort Port;
@@ -53,6 +51,7 @@ namespace STUN.Client
 
         public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
         {
+            Proxy = new NoneUdpProxy(local, null);
             Func<string, IPAddress> dnsQuery1;
             if (string.IsNullOrEmpty(server))
             {
@@ -79,8 +78,6 @@ namespace STUN.Client
                 throw new ArgumentException(@"Wrong STUN server !");
             }
             Port = port;
-
-            UdpClient = local == null ? new UdpClient() : new UdpClient(local);
 
             Timeout = TimeSpan.FromSeconds(1.6);
         }
@@ -215,8 +212,7 @@ namespace STUN.Client
                 {
                     try
                     {
-                        // var (receive1, ipe, local) = await Proxy.RecieveAsync(b1, remote, receive);
-                        var (receive1, ipe, local) = await UdpClient.UdpReceiveAsync(b1, remote, receive);
+                        var (receive1, ipe, local) = await Proxy.RecieveAsync(b1, remote, receive);
 
                         var message = new StunMessage5389();
                         if (message.TryParse(receive1) &&
@@ -240,7 +236,7 @@ namespace STUN.Client
 
         public virtual void Dispose()
         {
-            UdpClient?.Dispose();
+            Proxy?.Dispose();
             _natTypeSubj.OnCompleted();
             PubSubj.OnCompleted();
             LocalSubj.OnCompleted();

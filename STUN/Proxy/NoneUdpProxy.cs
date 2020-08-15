@@ -22,9 +22,13 @@ namespace STUN.Proxy
 
         protected UdpClient UdpClient;
 
-        public Task ConnectAsync(IPEndPoint local, IPEndPoint remote)
+        public NoneUdpProxy(IPEndPoint local, IPEndPoint proxy)
         {
             UdpClient = local == null ? new UdpClient() : new UdpClient(local);
+        }
+
+        public Task ConnectAsync()
+        {
             return Task.CompletedTask;
         }
 
@@ -54,6 +58,11 @@ namespace STUN.Proxy
             return (res.Take(length).ToArray(),
                     (IPEndPoint)receive
                     , local);
+        }
+
+        public void Dispose()
+        {
+            UdpClient?.Dispose();
         }
     }
 }

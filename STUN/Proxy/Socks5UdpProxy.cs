@@ -24,22 +24,23 @@ namespace STUN.Proxy
             set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
         }
 
-        public IPEndPoint LocalEndPoint => throw new NotImplementedException();
+        public IPEndPoint LocalEndPoint { get; private set; }
 
         UdpClient UdpClient;
 
         string user;
         string passwd;
-        public Socks5UdpProxy(IPEndPoint proxy)
+        public Socks5UdpProxy(IPEndPoint local, IPEndPoint proxy)
         {
+            LocalEndPoint = local;
+            UdpClient = local == null ? new UdpClient() : new UdpClient(local);
             socksTcpEndPoint = proxy;
         }
 
-        public async Task ConnectAsync(IPEndPoint local, IPEndPoint remote)
+        public async Task ConnectAsync()
         {
             byte[] buf = new byte[1024];
 
-            UdpClient = local == null ? new UdpClient() : new UdpClient(local);
             await assoc.ConnectAsync(socksTcpEndPoint.Address, socksTcpEndPoint.Port);
             try
             {
@@ -94,20 +95,15 @@ namespace STUN.Proxy
                 buf[0] = 5;
                 buf[1] = 3;
                 buf[2] = 0;
+
                 int addrLen;
                 int port;
-                if (remote is IPEndPoint ir)
-                {
-                    byte[] abyte = ir.Address.GetAddressBytes();
-                    addrLen = abyte.Length;
-                    buf[3] = (byte)(abyte.Length == 4 ? 1 : 4);
-                    Array.Copy(abyte, 0, buf, 4, addrLen);
-                    port = ir.Port;
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+                byte[] abyte = IPAddress.Any.GetAddressBytes();
+                addrLen = abyte.Length;
+                buf[3] = (byte)(abyte.Length == 4 ? 1 : 4);
+                Array.Copy(abyte, 0, buf, 4, addrLen);
+                port = 0;
+
                 buf[addrLen + 4] = (byte)(port / 256);
                 buf[addrLen + 5] = (byte)(port % 256);
 
@@ -211,9 +207,15 @@ namespace STUN.Proxy
             byte[] ret = new byte[ipbyte.Length + 3];
             ret[0] = (byte)(ipbyte.Length == 1 ? 4 : 16);
             Array.Copy(ipbyte, 0, ret, 1, ipbyte.Length);
-            ret[ipbyte.Length + 1] = (byte)(ep.Port % 256);
-            ret[ipbyte.Length + 2] = (byte)(ep.Port / 256);
+            ret[ipbyte.Length + 1] = (byte)(ep.Port / 256);
+            ret[ipbyte.Length + 2] = (byte)(ep.Port % 256);
             return ret;
+        }
+    
+        public void Dispose()
+        {
+            UdpClient?.Dispose();
+            assoc?.Dispose();
         }
     }
 }
