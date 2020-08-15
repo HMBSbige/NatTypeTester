@@ -195,10 +195,8 @@ namespace NatTypeTester.ViewModels
                             ProxyUser, ProxyPassword
                             );
 
-                        using var client = new StunClient3489(server.Hostname, proxy, server.Port,
-                                NetUtils.ParseEndpoint(LocalEnd));
-
-
+                        using var client = new StunClient3489(server.Hostname, server.Port,
+                                NetUtils.ParseEndpoint(LocalEnd), proxy);
 
                         client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler)
                                 .Subscribe(t => ClassicNatType = $@"{t}");
@@ -234,7 +232,7 @@ namespace NatTypeTester.ViewModels
                             ProxyUser, ProxyPassword
                             );
 
-                        using var client = new StunClient5389UDP(server.Hostname, proxy, server.Port, NetUtils.ParseEndpoint(LocalAddress));
+                        using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress), proxy);
 
 
 

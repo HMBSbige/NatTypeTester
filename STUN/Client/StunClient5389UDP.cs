@@ -33,14 +33,15 @@ namespace STUN.Client
 
         #endregion
 
-        public StunClient5389UDP(string server, IUdpProxy proxy, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
-        : base(server, proxy, port, local, dnsQuery)
+        public StunClient5389UDP(string server, ushort port = 3478, IPEndPoint local = null, IUdpProxy proxy = null, IDnsQuery dnsQuery = null)
+        : base(server, port, local, proxy, dnsQuery)
         {
             Timeout = TimeSpan.FromSeconds(3);
         }
 
         public async Task<StunResult5389> QueryAsync()
         {
+            await Proxy.ConnectAsync();
             var result = new StunResult5389();
             _bindingSubj.OnNext(result.BindingTestResult);
             _mappingBehaviorSubj.OnNext(result.MappingBehavior);
@@ -92,6 +93,7 @@ namespace STUN.Client
             finally
             {
                 _mappingBehaviorSubj.OnNext(result.MappingBehavior);
+                await Proxy.DisconnectAsync();
             }
         }
 
@@ -104,7 +106,6 @@ namespace STUN.Client
         private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, bool notifyChanged)
         {
             BindingTestResult res;
-
             var test = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest };
             var (response1, _, local1) = await TestAsync(test, remote, remote);
             var mappedAddress1 = AttributeExtensions.GetXorMappedAddressAttribute(response1);

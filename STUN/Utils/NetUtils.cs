@@ -46,7 +46,7 @@ namespace STUN.Utils
         public static async Task<StunResult5389> NatBehaviorDiscovery(string server, ushort port, IPEndPoint local)
         {
             // proxy is not supported yet
-            using var client = new StunClient5389UDP(server, null, port, local);
+            using var client = new StunClient5389UDP(server, port, local);
             return await client.QueryAsync();
         }
 

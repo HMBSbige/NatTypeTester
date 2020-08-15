@@ -49,7 +49,7 @@ namespace STUN.Client
 
         protected IUdpProxy Proxy;
 
-        public StunClient3489(string server, IUdpProxy proxy = null, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
+        public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IUdpProxy proxy = null, IDnsQuery dnsQuery = null)
         {
             Proxy = proxy ?? new NoneUdpProxy(local, null);
 

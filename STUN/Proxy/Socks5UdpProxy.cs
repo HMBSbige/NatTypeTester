@@ -24,19 +24,22 @@ namespace STUN.Proxy
             set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
         }
 
-        public IPEndPoint LocalEndPoint { get; private set; }
+        public IPEndPoint LocalEndPoint { get => (IPEndPoint)UdpClient.Client.LocalEndPoint; }
 
         UdpClient UdpClient;
 
         string user;
-        string passwd;
+        string password;
         public Socks5UdpProxy(IPEndPoint local, IPEndPoint proxy)
         {
-            LocalEndPoint = local;
             UdpClient = local == null ? new UdpClient() : new UdpClient(local);
             socksTcpEndPoint = proxy;
         }
-
+        public Socks5UdpProxy(IPEndPoint local, IPEndPoint proxy, string user, string password) : this(local, proxy)
+        {
+            this.user = user;
+            this.password = password;
+        }
         public async Task ConnectAsync()
         {
             byte[] buf = new byte[1024];
@@ -45,7 +48,7 @@ namespace STUN.Proxy
             try
             {
                 var s = assoc.GetStream();
-                bool requestPasswordAuth = user != null;
+                bool requestPasswordAuth = !string.IsNullOrEmpty(user);
 
                 #region Handshake
                 // we have no gssapi support
@@ -71,7 +74,7 @@ namespace STUN.Proxy
                         break;
                     case 2:
                         byte[] ubyte = Encoding.UTF8.GetBytes(user);
-                        byte[] pbyte = Encoding.UTF8.GetBytes(passwd);
+                        byte[] pbyte = Encoding.UTF8.GetBytes(password);
                         buf[0] = 1;
                         buf[1] = (byte)ubyte.Length;
                         Array.Copy(ubyte, 0, buf, 2, ubyte.Length);
@@ -97,18 +100,11 @@ namespace STUN.Proxy
                 buf[2] = 0;
 
                 int addrLen;
-                int port;
-                byte[] abyte = IPAddress.Any.GetAddressBytes();
+                byte[] abyte = GetEndPointByte(new IPEndPoint(IPAddress.Any, 0));
                 addrLen = abyte.Length;
-                buf[3] = (byte)(abyte.Length == 4 ? 1 : 4);
-                Array.Copy(abyte, 0, buf, 4, addrLen);
-                port = 0;
-
-                buf[addrLen + 4] = (byte)(port / 256);
-                buf[addrLen + 5] = (byte)(port % 256);
-
+                Array.Copy(abyte, 0, buf, 3, addrLen);
                 // 5 cmd(3=udpassoc) 0 atyp(1=v4 3=dns 4=v5) addr port
-                s.Write(buf, 0, addrLen + 6);
+                s.Write(buf, 0, addrLen + 3);
                 #endregion
 
                 #region UDP Assoc Response
@@ -147,7 +143,8 @@ namespace STUN.Proxy
         public async Task<(byte[], IPEndPoint, IPAddress)> RecieveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
         {
             TcpState state = assoc.GetState();
-            if (state != TcpState.Established) throw new Exception();
+            if (state != TcpState.Established)
+                throw new InvalidOperationException("No UDP association, maybe already disconnected or not connected");
 
             byte[] remoteBytes = GetEndPointByte(remote);
             byte[] proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
@@ -211,7 +208,7 @@ namespace STUN.Proxy
             ret[ipbyte.Length + 2] = (byte)(ep.Port % 256);
             return ret;
         }
-    
+
         public void Dispose()
         {
             UdpClient?.Dispose();
