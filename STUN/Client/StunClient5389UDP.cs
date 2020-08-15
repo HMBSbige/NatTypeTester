@@ -1,6 +1,7 @@
 ﻿using STUN.Enums;
 using STUN.Interfaces;
 using STUN.Message;
+using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;
 using System;
@@ -32,8 +33,8 @@ namespace STUN.Client
 
         #endregion
 
-        public StunClient5389UDP(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
-        : base(server, port, local, dnsQuery)
+        public StunClient5389UDP(string server, IUdpProxy proxy, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
+        : base(server, proxy, port, local, dnsQuery)
         {
             Timeout = TimeSpan.FromSeconds(3);
         }

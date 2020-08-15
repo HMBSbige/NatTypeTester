@@ -49,9 +49,10 @@ namespace STUN.Client
 
         protected IUdpProxy Proxy;
 
-        public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
+        public StunClient3489(string server, IUdpProxy proxy = null, ushort port = 3478, IPEndPoint local = null, IDnsQuery dnsQuery = null)
         {
-            Proxy = new Socks5UdpProxy(local, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1081));
+            Proxy = proxy ?? new NoneUdpProxy(local, null);
+
             Func<string, IPAddress> dnsQuery1;
             if (string.IsNullOrEmpty(server))
             {

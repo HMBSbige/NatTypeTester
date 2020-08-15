@@ -10,6 +10,8 @@ using DynamicData.Binding;
 using NatTypeTester.Model;
 using ReactiveUI;
 using STUN.Client;
+using STUN.Enums;
+using STUN.Proxy;
 using STUN.Utils;
 
 namespace NatTypeTester.ViewModels
@@ -107,6 +109,38 @@ namespace NatTypeTester.ViewModels
 
         #endregion
 
+        #region Proxy
+
+        private ProxyType _proxyType = ProxyType.Socks5;
+        public ProxyType ProxyType
+        {
+            get => _proxyType;
+            set => this.RaiseAndSetIfChanged(ref _proxyType, value);
+        }
+
+        private string _proxyServer = "127.0.0.1:1081";
+        public string ProxyServer
+        {
+            get => _proxyServer;
+            set => this.RaiseAndSetIfChanged(ref _proxyServer, value);
+        }
+
+        private string _proxyUser;
+        public string ProxyUser
+        {
+            get => _proxyUser;
+            set => this.RaiseAndSetIfChanged(ref _proxyUser, value);
+        }
+
+        private string _proxyPassword;
+        public string ProxyPassword
+        {
+            get => _proxyPassword;
+            set => this.RaiseAndSetIfChanged(ref _proxyPassword, value);
+        }
+
+        #endregion
+
         public MainWindowViewModel()
         {
             LoadStunServer();
@@ -152,8 +186,18 @@ namespace NatTypeTester.ViewModels
                     var server = new StunServer();
                     if (server.Parse(StunServer))
                     {
-                        using var client = new StunClient3489(server.Hostname, server.Port,
+                        var proxy = ProxyFactory.CreateProxy(
+                            ProxyType,
+                            NetUtils.ParseEndpoint(LocalEnd),
+                            NetUtils.ParseEndpoint(ProxyServer),
+                            ProxyUser, ProxyPassword
+                            );
+
+                        using var client = new StunClient3489(server.Hostname, proxy, server.Port,
                                 NetUtils.ParseEndpoint(LocalEnd));
+
+
+
                         client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler)
                                 .Subscribe(t => ClassicNatType = $@"{t}");
                         client.PubChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => PublicEnd = $@"{t}");
@@ -181,7 +225,16 @@ namespace NatTypeTester.ViewModels
                     var server = new StunServer();
                     if (server.Parse(StunServer))
                     {
-                        using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress));
+                        var proxy = ProxyFactory.CreateProxy(
+                            ProxyType,
+                            NetUtils.ParseEndpoint(LocalEnd),
+                            NetUtils.ParseEndpoint(ProxyServer),
+                            ProxyUser, ProxyPassword
+                            );
+
+                        using var client = new StunClient5389UDP(server.Hostname, proxy, server.Port, NetUtils.ParseEndpoint(LocalAddress));
+
+
 
                         client.BindingTestResultChanged
                                 .ObserveOn(RxApp.MainThreadScheduler)
