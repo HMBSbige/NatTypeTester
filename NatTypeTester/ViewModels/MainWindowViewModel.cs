@@ -111,6 +111,8 @@ namespace NatTypeTester.ViewModels
 
         #region Proxy
 
+        public bool CanConfigProxy => ProxyType != ProxyType.Plain;
+
         private ProxyType _proxyType = ProxyType.Socks5;
         public ProxyType ProxyType
         {

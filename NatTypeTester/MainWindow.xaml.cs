@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -31,6 +32,28 @@ namespace NatTypeTester
                 ).DisposeWith(disposableRegistration);
 
                 #endregion
+
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.CanConfigProxy,
+                        v => v.ProxyConfigGrid.IsEnabled
+                ).DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                        vm => vm.ProxyServer,
+                        v => v.ProxyServerTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                        vm => vm.ProxyUser,
+                        v => v.ProxyUsernameTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
+                this.Bind(ViewModel,
+                        vm => vm.ProxyPassword,
+                        v => v.ProxyPasswordTextBox.Text
+                ).DisposeWith(disposableRegistration);
+
 
                 #region RFC3489
 
