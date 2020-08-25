@@ -7,7 +7,7 @@ namespace STUN.Proxy
 {
     public static class ProxyFactory
     {
-        public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint local, IPEndPoint proxy, string user, string password)
+        public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint local, IPEndPoint proxy, string user = null, string password = null)
         {
             return type switch
             {

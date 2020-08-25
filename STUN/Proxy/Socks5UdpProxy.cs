@@ -13,7 +13,7 @@ namespace STUN.Proxy
 {
     public class Socks5UdpProxy : IUdpProxy
     {
-        private readonly TcpClient _assoc = new TcpClient();
+        private readonly TcpClient _assoc;
         private readonly IPEndPoint _socksTcpEndPoint;
 
         private IPEndPoint _assocEndPoint;
@@ -34,6 +34,7 @@ namespace STUN.Proxy
         public Socks5UdpProxy(IPEndPoint local, IPEndPoint proxy)
         {
             _udpClient = local == null ? new UdpClient() : new UdpClient(local);
+            _assoc = new TcpClient(proxy.AddressFamily);
             _socksTcpEndPoint = proxy;
         }
 
