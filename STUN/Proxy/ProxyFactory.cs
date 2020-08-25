@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using STUN.Enums;
+using STUN.Interfaces;
+using System;
 using System.Net;
-using System.Text;
-using STUN.Enums;
 
 namespace STUN.Proxy
 {
@@ -10,15 +9,12 @@ namespace STUN.Proxy
     {
         public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint local, IPEndPoint proxy, string user, string password)
         {
-            switch (type)
+            return type switch
             {
-                case ProxyType.Plain:
-                    return new NoneUdpProxy(local, null);
-                case ProxyType.Socks5:
-                    return new Socks5UdpProxy(local, proxy);
-                default:
-                    throw new NotSupportedException(type.ToString());
-            }
+                ProxyType.Plain => new NoneUdpProxy(local),
+                ProxyType.Socks5 => new Socks5UdpProxy(local, proxy, user, password),
+                _ => throw new NotSupportedException(type.ToString())
+            };
         }
     }
 }

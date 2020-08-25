@@ -1,12 +1,9 @@
 ﻿using STUN.Enums;
 using STUN.Interfaces;
 using STUN.Message;
-using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;

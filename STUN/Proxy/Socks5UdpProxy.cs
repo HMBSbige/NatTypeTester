@@ -1,54 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using STUN.Interfaces;
+using STUN.Utils;
+using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using STUN.Utils;
 
 namespace STUN.Proxy
 {
-    class Socks5UdpProxy : IUdpProxy
+    public class Socks5UdpProxy : IUdpProxy
     {
-        TcpClient assoc = new TcpClient();
-        IPEndPoint socksTcpEndPoint;
+        private readonly TcpClient _assoc = new TcpClient();
+        private readonly IPEndPoint _socksTcpEndPoint;
 
-        IPEndPoint assocEndPoint;
+        private IPEndPoint _assocEndPoint;
 
         public TimeSpan Timeout
         {
-            get => TimeSpan.FromMilliseconds(UdpClient.Client.ReceiveTimeout);
-            set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+            get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
+            set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
         }
 
-        public IPEndPoint LocalEndPoint { get => (IPEndPoint)UdpClient.Client.LocalEndPoint; }
+        public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
 
-        UdpClient UdpClient;
+        private readonly UdpClient _udpClient;
 
-        string user;
-        string password;
+        private readonly string _user;
+        private readonly string _password;
+
         public Socks5UdpProxy(IPEndPoint local, IPEndPoint proxy)
         {
-            UdpClient = local == null ? new UdpClient() : new UdpClient(local);
-            socksTcpEndPoint = proxy;
+            _udpClient = local == null ? new UdpClient() : new UdpClient(local);
+            _socksTcpEndPoint = proxy;
         }
+
         public Socks5UdpProxy(IPEndPoint local, IPEndPoint proxy, string user, string password) : this(local, proxy)
         {
-            this.user = user;
-            this.password = password;
+            _user = user;
+            _password = password;
         }
+
         public async Task ConnectAsync()
         {
-            byte[] buf = new byte[1024];
+            var buf = new byte[1024];
 
-            await assoc.ConnectAsync(socksTcpEndPoint.Address, socksTcpEndPoint.Port);
+            await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port);
             try
             {
-                var s = assoc.GetStream();
-                bool requestPasswordAuth = !string.IsNullOrEmpty(user);
+                var s = _assoc.GetStream();
+                var requestPasswordAuth = !string.IsNullOrEmpty(_user);
 
                 #region Handshake
                 // we have no gssapi support
@@ -62,8 +64,10 @@ namespace STUN.Proxy
                     s.Write(new byte[] { 5, 1, 0 }, 0, 3);
                 }
                 // 5 auth(ff=deny)
-                if (s.Read(buf, 0, 2) != 2) throw new ProtocolViolationException();
-                if (buf[0] != 5) throw new ProtocolViolationException();
+                if (s.Read(buf, 0, 2) != 2)
+                    throw new ProtocolViolationException();
+                if (buf[0] != 5)
+                    throw new ProtocolViolationException();
                 #endregion
 
                 #region Auth
@@ -73,8 +77,8 @@ namespace STUN.Proxy
                     case 0:
                         break;
                     case 2:
-                        byte[] ubyte = Encoding.UTF8.GetBytes(user);
-                        byte[] pbyte = Encoding.UTF8.GetBytes(password);
+                        var ubyte = Encoding.UTF8.GetBytes(_user);
+                        var pbyte = Encoding.UTF8.GetBytes(_password);
                         buf[0] = 1;
                         buf[1] = (byte)ubyte.Length;
                         Array.Copy(ubyte, 0, buf, 2, ubyte.Length);
@@ -83,9 +87,12 @@ namespace STUN.Proxy
                         // 1 userlen user passlen pass
                         s.Write(buf, 0, ubyte.Length + pbyte.Length + 4);
                         // 1 state(0=ok)
-                        if (s.Read(buf, 0, 2) != 2) throw new ProtocolViolationException();
-                        if (buf[0] != 1) throw new ProtocolViolationException();
-                        if (buf[1] != 0) throw new UnauthorizedAccessException();
+                        if (s.Read(buf, 0, 2) != 2)
+                            throw new ProtocolViolationException();
+                        if (buf[0] != 1)
+                            throw new ProtocolViolationException();
+                        if (buf[1] != 0)
+                            throw new UnauthorizedAccessException();
                         break;
                     case 0xff:
                         throw new UnauthorizedAccessException();
@@ -100,7 +107,7 @@ namespace STUN.Proxy
                 buf[2] = 0;
 
                 int addrLen;
-                byte[] abyte = GetEndPointByte(new IPEndPoint(IPAddress.Any, 0));
+                var abyte = GetEndPointByte(new IPEndPoint(IPAddress.Any, 0));
                 addrLen = abyte.Length;
                 Array.Copy(abyte, 0, buf, 3, addrLen);
                 // 5 cmd(3=udpassoc) 0 atyp(1=v4 3=dns 4=v5) addr port
@@ -108,9 +115,12 @@ namespace STUN.Proxy
                 #endregion
 
                 #region UDP Assoc Response
-                if (s.Read(buf, 0, 4) != 4) throw new ProtocolViolationException();
-                if (buf[0] != 5 || buf[2] != 0) throw new ProtocolViolationException();
-                if (buf[1] != 0) throw new UnauthorizedAccessException();
+                if (s.Read(buf, 0, 4) != 4)
+                    throw new ProtocolViolationException();
+                if (buf[0] != 5 || buf[2] != 0)
+                    throw new ProtocolViolationException();
+                if (buf[1] != 0)
+                    throw new UnauthorizedAccessException();
 
                 switch (buf[3])
                 {
@@ -124,64 +134,60 @@ namespace STUN.Proxy
                         throw new NotSupportedException();
                 }
 
-                byte[] addr = new byte[addrLen];
-                if (s.Read(addr, 0, addrLen) != addrLen) throw new ProtocolViolationException();
-                IPAddress assocIP = new IPAddress(addr);
-                if (s.Read(buf, 0, 2) != 2) throw new ProtocolViolationException();
-                int assocPort = buf[0] * 256 + buf[1];
+                var addr = new byte[addrLen];
+                if (s.Read(addr, 0, addrLen) != addrLen)
+                    throw new ProtocolViolationException();
+                var assocIP = new IPAddress(addr);
+                if (s.Read(buf, 0, 2) != 2)
+                    throw new ProtocolViolationException();
+                var assocPort = buf[0] * 256 + buf[1];
                 #endregion
 
-                assocEndPoint = new IPEndPoint(assocIP, assocPort);
+                _assocEndPoint = new IPEndPoint(assocIP, assocPort);
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                assoc.Close();
+                _assoc.Close();
             }
         }
 
         public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
         {
-            TcpState state = assoc.GetState();
+            var state = _assoc.GetState();
             if (state != TcpState.Established)
                 throw new InvalidOperationException("No UDP association, maybe already disconnected or not connected");
 
-            byte[] remoteBytes = GetEndPointByte(remote);
-            byte[] proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
+            var remoteBytes = GetEndPointByte(remote);
+            var proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
             Array.Copy(remoteBytes, 0, proxyBytes, 3, remoteBytes.Length);
             Array.Copy(bytes, 0, proxyBytes, remoteBytes.Length + 3, bytes.Length);
 
-            await UdpClient.SendAsync(proxyBytes, proxyBytes.Length, assocEndPoint);
+            await _udpClient.SendAsync(proxyBytes, proxyBytes.Length, _assocEndPoint);
             var res = new byte[ushort.MaxValue];
             var flag = SocketFlags.None;
             EndPoint ep = new IPEndPoint(0, 0);
-            var length = UdpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref ep, out var ipPacketInformation);
+            var length = _udpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref ep, out var ipPacketInformation);
 
             if (res[0] != 0 || res[1] != 0 || res[2] != 0)
             {
                 throw new Exception();
             }
 
-            int addrLen;
-            switch (res[3])
+            var addressLen = res[3] switch
             {
-                case 1:
-                    addrLen = 4;
-                    break;
-                case 4:
-                    addrLen = 16;
-                    break;
-                default:
-                    throw new Exception();
-            }
+                1 => 4,
+                4 => 16,
+                _ => throw new Exception()
+            };
 
-            byte[] ipbyte = new byte[addrLen];
-            Array.Copy(res, 4, ipbyte, 0, addrLen);
+            var ipByte = new byte[addressLen];
+            Array.Copy(res, 4, ipByte, 0, addressLen);
 
-            IPAddress ip = new IPAddress(ipbyte);
-            int port = res[addrLen + 4] * 256 + res[addrLen + 5];
-            byte[] ret = new byte[length - addrLen - 6];
-            Array.Copy(res, addrLen + 6, ret, 0, length - addrLen - 6);
+            var ip = new IPAddress(ipByte);
+            var port = res[addressLen + 4] * 256 + res[addressLen + 5];
+            var ret = new byte[length - addressLen - 6];
+            Array.Copy(res, addressLen + 6, ret, 0, length - addressLen - 6);
             return (
                 ret,
                 new IPEndPoint(ip, port),
@@ -192,27 +198,31 @@ namespace STUN.Proxy
         {
             try
             {
-                assoc.Close();
+                _assoc.Close();
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
+
             return Task.CompletedTask;
         }
 
-        byte[] GetEndPointByte(IPEndPoint ep)
+        private static byte[] GetEndPointByte(IPEndPoint ep)
         {
-            byte[] ipbyte = ep.Address.GetAddressBytes();
-            byte[] ret = new byte[ipbyte.Length + 3];
-            ret[0] = (byte)(ipbyte.Length == 4 ? 1 : 4);
-            Array.Copy(ipbyte, 0, ret, 1, ipbyte.Length);
-            ret[ipbyte.Length + 1] = (byte)(ep.Port / 256);
-            ret[ipbyte.Length + 2] = (byte)(ep.Port % 256);
+            var ipByte = ep.Address.GetAddressBytes();
+            var ret = new byte[ipByte.Length + 3];
+            ret[0] = (byte)(ipByte.Length == 4 ? 1 : 4);
+            Array.Copy(ipByte, 0, ret, 1, ipByte.Length);
+            ret[ipByte.Length + 1] = (byte)(ep.Port / 256);
+            ret[ipByte.Length + 2] = (byte)(ep.Port % 256);
             return ret;
         }
 
         public void Dispose()
         {
-            UdpClient?.Dispose();
-            assoc?.Dispose();
+            _udpClient?.Dispose();
+            _assoc?.Dispose();
         }
     }
 }

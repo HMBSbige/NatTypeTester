@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 
-namespace STUN.Proxy
+namespace STUN.Interfaces
 {
     public interface IUdpProxy : IDisposable
     {

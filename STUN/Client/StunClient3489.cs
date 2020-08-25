@@ -8,7 +8,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -51,9 +50,8 @@ namespace STUN.Client
 
         public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IUdpProxy proxy = null, IDnsQuery dnsQuery = null)
         {
-            Proxy = proxy ?? new NoneUdpProxy(local, null);
+            Proxy = proxy ?? new NoneUdpProxy(local);
 
-            Func<string, IPAddress> dnsQuery1;
             if (string.IsNullOrEmpty(server))
             {
                 throw new ArgumentException(@"Please specify STUN server !");
@@ -64,16 +62,9 @@ namespace STUN.Client
                 throw new ArgumentException(@"Port value must be >= 1 !");
             }
 
-            if (dnsQuery != null)
-            {
-                dnsQuery1 = dnsQuery.Query;
-            }
-            else
-            {
-                dnsQuery1 = new DefaultDnsQuery().Query;
-            }
+            dnsQuery ??= new DefaultDnsQuery();
 
-            Server = dnsQuery1(server);
+            Server = dnsQuery.Query(server);
             if (Server == null)
             {
                 throw new ArgumentException(@"Wrong STUN server !");
@@ -210,8 +201,8 @@ namespace STUN.Client
                 //var t = DateTime.Now;
 
                 // Simple retransmissions
-                //https://tools.ietf.org/html/rfc5389#section-7.2.1
-                //while (t + TimeSpan.FromSeconds(6) > DateTime.Now)
+                //https://tools.ietf.org/html/rfc3489#section-9.3
+                //while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
                 {
                     try
                     {

@@ -1,28 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using STUN.Interfaces;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace STUN.Proxy
 {
-    class NoneUdpProxy : IUdpProxy
+    public class NoneUdpProxy : IUdpProxy
     {
-
         public TimeSpan Timeout
         {
             get => TimeSpan.FromMilliseconds(UdpClient.Client.ReceiveTimeout);
             set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
         }
 
-        public IPEndPoint LocalEndPoint { get => (IPEndPoint)UdpClient.Client.LocalEndPoint; }
+        public IPEndPoint LocalEndPoint => (IPEndPoint)UdpClient.Client.LocalEndPoint;
 
         protected UdpClient UdpClient;
 
-        public NoneUdpProxy(IPEndPoint local, IPEndPoint proxy)
+        public NoneUdpProxy(IPEndPoint local)
         {
             UdpClient = local == null ? new UdpClient() : new UdpClient(local);
         }
