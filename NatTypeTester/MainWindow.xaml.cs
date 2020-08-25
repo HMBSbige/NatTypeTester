@@ -1,5 +1,6 @@
 ﻿using NatTypeTester.ViewModels;
 using ReactiveUI;
+using STUN.Enums;
 using System;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -34,11 +35,6 @@ namespace NatTypeTester
 
                 #region Proxy
 
-                this.OneWayBind(ViewModel,
-                        vm => vm.CanConfigProxy,
-                        v => v.ProxyConfigGrid.IsEnabled
-                ).DisposeWith(d);
-
                 this.Bind(ViewModel,
                         vm => vm.ProxyServer,
                         v => v.ProxyServerTextBox.Text
@@ -53,6 +49,20 @@ namespace NatTypeTester
                         vm => vm.ProxyPassword,
                         v => v.ProxyPasswordTextBox.Text
                 ).DisposeWith(d);
+
+                this.WhenAnyValue(x => x.ProxyTypeNoneRadio.IsChecked, x => x.ProxyTypeSocks5Radio.IsChecked)
+                    .Subscribe(values =>
+                    {
+                        ProxyConfigGrid.IsEnabled = !values.Item1.GetValueOrDefault(false);
+                        if (values.Item1.GetValueOrDefault(false))
+                        {
+                            ViewModel.ProxyType = ProxyType.Plain;
+                        }
+                        else if (values.Item2.GetValueOrDefault(false))
+                        {
+                            ViewModel.ProxyType = ProxyType.Socks5;
+                        }
+                    }).DisposeWith(d);
 
                 #endregion
 

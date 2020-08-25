@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Windows;
-using DynamicData;
+﻿using DynamicData;
 using DynamicData.Binding;
 using NatTypeTester.Model;
 using ReactiveUI;
@@ -13,6 +6,13 @@ using STUN.Client;
 using STUN.Enums;
 using STUN.Proxy;
 using STUN.Utils;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Windows;
 
 namespace NatTypeTester.ViewModels
 {
@@ -111,8 +111,6 @@ namespace NatTypeTester.ViewModels
 
         #region Proxy
 
-        public bool CanConfigProxy => ProxyType != ProxyType.Plain;
-
         private ProxyType _proxyType = ProxyType.Socks5;
         public ProxyType ProxyType
         {
@@ -120,7 +118,7 @@ namespace NatTypeTester.ViewModels
             set => this.RaiseAndSetIfChanged(ref _proxyType, value);
         }
 
-        private string _proxyServer = "127.0.0.1:1081";
+        private string _proxyServer = @"127.0.0.1:1080";
         public string ProxyServer
         {
             get => _proxyServer;
@@ -165,7 +163,8 @@ namespace NatTypeTester.ViewModels
 
             const string path = @"stun.txt";
 
-            if (!File.Exists(path)) return;
+            if (!File.Exists(path))
+                return;
 
             using var sw = new StreamReader(path);
             string line;
@@ -195,8 +194,7 @@ namespace NatTypeTester.ViewModels
                             ProxyUser, ProxyPassword
                             );
 
-                        using var client = new StunClient3489(server.Hostname, server.Port,
-                                NetUtils.ParseEndpoint(LocalEnd), proxy);
+                        using var client = new StunClient3489(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalEnd), proxy);
 
                         client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler)
                                 .Subscribe(t => ClassicNatType = $@"{t}");
@@ -233,8 +231,6 @@ namespace NatTypeTester.ViewModels
                             );
 
                         using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress), proxy);
-
-
 
                         client.BindingTestResultChanged
                                 .ObserveOn(RxApp.MainThreadScheduler)
