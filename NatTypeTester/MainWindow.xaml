@@ -57,7 +57,7 @@
 							<RowDefinition Height="Auto"/>
 						</Grid.RowDefinitions>
 						<RadioButton Grid.Row="0" Content="Don't use Proxy" GroupName="ProxyTypeGroup" x:Name="ProxyTypeNoneRadio" Margin="5" IsChecked="True"/>
-						<RadioButton Grid.Row="1" Content="Socks5 Proxy" GroupName="ProxyTypeGroup" x:Name="ProxyTypeSocks5Radio" Margin="5" IsChecked="False" />
+						<RadioButton Grid.Row="1" Content="SOCKS5" GroupName="ProxyTypeGroup" x:Name="ProxyTypeSocks5Radio" Margin="5" IsChecked="False" />
 					</Grid>
 					<Grid x:Name="ProxyConfigGrid" Margin="0" Grid.Row="1" IsEnabled="False">
 						<Grid.RowDefinitions>

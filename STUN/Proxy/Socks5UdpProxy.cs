@@ -77,10 +77,10 @@ namespace STUN.Proxy
                         buf[0] = 1;
                         buf[1] = (byte)uByte.Length;
                         Array.Copy(uByte, 0, buf, 2, uByte.Length);
-                        buf[uByte.Length + 3] = (byte)pByte.Length;
-                        Array.Copy(pByte, 0, buf, uByte.Length + 4, pByte.Length);
+                        buf[uByte.Length + 2] = (byte)pByte.Length;
+                        Array.Copy(pByte, 0, buf, uByte.Length + 3, pByte.Length);
                         // 1 userLen user passLen pass
-                        await s.WriteAsync(buf, 0, uByte.Length + pByte.Length + 4, token);
+                        await s.WriteAsync(buf, 0, uByte.Length + pByte.Length + 3, token);
                         // 1 state(0=ok)
                         if (await s.ReadAsync(buf, 0, 2, token) != 2)
                             throw new ProtocolViolationException();
