@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace STUN.Interfaces
@@ -8,8 +9,8 @@ namespace STUN.Interfaces
     {
         TimeSpan Timeout { get; set; }
         IPEndPoint LocalEndPoint { get; }
-        Task ConnectAsync();
-        Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive);
-        Task DisconnectAsync();
+        Task ConnectAsync(CancellationToken token = default);
+        Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default);
+        Task DisconnectAsync(CancellationToken token = default);
     }
 }

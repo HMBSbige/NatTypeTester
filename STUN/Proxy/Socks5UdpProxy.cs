@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace STUN.Proxy
@@ -42,29 +43,22 @@ namespace STUN.Proxy
             _password = password;
         }
 
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(CancellationToken token = default)
         {
-            var buf = new byte[1024];
-
-            await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port);
             try
             {
+                var buf = new byte[1024];
+                await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port);
                 var s = _assoc.GetStream();
                 var requestPasswordAuth = !string.IsNullOrEmpty(_user);
 
                 #region Handshake
-                // we have no gssapi support
-                if (requestPasswordAuth)
-                {
-                    // 5 authlen auth[](0=none, 2=userpasswd)
-                    s.Write(new byte[] { 5, 2, 0, 2 }, 0, 4);
-                }
-                else
-                {
-                    s.Write(new byte[] { 5, 1, 0 }, 0, 3);
-                }
+                // we have no GSS-API support
+                var handShake = requestPasswordAuth ? new byte[] { 5, 2, 0, 2 } : new byte[] { 5, 1, 0 };
+                await s.WriteAsync(handShake, 0, handShake.Length, token);
+
                 // 5 auth(ff=deny)
-                if (s.Read(buf, 0, 2) != 2)
+                if (await s.ReadAsync(buf, 0, 2, token) != 2)
                     throw new ProtocolViolationException();
                 if (buf[0] != 5)
                     throw new ProtocolViolationException();
@@ -77,17 +71,17 @@ namespace STUN.Proxy
                     case 0:
                         break;
                     case 2:
-                        var ubyte = Encoding.UTF8.GetBytes(_user);
-                        var pbyte = Encoding.UTF8.GetBytes(_password);
+                        var uByte = Encoding.UTF8.GetBytes(_user);
+                        var pByte = Encoding.UTF8.GetBytes(_password);
                         buf[0] = 1;
-                        buf[1] = (byte)ubyte.Length;
-                        Array.Copy(ubyte, 0, buf, 2, ubyte.Length);
-                        buf[ubyte.Length + 3] = (byte)pbyte.Length;
-                        Array.Copy(pbyte, 0, buf, ubyte.Length + 4, pbyte.Length);
-                        // 1 userlen user passlen pass
-                        s.Write(buf, 0, ubyte.Length + pbyte.Length + 4);
+                        buf[1] = (byte)uByte.Length;
+                        Array.Copy(uByte, 0, buf, 2, uByte.Length);
+                        buf[uByte.Length + 3] = (byte)pByte.Length;
+                        Array.Copy(pByte, 0, buf, uByte.Length + 4, pByte.Length);
+                        // 1 userLen user passLen pass
+                        await s.WriteAsync(buf, 0, uByte.Length + pByte.Length + 4, token);
                         // 1 state(0=ok)
-                        if (s.Read(buf, 0, 2) != 2)
+                        if (await s.ReadAsync(buf, 0, 2, token) != 2)
                             throw new ProtocolViolationException();
                         if (buf[0] != 1)
                             throw new ProtocolViolationException();
@@ -106,39 +100,28 @@ namespace STUN.Proxy
                 buf[1] = 3;
                 buf[2] = 0;
 
-                int addrLen;
-                var abyte = GetEndPointByte(new IPEndPoint(IPAddress.Any, 0));
-                addrLen = abyte.Length;
+                var abyte = GetEndPointByte(new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort));
+                var addrLen = abyte.Length;
                 Array.Copy(abyte, 0, buf, 3, addrLen);
                 // 5 cmd(3=udpassoc) 0 atyp(1=v4 3=dns 4=v5) addr port
-                s.Write(buf, 0, addrLen + 3);
+                await s.WriteAsync(buf, 0, addrLen + 3, token);
                 #endregion
 
                 #region UDP Assoc Response
-                if (s.Read(buf, 0, 4) != 4)
+                if (await s.ReadAsync(buf, 0, 4, token) != 4)
                     throw new ProtocolViolationException();
                 if (buf[0] != 5 || buf[2] != 0)
                     throw new ProtocolViolationException();
                 if (buf[1] != 0)
                     throw new UnauthorizedAccessException();
 
-                switch (buf[3])
-                {
-                    case 1:
-                        addrLen = 4;
-                        break;
-                    case 4:
-                        addrLen = 16;
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
+                addrLen = GetAddressLength(buf[3]);
 
                 var addr = new byte[addrLen];
-                if (s.Read(addr, 0, addrLen) != addrLen)
+                if (await s.ReadAsync(addr, 0, addrLen, token) != addrLen)
                     throw new ProtocolViolationException();
                 var assocIP = new IPAddress(addr);
-                if (s.Read(buf, 0, 2) != 2)
+                if (await s.ReadAsync(buf, 0, 2, token) != 2)
                     throw new ProtocolViolationException();
                 var assocPort = buf[0] * 256 + buf[1];
                 #endregion
@@ -148,11 +131,12 @@ namespace STUN.Proxy
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                _assoc.Close();
+                await DisconnectAsync(token);
+                throw;
             }
         }
 
-        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
+        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
         {
             var state = _assoc.GetState();
             if (state != TcpState.Established)
@@ -174,12 +158,7 @@ namespace STUN.Proxy
                 throw new Exception();
             }
 
-            var addressLen = res[3] switch
-            {
-                1 => 4,
-                4 => 16,
-                _ => throw new Exception()
-            };
+            var addressLen = GetAddressLength(res[3]);
 
             var ipByte = new byte[addressLen];
             Array.Copy(res, 4, ipByte, 0, addressLen);
@@ -194,7 +173,7 @@ namespace STUN.Proxy
                 ipPacketInformation.Address);
         }
 
-        public Task DisconnectAsync()
+        public Task DisconnectAsync(CancellationToken token = default)
         {
             try
             {
@@ -217,6 +196,16 @@ namespace STUN.Proxy
             ret[ipByte.Length + 1] = (byte)(ep.Port / 256);
             ret[ipByte.Length + 2] = (byte)(ep.Port % 256);
             return ret;
+        }
+
+        private static int GetAddressLength(byte b)
+        {
+            return b switch
+            {
+                1 => 4,
+                4 => 16,
+                _ => throw new NotSupportedException()
+            };
         }
 
         public void Dispose()

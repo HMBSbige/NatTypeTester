@@ -38,23 +38,25 @@ namespace STUN.Client
 
         public async Task<StunResult5389> QueryAsync()
         {
-            await Proxy.ConnectAsync();
             var result = new StunResult5389();
-            _bindingSubj.OnNext(result.BindingTestResult);
-            _mappingBehaviorSubj.OnNext(result.MappingBehavior);
-            _filteringBehaviorSubj.OnNext(result.FilteringBehavior);
-            PubSubj.OnNext(result.PublicEndPoint);
-
-            result = await FilteringBehaviorTestAsync();
-            if (result.BindingTestResult != BindingTestResult.Success
-            || result.FilteringBehavior == FilteringBehavior.UnsupportedServer
-            )
-            {
-                return result;
-            }
-
             try
             {
+                _bindingSubj.OnNext(result.BindingTestResult);
+                _mappingBehaviorSubj.OnNext(result.MappingBehavior);
+                _filteringBehaviorSubj.OnNext(result.FilteringBehavior);
+                PubSubj.OnNext(result.PublicEndPoint);
+
+                await Proxy.ConnectAsync();
+
+                result = await FilteringBehaviorTestAsync();
+                if (result.BindingTestResult != BindingTestResult.Success
+                || result.FilteringBehavior == FilteringBehavior.UnsupportedServer
+                )
+                {
+                    return result;
+                }
+
+
                 if (Equals(result.PublicEndPoint, result.LocalEndPoint))
                 {
                     result.MappingBehavior = MappingBehavior.Direct;

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace STUN.Proxy
@@ -25,18 +26,18 @@ namespace STUN.Proxy
             UdpClient = local == null ? new UdpClient() : new UdpClient(local);
         }
 
-        public Task ConnectAsync()
+        public Task ConnectAsync(CancellationToken token = default)
         {
             return Task.CompletedTask;
         }
 
-        public Task DisconnectAsync()
+        public Task DisconnectAsync(CancellationToken token = default)
         {
             UdpClient.Close();
             return Task.CompletedTask;
         }
 
-        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
+        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
         {
             var localEndPoint = (IPEndPoint)UdpClient.Client.LocalEndPoint;
 
