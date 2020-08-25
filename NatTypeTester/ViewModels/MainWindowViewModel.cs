@@ -187,7 +187,7 @@ namespace NatTypeTester.ViewModels
                     var server = new StunServer();
                     if (server.Parse(StunServer))
                     {
-                        var proxy = ProxyFactory.CreateProxy(
+                        using var proxy = ProxyFactory.CreateProxy(
                             ProxyType,
                             NetUtils.ParseEndpoint(LocalEnd),
                             NetUtils.ParseEndpoint(ProxyServer),
@@ -223,7 +223,7 @@ namespace NatTypeTester.ViewModels
                     var server = new StunServer();
                     if (server.Parse(StunServer))
                     {
-                        var proxy = ProxyFactory.CreateProxy(
+                        using var proxy = ProxyFactory.CreateProxy(
                             ProxyType,
                             NetUtils.ParseEndpoint(LocalEnd),
                             NetUtils.ParseEndpoint(ProxyServer),

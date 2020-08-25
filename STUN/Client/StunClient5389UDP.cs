@@ -48,14 +48,13 @@ namespace STUN.Client
 
                 await Proxy.ConnectAsync();
 
-                result = await FilteringBehaviorTestAsync();
+                result = await FilteringBehaviorTestBaseAsync();
                 if (result.BindingTestResult != BindingTestResult.Success
                 || result.FilteringBehavior == FilteringBehavior.UnsupportedServer
                 )
                 {
                     return result;
                 }
-
 
                 if (Equals(result.PublicEndPoint, result.LocalEndPoint))
                 {
@@ -98,8 +97,16 @@ namespace STUN.Client
 
         public async Task<StunResult5389> BindingTestAsync()
         {
-            var result = await BindingTestBaseAsync(RemoteEndPoint, true);
-            return result;
+            try
+            {
+                await Proxy.ConnectAsync();
+                var result = await BindingTestBaseAsync(RemoteEndPoint, true);
+                return result;
+            }
+            finally
+            {
+                await Proxy.DisconnectAsync();
+            }
         }
 
         private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, bool notifyChanged)
@@ -142,62 +149,65 @@ namespace STUN.Client
 
         public async Task<StunResult5389> MappingBehaviorTestAsync()
         {
-            // test I
-            var result1 = await BindingTestBaseAsync(RemoteEndPoint, true);
+            var result = new StunResult5389();
             try
             {
-                if (result1.BindingTestResult != BindingTestResult.Success)
+                await Proxy.ConnectAsync();
+                // test I
+                result = await BindingTestBaseAsync(RemoteEndPoint, true);
+                if (result.BindingTestResult != BindingTestResult.Success)
                 {
-                    return result1;
+                    return result;
                 }
 
-                if (result1.OtherEndPoint == null
-                    || Equals(result1.OtherEndPoint.Address, RemoteEndPoint.Address)
-                    || result1.OtherEndPoint.Port == RemoteEndPoint.Port)
+                if (result.OtherEndPoint == null
+                    || Equals(result.OtherEndPoint.Address, RemoteEndPoint.Address)
+                    || result.OtherEndPoint.Port == RemoteEndPoint.Port)
                 {
-                    result1.MappingBehavior = MappingBehavior.UnsupportedServer;
-                    return result1;
+                    result.MappingBehavior = MappingBehavior.UnsupportedServer;
+                    return result;
                 }
 
-                if (Equals(result1.PublicEndPoint, result1.LocalEndPoint))
+                if (Equals(result.PublicEndPoint, result.LocalEndPoint))
                 {
-                    result1.MappingBehavior = MappingBehavior.Direct;
-                    return result1;
+                    result.MappingBehavior = MappingBehavior.Direct;
+                    return result;
                 }
 
                 // test II
-                var result2 = await BindingTestBaseAsync(new IPEndPoint(result1.OtherEndPoint.Address, RemoteEndPoint.Port), false);
+                var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port), false);
                 if (result2.BindingTestResult != BindingTestResult.Success)
                 {
-                    result1.MappingBehavior = MappingBehavior.Fail;
-                    return result1;
+                    result.MappingBehavior = MappingBehavior.Fail;
+                    return result;
                 }
 
-                if (Equals(result2.PublicEndPoint, result1.PublicEndPoint))
+                if (Equals(result2.PublicEndPoint, result.PublicEndPoint))
                 {
-                    result1.MappingBehavior = MappingBehavior.EndpointIndependent;
-                    return result1;
+                    result.MappingBehavior = MappingBehavior.EndpointIndependent;
+                    return result;
                 }
 
                 // test III
-                var result3 = await BindingTestBaseAsync(result1.OtherEndPoint, false);
+                var result3 = await BindingTestBaseAsync(result.OtherEndPoint, false);
                 if (result3.BindingTestResult != BindingTestResult.Success)
                 {
-                    result1.MappingBehavior = MappingBehavior.Fail;
-                    return result1;
+                    result.MappingBehavior = MappingBehavior.Fail;
+                    return result;
                 }
 
-                result1.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
+                result.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
 
-                return result1;
+                return result;
             }
             finally
             {
-                _mappingBehaviorSubj.OnNext(result1.MappingBehavior);
+                _mappingBehaviorSubj.OnNext(result.MappingBehavior);
+                await Proxy.DisconnectAsync();
             }
         }
 
-        public async Task<StunResult5389> FilteringBehaviorTestAsync()
+        private async Task<StunResult5389> FilteringBehaviorTestBaseAsync()
         {
             // test I
             var result1 = await BindingTestBaseAsync(RemoteEndPoint, true);
@@ -257,6 +267,20 @@ namespace STUN.Client
             finally
             {
                 _filteringBehaviorSubj.OnNext(result1.FilteringBehavior);
+            }
+        }
+
+        public async Task<StunResult5389> FilteringBehaviorTestAsync()
+        {
+            try
+            {
+                await Proxy.ConnectAsync();
+                var result = await FilteringBehaviorTestBaseAsync();
+                return result;
+            }
+            finally
+            {
+                await Proxy.DisconnectAsync();
             }
         }
 
