@@ -38,7 +38,7 @@ namespace STUN.Proxy
             return Task.CompletedTask;
         }
 
-        public async Task<(byte[], IPEndPoint, IPAddress)> RecieveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
+        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
         {
             var localEndPoint = (IPEndPoint)UdpClient.Client.LocalEndPoint;
 

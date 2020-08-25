@@ -215,7 +215,7 @@ namespace STUN.Client
                 {
                     try
                     {
-                        var (receive1, ipe, local) = await Proxy.RecieveAsync(b1, remote, receive);
+                        var (receive1, ipe, local) = await Proxy.ReceiveAsync(b1, remote, receive);
 
                         var message = new StunMessage5389();
                         if (message.TryParse(receive1) &&

@@ -140,7 +140,7 @@ namespace STUN.Proxy
             }
         }
 
-        public async Task<(byte[], IPEndPoint, IPAddress)> RecieveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
+        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive)
         {
             TcpState state = assoc.GetState();
             if (state != TcpState.Established)
