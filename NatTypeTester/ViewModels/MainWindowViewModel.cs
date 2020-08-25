@@ -1,16 +1,18 @@
-﻿using System;
+﻿using DynamicData;
+using DynamicData.Binding;
+using NatTypeTester.Model;
+using ReactiveUI;
+using STUN.Client;
+using STUN.Enums;
+using STUN.Proxy;
+using STUN.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
-using DynamicData;
-using DynamicData.Binding;
-using NatTypeTester.Model;
-using ReactiveUI;
-using STUN.Client;
-using STUN.Utils;
 
 namespace NatTypeTester.ViewModels
 {
@@ -107,6 +109,38 @@ namespace NatTypeTester.ViewModels
 
         #endregion
 
+        #region Proxy
+
+        private ProxyType _proxyType = ProxyType.Socks5;
+        public ProxyType ProxyType
+        {
+            get => _proxyType;
+            set => this.RaiseAndSetIfChanged(ref _proxyType, value);
+        }
+
+        private string _proxyServer = @"127.0.0.1:1080";
+        public string ProxyServer
+        {
+            get => _proxyServer;
+            set => this.RaiseAndSetIfChanged(ref _proxyServer, value);
+        }
+
+        private string _proxyUser;
+        public string ProxyUser
+        {
+            get => _proxyUser;
+            set => this.RaiseAndSetIfChanged(ref _proxyUser, value);
+        }
+
+        private string _proxyPassword;
+        public string ProxyPassword
+        {
+            get => _proxyPassword;
+            set => this.RaiseAndSetIfChanged(ref _proxyPassword, value);
+        }
+
+        #endregion
+
         public MainWindowViewModel()
         {
             LoadStunServer();
@@ -129,7 +163,8 @@ namespace NatTypeTester.ViewModels
 
             const string path = @"stun.txt";
 
-            if (!File.Exists(path)) return;
+            if (!File.Exists(path))
+                return;
 
             using var sw = new StreamReader(path);
             string line;
@@ -145,20 +180,27 @@ namespace NatTypeTester.ViewModels
 
         private IObservable<Unit> TestClassicNatTypeImpl()
         {
-            return Observable.Start(() =>
+            return Observable.FromAsync(async () =>
             {
                 try
                 {
                     var server = new StunServer();
                     if (server.Parse(StunServer))
                     {
-                        using var client = new StunClient3489(server.Hostname, server.Port,
-                                NetUtils.ParseEndpoint(LocalEnd));
+                        using var proxy = ProxyFactory.CreateProxy(
+                            ProxyType,
+                            NetUtils.ParseEndpoint(LocalEnd),
+                            NetUtils.ParseEndpoint(ProxyServer),
+                            ProxyUser, ProxyPassword
+                            );
+
+                        using var client = new StunClient3489(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalEnd), proxy);
+
                         client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler)
                                 .Subscribe(t => ClassicNatType = $@"{t}");
                         client.PubChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => PublicEnd = $@"{t}");
                         client.LocalChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => LocalEnd = $@"{t}");
-                        client.Query();
+                        await client.Query3489Async();
                     }
                     else
                     {
@@ -169,7 +211,7 @@ namespace NatTypeTester.ViewModels
                 {
                     MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            });
+            }).SubscribeOn(RxApp.TaskpoolScheduler);
         }
 
         private IObservable<Unit> DiscoveryNatTypeImpl()
@@ -181,7 +223,14 @@ namespace NatTypeTester.ViewModels
                     var server = new StunServer();
                     if (server.Parse(StunServer))
                     {
-                        using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress));
+                        using var proxy = ProxyFactory.CreateProxy(
+                            ProxyType,
+                            NetUtils.ParseEndpoint(LocalEnd),
+                            NetUtils.ParseEndpoint(ProxyServer),
+                            ProxyUser, ProxyPassword
+                            );
+
+                        using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress), proxy);
 
                         client.BindingTestResultChanged
                                 .ObserveOn(RxApp.MainThreadScheduler)

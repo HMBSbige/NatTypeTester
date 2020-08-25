@@ -2,10 +2,12 @@
 using STUN.Client;
 using STUN.Enums;
 using STUN.Message.Attributes;
+using STUN.Proxy;
+using STUN.Utils;
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using STUN.Utils;
 
 namespace UnitTest
 {
@@ -152,6 +154,34 @@ namespace UnitTest
                           || result.FilteringBehavior == FilteringBehavior.AddressDependent
                           || result.FilteringBehavior == FilteringBehavior.AddressAndPortDependent
             );
+        }
+
+        [TestMethod]
+        public async Task ProxyTest()
+        {
+            using var proxy = ProxyFactory.CreateProxy(ProxyType.Socks5, IPEndPoint.Parse(@"0.0.0.0:0"), IPEndPoint.Parse(@"127.0.0.1:10000"));
+            using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0), proxy);
+            var result = await client.QueryAsync();
+
+            Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
+            Assert.IsNotNull(result.LocalEndPoint);
+            Assert.IsNotNull(result.PublicEndPoint);
+            Assert.IsNotNull(result.OtherEndPoint);
+            Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+            Assert.IsTrue(result.MappingBehavior == MappingBehavior.Direct ||
+                          result.MappingBehavior == MappingBehavior.EndpointIndependent ||
+                          result.MappingBehavior == MappingBehavior.AddressDependent ||
+                          result.MappingBehavior == MappingBehavior.AddressAndPortDependent);
+            Assert.IsTrue(result.FilteringBehavior == FilteringBehavior.EndpointIndependent ||
+                          result.FilteringBehavior == FilteringBehavior.AddressDependent ||
+                          result.FilteringBehavior == FilteringBehavior.AddressAndPortDependent);
+
+            Console.WriteLine(result.BindingTestResult);
+            Console.WriteLine(result.MappingBehavior);
+            Console.WriteLine(result.FilteringBehavior);
+            Console.WriteLine(result.OtherEndPoint);
+            Console.WriteLine(result.LocalEndPoint);
+            Console.WriteLine(result.PublicEndPoint);
         }
     }
 }
