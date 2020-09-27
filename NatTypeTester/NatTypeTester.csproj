@@ -6,7 +6,8 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <LangVersion>latest</LangVersion>
-    <Version>3.2</Version>
+    <Version>3.3</Version>
+    <Authors>HMBSbige</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
