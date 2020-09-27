@@ -10,8 +10,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup MSBuild.exe
-      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
 
     - name: Build
       run: msbuild -v:m -m -r -t:Build -p:Configuration=Release
