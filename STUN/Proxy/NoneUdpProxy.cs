@@ -31,7 +31,7 @@ namespace STUN.Proxy
             return Task.CompletedTask;
         }
 
-        public Task DisconnectAsync(CancellationToken token = default)
+        public Task DisconnectAsync()
         {
             UdpClient.Close();
             return Task.CompletedTask;

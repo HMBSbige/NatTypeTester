@@ -7,6 +7,7 @@ using System;
 using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace STUN.Client
@@ -46,9 +47,11 @@ namespace STUN.Client
                 _filteringBehaviorSubj.OnNext(result.FilteringBehavior);
                 PubSubj.OnNext(result.PublicEndPoint);
 
-                await Proxy.ConnectAsync();
+                using var cts = new CancellationTokenSource(Timeout);
 
-                result = await FilteringBehaviorTestBaseAsync();
+                await Proxy.ConnectAsync(cts.Token);
+
+                result = await FilteringBehaviorTestBaseAsync(cts.Token);
                 if (result.BindingTestResult != BindingTestResult.Success
                 || result.FilteringBehavior == FilteringBehavior.UnsupportedServer
                 )
@@ -63,7 +66,7 @@ namespace STUN.Client
                 }
 
                 // MappingBehaviorTest test II
-                var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port), false);
+                var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port), false, cts.Token);
                 if (result2.BindingTestResult != BindingTestResult.Success)
                 {
                     result.MappingBehavior = MappingBehavior.Fail;
@@ -77,7 +80,7 @@ namespace STUN.Client
                 }
 
                 // MappingBehaviorTest test III
-                var result3 = await BindingTestBaseAsync(result.OtherEndPoint, false);
+                var result3 = await BindingTestBaseAsync(result.OtherEndPoint, false, cts.Token);
                 if (result3.BindingTestResult != BindingTestResult.Success)
                 {
                     result.MappingBehavior = MappingBehavior.Fail;
@@ -99,8 +102,9 @@ namespace STUN.Client
         {
             try
             {
-                await Proxy.ConnectAsync();
-                var result = await BindingTestBaseAsync(RemoteEndPoint, true);
+                using var cts = new CancellationTokenSource(Timeout);
+                await Proxy.ConnectAsync(cts.Token);
+                var result = await BindingTestBaseAsync(RemoteEndPoint, true, cts.Token);
                 return result;
             }
             finally
@@ -109,11 +113,11 @@ namespace STUN.Client
             }
         }
 
-        private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, bool notifyChanged)
+        private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, bool notifyChanged, CancellationToken token)
         {
             BindingTestResult res;
             var test = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest };
-            var (response1, _, local1) = await TestAsync(test, remote, remote);
+            var (response1, _, local1) = await TestAsync(test, remote, remote, token);
             var mappedAddress1 = AttributeExtensions.GetXorMappedAddressAttribute(response1);
             var otherAddress = AttributeExtensions.GetOtherAddressAttribute(response1);
             var local = local1 == null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
@@ -150,11 +154,12 @@ namespace STUN.Client
         public async Task<StunResult5389> MappingBehaviorTestAsync()
         {
             var result = new StunResult5389();
+            using var cts = new CancellationTokenSource(Timeout);
             try
             {
-                await Proxy.ConnectAsync();
+                await Proxy.ConnectAsync(cts.Token);
                 // test I
-                result = await BindingTestBaseAsync(RemoteEndPoint, true);
+                result = await BindingTestBaseAsync(RemoteEndPoint, true, cts.Token);
                 if (result.BindingTestResult != BindingTestResult.Success)
                 {
                     return result;
@@ -175,7 +180,7 @@ namespace STUN.Client
                 }
 
                 // test II
-                var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port), false);
+                var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port), false, cts.Token);
                 if (result2.BindingTestResult != BindingTestResult.Success)
                 {
                     result.MappingBehavior = MappingBehavior.Fail;
@@ -189,7 +194,7 @@ namespace STUN.Client
                 }
 
                 // test III
-                var result3 = await BindingTestBaseAsync(result.OtherEndPoint, false);
+                var result3 = await BindingTestBaseAsync(result.OtherEndPoint, false, cts.Token);
                 if (result3.BindingTestResult != BindingTestResult.Success)
                 {
                     result.MappingBehavior = MappingBehavior.Fail;
@@ -207,10 +212,10 @@ namespace STUN.Client
             }
         }
 
-        private async Task<StunResult5389> FilteringBehaviorTestBaseAsync()
+        private async Task<StunResult5389> FilteringBehaviorTestBaseAsync(CancellationToken token)
         {
             // test I
-            var result1 = await BindingTestBaseAsync(RemoteEndPoint, true);
+            var result1 = await BindingTestBaseAsync(RemoteEndPoint, true, token);
             try
             {
                 if (result1.BindingTestResult != BindingTestResult.Success)
@@ -232,7 +237,7 @@ namespace STUN.Client
                     StunMessageType = StunMessageType.BindingRequest,
                     Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
                 };
-                var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, result1.OtherEndPoint);
+                var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, result1.OtherEndPoint, token);
 
                 if (response2 != null)
                 {
@@ -246,7 +251,7 @@ namespace STUN.Client
                     StunMessageType = StunMessageType.BindingRequest,
                     Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
                 };
-                var (response3, remote3, _) = await TestAsync(test3, RemoteEndPoint, RemoteEndPoint);
+                var (response3, remote3, _) = await TestAsync(test3, RemoteEndPoint, RemoteEndPoint, token);
 
                 if (response3 == null)
                 {
@@ -274,8 +279,9 @@ namespace STUN.Client
         {
             try
             {
-                await Proxy.ConnectAsync();
-                var result = await FilteringBehaviorTestBaseAsync();
+                using var cts = new CancellationTokenSource(Timeout);
+                await Proxy.ConnectAsync(cts.Token);
+                var result = await FilteringBehaviorTestBaseAsync(cts.Token);
                 return result;
             }
             finally

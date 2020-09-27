@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace STUN.Client
@@ -46,7 +47,7 @@ namespace STUN.Client
 
         public IPEndPoint RemoteEndPoint => Server == null ? null : new IPEndPoint(Server, Port);
 
-        protected IUdpProxy Proxy;
+        protected readonly IUdpProxy Proxy;
 
         public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IUdpProxy proxy = null, IDnsQuery dnsQuery = null)
         {
@@ -80,13 +81,14 @@ namespace STUN.Client
             _natTypeSubj.OnNext(res.NatType);
             PubSubj.OnNext(res.PublicEndPoint);
 
+            using var cts = new CancellationTokenSource(Timeout);
             try
             {
-                await Proxy.ConnectAsync();
+                await Proxy.ConnectAsync(cts.Token);
                 // test I
                 var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
-                var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint);
+                var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint, cts.Token);
                 if (response1 == null)
                 {
                     res.NatType = NatType.UdpBlocked;
@@ -121,7 +123,7 @@ namespace STUN.Client
                 };
 
                 // test II
-                var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1);
+                var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1, cts.Token);
                 var mappedAddress2 = AttributeExtensions.GetMappedAddressAttribute(response2);
 
                 if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
@@ -150,7 +152,7 @@ namespace STUN.Client
 
                 // Test I(#2)
                 var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
-                var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1);
+                var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1, cts.Token);
                 var mappedAddress12 = AttributeExtensions.GetMappedAddressAttribute(response12);
 
                 if (mappedAddress12 == null)
@@ -173,7 +175,7 @@ namespace STUN.Client
                     MagicCookie = 0,
                     Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
                 };
-                var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1);
+                var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1, cts.Token);
                 var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
                 if (mappedAddress3 != null)
                 {
@@ -193,7 +195,7 @@ namespace STUN.Client
             }
         }
 
-        protected async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive)
+        protected async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
         {
             try
             {
@@ -206,7 +208,7 @@ namespace STUN.Client
                 {
                     try
                     {
-                        var (receive1, ipe, local) = await Proxy.ReceiveAsync(b1, remote, receive);
+                        var (receive1, ipe, local) = await Proxy.ReceiveAsync(b1, remote, receive, token);
 
                         var message = new StunMessage5389();
                         if (message.TryParse(receive1) &&

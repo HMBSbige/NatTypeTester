@@ -164,7 +164,9 @@ namespace NatTypeTester.ViewModels
             const string path = @"stun.txt";
 
             if (!File.Exists(path))
+            {
                 return;
+            }
 
             using var sw = new StreamReader(path);
             string line;

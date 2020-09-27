@@ -21,7 +21,12 @@ namespace STUN.Proxy
         public TimeSpan Timeout
         {
             get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
-            set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+            set
+            {
+                var timeout = Convert.ToInt32(value.TotalMilliseconds);
+                _udpClient.Client.ReceiveTimeout = timeout;
+                _assoc.ReceiveTimeout = timeout;
+            }
         }
 
         public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
@@ -51,21 +56,30 @@ namespace STUN.Proxy
                 var buf = new byte[1024];
                 await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port);
                 var s = _assoc.GetStream();
+                using var _ = token.Register(() => s.Close());
                 var requestPasswordAuth = !string.IsNullOrEmpty(_user);
 
                 #region Handshake
+
                 // we have no GSS-API support
                 var handShake = requestPasswordAuth ? new byte[] { 5, 2, 0, 2 } : new byte[] { 5, 1, 0 };
                 await s.WriteAsync(handShake, 0, handShake.Length, token);
 
                 // 5 auth(ff=deny)
                 if (await s.ReadAsync(buf, 0, 2, token) != 2)
+                {
                     throw new ProtocolViolationException();
+                }
+
                 if (buf[0] != 5)
+                {
                     throw new ProtocolViolationException();
+                }
+
                 #endregion
 
                 #region Auth
+
                 var auth = buf[1];
                 switch (auth)
                 {
@@ -83,20 +97,31 @@ namespace STUN.Proxy
                         await s.WriteAsync(buf, 0, uByte.Length + pByte.Length + 3, token);
                         // 1 state(0=ok)
                         if (await s.ReadAsync(buf, 0, 2, token) != 2)
+                        {
                             throw new ProtocolViolationException();
+                        }
+
                         if (buf[0] != 1)
+                        {
                             throw new ProtocolViolationException();
+                        }
+
                         if (buf[1] != 0)
+                        {
                             throw new UnauthorizedAccessException();
+                        }
+
                         break;
                     case 0xff:
                         throw new UnauthorizedAccessException();
                     default:
                         throw new ProtocolViolationException();
                 }
+
                 #endregion
 
                 #region UDP Assoc Send
+
                 buf[0] = 5;
                 buf[1] = 3;
                 buf[2] = 0;
@@ -106,33 +131,55 @@ namespace STUN.Proxy
                 Array.Copy(abyte, 0, buf, 3, addrLen);
                 // 5 cmd(3=udpassoc) 0 atyp(1=v4 3=dns 4=v5) addr port
                 await s.WriteAsync(buf, 0, addrLen + 3, token);
+
                 #endregion
 
                 #region UDP Assoc Response
+
                 if (await s.ReadAsync(buf, 0, 4, token) != 4)
+                {
                     throw new ProtocolViolationException();
+                }
+
                 if (buf[0] != 5 || buf[2] != 0)
+                {
                     throw new ProtocolViolationException();
+                }
+
                 if (buf[1] != 0)
+                {
                     throw new UnauthorizedAccessException();
+                }
 
                 addrLen = GetAddressLength(buf[3]);
 
                 var addr = new byte[addrLen];
                 if (await s.ReadAsync(addr, 0, addrLen, token) != addrLen)
+                {
                     throw new ProtocolViolationException();
+                }
+
                 var assocIP = new IPAddress(addr);
                 if (await s.ReadAsync(buf, 0, 2, token) != 2)
+                {
                     throw new ProtocolViolationException();
+                }
+
                 var assocPort = buf[0] * 256 + buf[1];
+
                 #endregion
 
                 _assocEndPoint = new IPEndPoint(assocIP, assocPort);
             }
+            catch (ObjectDisposedException ex) when (ex.ObjectName == typeof(NetworkStream).FullName)
+            {
+                await DisconnectAsync();
+                throw new TimeoutException();
+            }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                await DisconnectAsync(token);
+                await DisconnectAsync();
                 throw;
             }
         }
@@ -141,7 +188,9 @@ namespace STUN.Proxy
         {
             var state = _assoc.GetState();
             if (state != TcpState.Established)
+            {
                 throw new InvalidOperationException("No UDP association, maybe already disconnected or not connected");
+            }
 
             var remoteBytes = GetEndPointByte(remote);
             var proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
@@ -174,7 +223,7 @@ namespace STUN.Proxy
                 ipPacketInformation.Address);
         }
 
-        public Task DisconnectAsync(CancellationToken token = default)
+        public Task DisconnectAsync()
         {
             try
             {

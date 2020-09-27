@@ -11,6 +11,6 @@ namespace STUN.Interfaces
         IPEndPoint LocalEndPoint { get; }
         Task ConnectAsync(CancellationToken token = default);
         Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default);
-        Task DisconnectAsync(CancellationToken token = default);
+        Task DisconnectAsync();
     }
 }
