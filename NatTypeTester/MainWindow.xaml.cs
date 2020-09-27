@@ -1,4 +1,5 @@
-﻿using NatTypeTester.ViewModels;
+﻿using ModernWpf;
+using NatTypeTester.ViewModels;
 using ReactiveUI;
 using STUN.Enums;
 using System;
@@ -16,6 +17,7 @@ namespace NatTypeTester
         {
             InitializeComponent();
             ViewModel = new MainWindowViewModel();
+            ThemeManager.Current.ApplicationTheme = null;
 
             this.WhenActivated(d =>
             {

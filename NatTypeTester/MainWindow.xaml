@@ -5,161 +5,134 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:reactiveUi="http://reactiveui.net"
 	xmlns:viewModels="clr-namespace:NatTypeTester.ViewModels"
+	xmlns:ui="http://schemas.modernwpf.com/2019"
 	Title="NatTypeTester"
-	Width="600"
+	Width="500"
 	WindowStartupLocation="CenterScreen"
-	SizeToContent="Height"
-	ResizeMode="CanMinimize"
-	Topmost="False">
-
-	<Window.Resources>
-		<SolidColorBrush x:Key="DisabledBackgroundBrush" Color="LightGray" />
-		<Style TargetType="{x:Type TextBox}">
-			<Style.Triggers>
-				<Trigger Property="IsReadOnly" Value="True">
-					<Setter Property="Background" Value="{StaticResource DisabledBackgroundBrush}" />
-				</Trigger>
-			</Style.Triggers>
-		</Style>
-	</Window.Resources>
+	Height="480"
+	ui:WindowHelper.UseModernWindowStyle="True">
 
 	<Grid>
-		<StackPanel>
-			<Grid Margin="0,5,5,5">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition />
-				</Grid.ColumnDefinitions>
-				<TextBlock Grid.Row="0" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="STUN Server" />
-				<ComboBox Grid.Column="1" x:Name="ServersComboBox"
-						Height="23.24"  IsEditable="True"
-						SelectedIndex="0" VerticalContentAlignment="Center">
-					<ComboBox.ItemTemplate>
-						<DataTemplate>
-							<TextBlock Text="{Binding}" />
-						</DataTemplate>
-					</ComboBox.ItemTemplate>
-				</ComboBox>
-			</Grid>
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="4*"/>
-					<ColumnDefinition Width="5*" />
-				</Grid.ColumnDefinitions>
-				<Grid Margin="0,0,5,5">
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto" />
-						<RowDefinition Height="Auto" />
-					</Grid.RowDefinitions>
-					<Grid Margin="0,0,0,5" Grid.Column="0">
+		<DockPanel>
+			<ComboBox DockPanel.Dock="Top"
+				x:Name="ServersComboBox"
+				ui:ControlHelper.Header="STUN Server"
+				IsEditable="True"
+				SelectedIndex="0" VerticalContentAlignment="Center"
+				Margin="10,10"
+				HorizontalAlignment="Stretch">
+				<ComboBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding}" />
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+
+			<TabControl  TabStripPlacement="Left">
+				<TabItem Header="RFC 5780" x:Name="RFC5780Tab">
+					<Grid>
 						<Grid.RowDefinitions>
 							<RowDefinition Height="Auto"/>
-							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition />
 						</Grid.RowDefinitions>
-						<RadioButton Grid.Row="0" Content="Don't use Proxy" GroupName="ProxyTypeGroup" x:Name="ProxyTypeNoneRadio" Margin="5" IsChecked="True"/>
-						<RadioButton Grid.Row="1" Content="SOCKS5" GroupName="ProxyTypeGroup" x:Name="ProxyTypeSocks5Radio" Margin="5" IsChecked="False" />
+						<TextBox
+							x:Name="BindingTestTextBox" Grid.Row="0"
+							Margin="10,5" IsReadOnly="True"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Binding test" />
+						<TextBox
+							x:Name="MappingBehaviorTextBox" Grid.Row="1"
+							Margin="10,5" IsReadOnly="True"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Mapping behavior" />
+						<TextBox
+							x:Name="FilteringBehaviorTextBox" Grid.Row="2"
+							Margin="10,5" IsReadOnly="True"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Filtering behavior" />
+						<TextBox
+							x:Name="LocalAddressTextBox" Grid.Row="3"
+							Margin="10,5" IsReadOnly="False"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Local end" />
+						<TextBox
+							x:Name="MappingAddressTextBox" Grid.Row="4"
+							Margin="10,5" IsReadOnly="True"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Public end" />
+
+						<Button x:Name="DiscoveryButton" Grid.Row="5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Test" Margin="0,10,10,10" />
 					</Grid>
-					<Grid x:Name="ProxyConfigGrid" Margin="0" Grid.Row="1" IsEnabled="False">
+				</TabItem>
+				<TabItem Header="RFC 3489" x:Name="RFC3489Tab">
+					<Grid>
 						<Grid.RowDefinitions>
-							<RowDefinition/>
-							<RowDefinition/>
-							<RowDefinition/>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition />
 						</Grid.RowDefinitions>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="Auto" MinWidth="100"/>
-							<ColumnDefinition/>
-						</Grid.ColumnDefinitions>
-						<TextBox x:Name="ProxyServerTextBox" Grid.Row="0" Grid.Column="1"
-						         Height="23.25" Margin="5" IsReadOnly="False"
-						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-						<TextBox x:Name="ProxyUsernameTextBox" Grid.Row="1" Grid.Column="1"
-						         Height="23.25" Margin="5" IsReadOnly="False"
-						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-						<TextBox x:Name="ProxyPasswordTextBox" Grid.Row="2" Grid.Column="1"
-						         Height="23.25" Margin="5"
-						         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-						<TextBlock Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="Server" />
-						<TextBlock Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="User ID" />
-						<TextBlock Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="Password" />
+
+						<TextBox x:Name="NatTypeTextBox" Grid.Row="0"
+							Margin="10,5" IsReadOnly="True"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="NAT type" />
+						<TextBox x:Name="LocalEndTextBox" Grid.Row="1"
+							Margin="10,5"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Local end" />
+						<TextBox x:Name="PublicEndTextBox" Grid.Row="2"
+							Margin="10,5" IsReadOnly="True"
+							VerticalContentAlignment="Center" VerticalAlignment="Center"
+							ui:ControlHelper.Header="Public end" />
+
+						<Button x:Name="TestButton" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Test" Margin="0,0,10,10"/>
 					</Grid>
-				</Grid>
-
-				<TabControl Grid.Column="1" >
-					<TabItem Header="RFC 5780" x:Name="RFC5780Tab">
-						<Grid>
+				</TabItem>
+				<TabItem Header="Proxy">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Grid Margin="10,0" Grid.Column="0">
 							<Grid.RowDefinitions>
-								<RowDefinition />
-								<RowDefinition />
-								<RowDefinition />
-								<RowDefinition />
-								<RowDefinition />
-								<RowDefinition />
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
 							</Grid.RowDefinitions>
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto" />
-								<ColumnDefinition />
-								<ColumnDefinition Width="65" />
-							</Grid.ColumnDefinitions>
-							<TextBlock Grid.Row="0" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Binding test" />
-							<TextBlock Grid.Row="1" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Mapping behavior" />
-							<TextBlock Grid.Row="2" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Filtering behavior" />
-							<TextBlock Grid.Row="3" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Local end" />
-							<TextBlock Grid.Row="4" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Public end" />
-
-							<TextBox x:Name="BindingTestTextBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
-					         Height="23.24" Margin="5" IsReadOnly="True"
-					         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-							<TextBox x:Name="MappingBehaviorTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-					         Height="23.24" Margin="5" IsReadOnly="True"
-					         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-							<TextBox x:Name="FilteringBehaviorTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-					         Height="23.24" Margin="5" IsReadOnly="True"
-					         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-							<TextBox x:Name="LocalAddressTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-					         Height="23.24" Margin="5" IsReadOnly="False"
-					         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-							<TextBox x:Name="MappingAddressTextBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-					         Height="23.24" Margin="5" IsReadOnly="True"
-					         VerticalContentAlignment="Center" VerticalAlignment="Center" />
-
-							<Button x:Name="DiscoveryButton" Grid.Row="5" Grid.Column="2" Content="Test" Margin="5" />
+							<RadioButton Grid.Row="0" Content="Don't use Proxy" GroupName="ProxyTypeGroup" x:Name="ProxyTypeNoneRadio" IsChecked="True"/>
+							<RadioButton Grid.Row="1" Content="SOCKS5" GroupName="ProxyTypeGroup" x:Name="ProxyTypeSocks5Radio" IsChecked="False" />
 						</Grid>
-					</TabItem>
-					<TabItem Header="RFC 3489" x:Name="RFC3489Tab">
-						<Grid>
+						<Grid x:Name="ProxyConfigGrid" Margin="10,5" Grid.Row="1" IsEnabled="False">
 							<Grid.RowDefinitions>
-								<RowDefinition Height="29"/>
-								<RowDefinition />
-								<RowDefinition />
-								<RowDefinition />
-								<RowDefinition />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto"/>
 							</Grid.RowDefinitions>
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto" />
-								<ColumnDefinition />
-								<ColumnDefinition Width="65" />
-							</Grid.ColumnDefinitions>
-
-							<TextBlock Grid.Row="1" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="NAT type" />
-							<TextBlock Grid.Row="2" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Local end" />
-							<TextBlock Grid.Row="3" Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="Public end" />
-
-							<TextBox x:Name="NatTypeTextBox" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-							Height="23.25" Margin="5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"/>
-							<TextBox x:Name="LocalEndTextBox" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-							Height="23.25" Margin="5"
-							VerticalContentAlignment="Center" VerticalAlignment="Center" />
-							<TextBox x:Name="PublicEndTextBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-							Height="23.25" Margin="5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center" />
-
-							<Button x:Name="TestButton" Grid.Row="4" Grid.Column="2" Content="Test" Margin="5"/>
+							<TextBox
+								x:Name="ProxyServerTextBox" Grid.Row="0"
+								Margin="0,5" IsReadOnly="False"
+								VerticalContentAlignment="Center" VerticalAlignment="Center"
+								ui:ControlHelper.Header="Server" />
+							<TextBox
+								x:Name="ProxyUsernameTextBox" Grid.Row="1"
+								Margin="0,5" IsReadOnly="False"
+								VerticalContentAlignment="Center" VerticalAlignment="Center"
+								ui:ControlHelper.Header="User ID" />
+							<TextBox 
+								x:Name="ProxyPasswordTextBox" Grid.Row="2"
+								Margin="0,5"
+								VerticalContentAlignment="Center" VerticalAlignment="Center"
+								ui:ControlHelper.Header="Password" />
 						</Grid>
-					</TabItem>
-				</TabControl>
+					</Grid>
+				</TabItem>
+			</TabControl>
 
-			</Grid>
-		</StackPanel>
+		</DockPanel>
 	</Grid>
 </reactiveUi:ReactiveWindow>
