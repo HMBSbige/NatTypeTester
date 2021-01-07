@@ -1,10 +1,10 @@
-﻿namespace STUN.Enums
+namespace STUN.Enums
 {
-    public enum BindingTestResult
-    {
-        Unknown,
-        UnsupportedServer,
-        Success,
-        Fail
-    }
+	public enum BindingTestResult
+	{
+		Unknown,
+		UnsupportedServer,
+		Success,
+		Fail
+	}
 }

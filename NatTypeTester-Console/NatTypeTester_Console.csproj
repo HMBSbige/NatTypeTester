@@ -6,6 +6,7 @@
     <RootNamespace>NatTypeTester</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <AssemblyName>NatTypeTester.Console</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿<reactiveUi:ReactiveWindow
+<reactiveUi:ReactiveWindow
 	x:TypeArguments="viewModels:MainWindowViewModel"
 	x:Class="NatTypeTester.MainWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
