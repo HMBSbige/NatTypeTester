@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <Version>3.3</Version>
     <Authors>HMBSbige</Authors>
   </PropertyGroup>
