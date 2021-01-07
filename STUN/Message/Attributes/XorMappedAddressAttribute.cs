@@ -24,7 +24,7 @@ namespace STUN.Message.Attributes
 		{
 			get
 			{
-				if (Address == null)
+				if (Address is null)
 				{
 					return Array.Empty<byte>();
 				}
@@ -45,7 +45,7 @@ namespace STUN.Message.Attributes
 
 			Port = Xor(Port);
 
-			Address = Xor(Address);
+			Address = Xor(Address!);
 
 			return true;
 		}

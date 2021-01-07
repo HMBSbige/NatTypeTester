@@ -24,7 +24,7 @@ namespace STUN.Message.Attributes
 			}
 		}
 
-		public IEnumerable<AttributeType> Types { get; set; }
+		public IEnumerable<AttributeType> Types { get; set; } = Array.Empty<AttributeType>();
 
 		public bool TryParse(byte[] bytes)
 		{

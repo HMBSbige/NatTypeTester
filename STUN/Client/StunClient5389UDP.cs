@@ -21,13 +21,13 @@ namespace STUN.Client
 	{
 		#region Subject
 
-		private readonly Subject<BindingTestResult> _bindingSubj = new Subject<BindingTestResult>();
+		private readonly Subject<BindingTestResult> _bindingSubj = new();
 		public IObservable<BindingTestResult> BindingTestResultChanged => _bindingSubj.AsObservable();
 
-		private readonly Subject<MappingBehavior> _mappingBehaviorSubj = new Subject<MappingBehavior>();
+		private readonly Subject<MappingBehavior> _mappingBehaviorSubj = new();
 		public IObservable<MappingBehavior> MappingBehaviorChanged => _mappingBehaviorSubj.AsObservable();
 
-		private readonly Subject<FilteringBehavior> _filteringBehaviorSubj = new Subject<FilteringBehavior>();
+		private readonly Subject<FilteringBehavior> _filteringBehaviorSubj = new();
 		public IObservable<FilteringBehavior> FilteringBehaviorChanged => _filteringBehaviorSubj.AsObservable();
 
 		#endregion
@@ -67,7 +67,7 @@ namespace STUN.Client
 				}
 
 				// MappingBehaviorTest test II
-				var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint.Address, RemoteEndPoint.Port), false, cts.Token);
+				var result2 = await BindingTestBaseAsync(new IPEndPoint(result.OtherEndPoint!.Address, RemoteEndPoint.Port), false, cts.Token);
 				if (result2.BindingTestResult != BindingTestResult.Success)
 				{
 					result.MappingBehavior = MappingBehavior.Fail;
@@ -121,13 +121,13 @@ namespace STUN.Client
 			var (response1, _, local1) = await TestAsync(test, remote, remote, token);
 			var mappedAddress1 = AttributeExtensions.GetXorMappedAddressAttribute(response1);
 			var otherAddress = AttributeExtensions.GetOtherAddressAttribute(response1);
-			var local = local1 == null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
+			var local = local1 is null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
 
-			if (response1 == null)
+			if (response1 is null)
 			{
 				res = BindingTestResult.Fail;
 			}
-			else if (mappedAddress1 == null)
+			else if (mappedAddress1 is null)
 			{
 				res = BindingTestResult.UnsupportedServer;
 			}
@@ -166,7 +166,7 @@ namespace STUN.Client
 					return result;
 				}
 
-				if (result.OtherEndPoint == null
+				if (result.OtherEndPoint is null
 					|| Equals(result.OtherEndPoint.Address, RemoteEndPoint.Address)
 					|| result.OtherEndPoint.Port == RemoteEndPoint.Port)
 				{
@@ -224,7 +224,7 @@ namespace STUN.Client
 					return result1;
 				}
 
-				if (result1.OtherEndPoint == null
+				if (result1.OtherEndPoint is null
 					|| Equals(result1.OtherEndPoint.Address, RemoteEndPoint.Address)
 					|| result1.OtherEndPoint.Port == RemoteEndPoint.Port)
 				{
@@ -240,7 +240,7 @@ namespace STUN.Client
 				};
 				var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, result1.OtherEndPoint, token);
 
-				if (response2 != null)
+				if (response2 is not null)
 				{
 					result1.FilteringBehavior = FilteringBehavior.EndpointIndependent;
 					return result1;
@@ -254,7 +254,7 @@ namespace STUN.Client
 				};
 				var (response3, remote3, _) = await TestAsync(test3, RemoteEndPoint, RemoteEndPoint, token);
 
-				if (response3 == null)
+				if (response3 is null || remote3 is null)
 				{
 					result1.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
 					return result1;

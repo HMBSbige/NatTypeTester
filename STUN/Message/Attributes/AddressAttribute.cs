@@ -17,7 +17,7 @@ namespace STUN.Message.Attributes
 		{
 			get
 			{
-				if (Address == null)
+				if (Address is null)
 				{
 					return Array.Empty<byte>();
 				}
@@ -32,7 +32,7 @@ namespace STUN.Message.Attributes
 
 		public ushort Port { get; set; }
 
-		public IPAddress Address { get; set; }
+		public IPAddress? Address { get; set; }
 
 		public virtual bool TryParse(byte[] bytes)
 		{

@@ -23,14 +23,14 @@ namespace STUN.Client
 	{
 		#region Subject
 
-		private readonly Subject<NatType> _natTypeSubj = new Subject<NatType>();
+		private readonly Subject<NatType> _natTypeSubj = new();
 		public IObservable<NatType> NatTypeChanged => _natTypeSubj.AsObservable();
 
-		protected readonly Subject<IPEndPoint> PubSubj = new Subject<IPEndPoint>();
-		public IObservable<IPEndPoint> PubChanged => PubSubj.AsObservable();
+		protected readonly Subject<IPEndPoint?> PubSubj = new();
+		public IObservable<IPEndPoint?> PubChanged => PubSubj.AsObservable();
 
-		protected readonly Subject<IPEndPoint> LocalSubj = new Subject<IPEndPoint>();
-		public IObservable<IPEndPoint> LocalChanged => LocalSubj.AsObservable();
+		protected readonly Subject<IPEndPoint?> LocalSubj = new();
+		public IObservable<IPEndPoint?> LocalChanged => LocalSubj.AsObservable();
 
 		#endregion
 
@@ -45,11 +45,11 @@ namespace STUN.Client
 		protected readonly IPAddress Server;
 		protected readonly ushort Port;
 
-		public IPEndPoint RemoteEndPoint => Server == null ? null : new IPEndPoint(Server, Port);
+		public IPEndPoint RemoteEndPoint => new(Server, Port);
 
 		protected readonly IUdpProxy Proxy;
 
-		public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IUdpProxy proxy = null, IDnsQuery dnsQuery = null)
+		public StunClient3489(string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null, IDnsQuery? dnsQuery = null)
 		{
 			Proxy = proxy ?? new NoneUdpProxy(local);
 
@@ -65,11 +65,9 @@ namespace STUN.Client
 
 			dnsQuery ??= new DefaultDnsQuery();
 
-			Server = dnsQuery.Query(server);
-			if (Server == null)
-			{
-				throw new ArgumentException(@"Wrong STUN server !");
-			}
+			var ip = dnsQuery.Query(server);
+
+			Server = ip ?? throw new ArgumentException(@"Wrong STUN server !");
 			Port = port;
 
 			Timeout = TimeSpan.FromSeconds(1.6);
@@ -89,23 +87,23 @@ namespace STUN.Client
 				var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
 				var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint, cts.Token);
-				if (response1 == null)
+				if (response1 is null || remote1 is null)
 				{
 					res.NatType = NatType.UdpBlocked;
 					return res;
 				}
 
-				if (local1 != null)
+				if (local1 is not null)
 				{
 					LocalSubj.OnNext(LocalEndPoint);
 				}
 
-				var mappedAddress1 = AttributeExtensions.GetMappedAddressAttribute(response1);
-				var changedAddress1 = AttributeExtensions.GetChangedAddressAttribute(response1);
+				var mappedAddress1 = response1.GetMappedAddressAttribute();
+				var changedAddress1 = response1.GetChangedAddressAttribute();
 
 				// 某些单 IP 服务器的迷惑操作
-				if (mappedAddress1 == null
-				|| changedAddress1 == null
+				if (mappedAddress1 is null
+				|| changedAddress1 is null
 				|| Equals(changedAddress1.Address, remote1.Address)
 				|| changedAddress1.Port == remote1.Port)
 				{
@@ -124,12 +122,12 @@ namespace STUN.Client
 
 				// test II
 				var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1, cts.Token);
-				var mappedAddress2 = AttributeExtensions.GetMappedAddressAttribute(response2);
+				var mappedAddress2 = response2.GetMappedAddressAttribute();
 
 				if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
 				{
 					// No NAT
-					if (response2 == null)
+					if (response2 is null)
 					{
 						res.NatType = NatType.SymmetricUdpFirewall;
 						res.PublicEndPoint = mappedAddress1;
@@ -141,7 +139,7 @@ namespace STUN.Client
 				}
 
 				// NAT
-				if (response2 != null)
+				if (response2 is not null && remote2 is not null)
 				{
 					// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
 					var type = Equals(remote1.Address, remote2.Address) || remote1.Port == remote2.Port ? NatType.UnsupportedServer : NatType.FullCone;
@@ -153,9 +151,9 @@ namespace STUN.Client
 				// Test I(#2)
 				var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 				var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1, cts.Token);
-				var mappedAddress12 = AttributeExtensions.GetMappedAddressAttribute(response12);
+				var mappedAddress12 = response12.GetMappedAddressAttribute();
 
-				if (mappedAddress12 == null)
+				if (mappedAddress12 is null)
 				{
 					res.NatType = NatType.Unknown;
 					return res;
@@ -176,8 +174,8 @@ namespace STUN.Client
 					Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
 				};
 				var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1, cts.Token);
-				var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
-				if (mappedAddress3 != null)
+				var mappedAddress3 = response3.GetMappedAddressAttribute();
+				if (mappedAddress3 is not null)
 				{
 					res.NatType = NatType.RestrictedCone;
 					res.PublicEndPoint = mappedAddress3;
@@ -195,7 +193,7 @@ namespace STUN.Client
 			}
 		}
 
-		protected async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
+		protected async Task<(StunMessage5389?, IPEndPoint?, IPAddress?)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
 		{
 			try
 			{
@@ -232,7 +230,7 @@ namespace STUN.Client
 
 		public virtual void Dispose()
 		{
-			Proxy?.Dispose();
+			Proxy.Dispose();
 			_natTypeSubj.OnCompleted();
 			PubSubj.OnCompleted();
 			LocalSubj.OnCompleted();

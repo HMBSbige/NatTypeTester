@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace STUN.Message.Attributes
@@ -9,12 +10,12 @@ namespace STUN.Message.Attributes
 	{
 		public IEnumerable<byte> Bytes => _bytes;
 
-		private byte[] _bytes;
+		private byte[] _bytes = Array.Empty<byte>();
 
 		public bool TryParse(byte[] bytes)
 		{
 			_bytes = bytes;
-			return _bytes != null;
+			return true;
 		}
 	}
 }

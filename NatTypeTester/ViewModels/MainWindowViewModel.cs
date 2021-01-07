@@ -104,7 +104,7 @@ namespace NatTypeTester.ViewModels
 				@"stun.stunprotocol.org"
 		};
 
-		private SourceList<string> List { get; } = new SourceList<string>();
+		private SourceList<string> List { get; } = new();
 		public readonly IObservableCollection<string> StunServers = new ObservableCollectionExtended<string>();
 
 		#endregion

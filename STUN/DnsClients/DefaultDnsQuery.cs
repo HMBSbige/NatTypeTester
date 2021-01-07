@@ -6,12 +6,17 @@ namespace STUN.DnsClients
 {
 	public class DefaultDnsQuery : IDnsQuery
 	{
-		public async Task<IPAddress> QueryAsync(string host)
+		public async Task<IPAddress?> QueryAsync(string? host)
 		{
 			try
 			{
+				if (host is null)
+				{
+					return null;
+				}
+
 				var ip = IsIPAddress(host);
-				if (ip != null)
+				if (ip is not null)
 				{
 					return ip;
 				}
@@ -24,12 +29,17 @@ namespace STUN.DnsClients
 			}
 		}
 
-		public IPAddress Query(string host)
+		public IPAddress? Query(string? host)
 		{
 			try
 			{
+				if (host is null)
+				{
+					return null;
+				}
+
 				var ip = IsIPAddress(host);
-				if (ip != null)
+				if (ip is not null)
 				{
 					return ip;
 				}
@@ -42,9 +52,9 @@ namespace STUN.DnsClients
 			}
 		}
 
-		private static IPAddress IsIPAddress(string host)
+		private static IPAddress? IsIPAddress(string? host)
 		{
-			if (host != null && IPAddress.TryParse(host, out var ip))
+			if (host is not null && IPAddress.TryParse(host, out var ip))
 			{
 				return ip;
 			}
