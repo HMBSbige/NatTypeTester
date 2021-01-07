@@ -19,11 +19,31 @@ jobs:
 
     - name: Build
       shell: pwsh
-      run: msbuild -v:m -m /restore /p:Configuration=Release NatTypeTester/NatTypeTester.csproj
+      run: msbuild -v:m -m -r -p:Configuration=Release NatTypeTester/NatTypeTester.csproj
 
     - name: Upload
       continue-on-error: true
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.ProjectName }}
         path: ${{ env.ProjectName }}/bin/${{ env.Configuration }}/${{ env.NET_TFM }}/NatTypeTester.exe
+
+    - name: Get tag
+      if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+      id: tag
+      uses: dawidd6/action-get-tag@v1
+
+    - name: Create a new GitHub release if a new tag is pushed
+      uses: softprops/action-gh-release@v1
+      if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        name: v${{ steps.tag.outputs.tag }}
+        prerelease: true
+        draft: false
+        files: ${{ env.ProjectName }}/bin/${{ env.Configuration }}/${{ env.NET_TFM }}/NatTypeTester.exe
+        body: |
+          ## 更新日志：
+          * 这是 GitHub Actions 自动化部署，更新日志应该很快会手动更新
