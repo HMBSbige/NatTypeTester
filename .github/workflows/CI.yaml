@@ -1,0 +1,28 @@
+name: CI
+on: [push, pull_request]
+env:
+  ProjectName: NatTypeTester
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    env:
+      NET_TFM: net48
+      Configuration: Release
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Build
+      run: msbuild -v:m -m -r -t:Build -p:Configuration=Release
+
+    - name: Upload
+      continue-on-error: true
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.ProjectName }}
+        path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\

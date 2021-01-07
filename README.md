@@ -1,4 +1,5 @@
 # NatTypeTester
+[![CI](https://github.com/HMBSbige/NatTypeTester/workflows/CI/badge.svg)](https://github.com/HMBSbige/NatTypeTester/actions)
 
 ## RFC supports
 
