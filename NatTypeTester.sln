@@ -7,14 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester", "NatTypeTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester_Console", "NatTypeTester-Console\NatTypeTester_Console.csproj", "{CC6BE2E2-81CB-4C0B-BA17-4BB48DD403AC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{82ADB6FE-68F9-4C27-A0CA-3AA5BBB72DFA}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "STUN", "STUN\STUN.csproj", "{BF8F4960-AA76-4A0F-BA6D-EDF26DEFB9CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STUN", "STUN\STUN.csproj", "{BF8F4960-AA76-4A0F-BA6D-EDF26DEFB9CA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{AA8AF9BF-5CFB-4725-B42A-7B3B3890A279}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTest", "UnitTest\UnitTest.csproj", "{AA8AF9BF-5CFB-4725-B42A-7B3B3890A279}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
