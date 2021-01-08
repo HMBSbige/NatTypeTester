@@ -87,10 +87,7 @@ namespace STUN.Client
 					return;
 				}
 
-				if (local1 is not null)
-				{
-					Status.LocalEndPoint = LocalEndPoint;
-				}
+				Status.LocalEndPoint = local1 is null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
 
 				var mappedAddress1 = response1.GetMappedAddressAttribute();
 				var changedAddress1 = response1.GetChangedAddressAttribute();

@@ -33,7 +33,6 @@ namespace STUN.Proxy
 
 		public Task DisconnectAsync()
 		{
-			_udpClient.Close();
 			return Task.CompletedTask;
 		}
 

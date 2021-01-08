@@ -140,6 +140,8 @@ namespace NatTypeTester.ViewModels
 
 					Result3489 = client.Status;
 					await client.Query3489Async();
+
+					Result3489.LocalEndPoint = client.LocalEndPoint;
 				}
 				else
 				{
@@ -170,6 +172,11 @@ namespace NatTypeTester.ViewModels
 
 					Result5389 = client.Status;
 					await client.QueryAsync();
+
+					var cache = new StunResult5389();
+					cache.Clone(client.Status);
+					cache.LocalEndPoint = client.LocalEndPoint;
+					Result5389 = cache;
 				}
 				else
 				{

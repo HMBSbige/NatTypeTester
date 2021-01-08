@@ -17,5 +17,25 @@ namespace STUN.StunResult
 
 		[Reactive]
 		public FilteringBehavior FilteringBehavior { get; set; } = FilteringBehavior.Unknown;
+
+		public void Clone(StunResult5389 result)
+		{
+			PublicEndPoint = result.PublicEndPoint;
+			LocalEndPoint = result.LocalEndPoint;
+			OtherEndPoint = result.OtherEndPoint;
+			BindingTestResult = result.BindingTestResult;
+			MappingBehavior = result.MappingBehavior;
+			FilteringBehavior = result.FilteringBehavior;
+		}
+
+		public void Reset()
+		{
+			PublicEndPoint = default;
+			LocalEndPoint = default;
+			OtherEndPoint = default;
+			BindingTestResult = BindingTestResult.Unknown;
+			MappingBehavior = MappingBehavior.Unknown;
+			FilteringBehavior = FilteringBehavior.Unknown;
+		}
 	}
 }
