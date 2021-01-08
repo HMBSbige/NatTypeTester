@@ -2,6 +2,7 @@ using DynamicData;
 using DynamicData.Binding;
 using NatTypeTester.Model;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Proxy;
@@ -20,26 +21,14 @@ namespace NatTypeTester.ViewModels
 	{
 		#region RFC3489
 
-		private string _classicNatType;
-		public string ClassicNatType
-		{
-			get => _classicNatType;
-			set => this.RaiseAndSetIfChanged(ref _classicNatType, value);
-		}
+		[Reactive]
+		public string? ClassicNatType { get; set; }
 
-		private string _localEnd = NetUtils.DefaultLocalEnd;
-		public string LocalEnd
-		{
-			get => _localEnd;
-			set => this.RaiseAndSetIfChanged(ref _localEnd, value);
-		}
+		[Reactive]
+		public string LocalEnd { get; set; } = NetUtils.DefaultLocalEnd;
 
-		private string _publicEnd;
-		public string PublicEnd
-		{
-			get => _publicEnd;
-			set => this.RaiseAndSetIfChanged(ref _publicEnd, value);
-		}
+		[Reactive]
+		public string? PublicEnd { get; set; }
 
 		public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
 
@@ -47,40 +36,20 @@ namespace NatTypeTester.ViewModels
 
 		#region RFC5780
 
-		private string _bindingTest;
-		public string BindingTest
-		{
-			get => _bindingTest;
-			set => this.RaiseAndSetIfChanged(ref _bindingTest, value);
-		}
+		[Reactive]
+		public string? BindingTest { get; set; }
 
-		private string _mappingBehavior;
-		public string MappingBehavior
-		{
-			get => _mappingBehavior;
-			set => this.RaiseAndSetIfChanged(ref _mappingBehavior, value);
-		}
+		[Reactive]
+		public string? MappingBehavior { get; set; }
 
-		private string _filteringBehavior;
-		public string FilteringBehavior
-		{
-			get => _filteringBehavior;
-			set => this.RaiseAndSetIfChanged(ref _filteringBehavior, value);
-		}
+		[Reactive]
+		public string? FilteringBehavior { get; set; }
 
-		private string _localAddress = NetUtils.DefaultLocalEnd;
-		public string LocalAddress
-		{
-			get => _localAddress;
-			set => this.RaiseAndSetIfChanged(ref _localAddress, value);
-		}
+		[Reactive]
+		public string? LocalAddress { get; set; }
 
-		private string _mappingAddress;
-		public string MappingAddress
-		{
-			get => _mappingAddress;
-			set => this.RaiseAndSetIfChanged(ref _mappingAddress, value);
-		}
+		[Reactive]
+		public string? MappingAddress { get; set; }
 
 		public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
 
@@ -88,12 +57,8 @@ namespace NatTypeTester.ViewModels
 
 		#region Servers
 
-		private string _stunServer;
-		public string StunServer
-		{
-			get => _stunServer;
-			set => this.RaiseAndSetIfChanged(ref _stunServer, value);
-		}
+		[Reactive]
+		public string StunServer { get; set; } = @"stun.syncthing.net";
 
 		private readonly IEnumerable<string> _defaultServers = new HashSet<string>
 		{
@@ -111,33 +76,17 @@ namespace NatTypeTester.ViewModels
 
 		#region Proxy
 
-		private ProxyType _proxyType = ProxyType.Socks5;
-		public ProxyType ProxyType
-		{
-			get => _proxyType;
-			set => this.RaiseAndSetIfChanged(ref _proxyType, value);
-		}
+		[Reactive]
+		public ProxyType ProxyType { get; set; } = ProxyType.Socks5;
 
-		private string _proxyServer = @"127.0.0.1:1080";
-		public string ProxyServer
-		{
-			get => _proxyServer;
-			set => this.RaiseAndSetIfChanged(ref _proxyServer, value);
-		}
+		[Reactive]
+		public string ProxyServer { get; set; } = @"127.0.0.1:1080";
 
-		private string _proxyUser;
-		public string ProxyUser
-		{
-			get => _proxyUser;
-			set => this.RaiseAndSetIfChanged(ref _proxyUser, value);
-		}
+		[Reactive]
+		public string? ProxyUser { get; set; }
 
-		private string _proxyPassword;
-		public string ProxyPassword
-		{
-			get => _proxyPassword;
-			set => this.RaiseAndSetIfChanged(ref _proxyPassword, value);
-		}
+		[Reactive]
+		public string? ProxyPassword { get; set; }
 
 		#endregion
 

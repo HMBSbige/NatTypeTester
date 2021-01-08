@@ -92,7 +92,7 @@ namespace UnitTest
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
-			Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
 			Assert.AreEqual(result.MappingBehavior, MappingBehavior.Unknown);
 			Assert.AreEqual(result.FilteringBehavior, FilteringBehavior.Unknown);
 		}
@@ -107,7 +107,7 @@ namespace UnitTest
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
-			Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
 			Assert.IsTrue(result.MappingBehavior is MappingBehavior.Direct
 			or MappingBehavior.EndpointIndependent
 			or MappingBehavior.AddressDependent
@@ -126,7 +126,7 @@ namespace UnitTest
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
-			Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
 			Assert.AreEqual(result.MappingBehavior, MappingBehavior.Unknown);
 			Assert.IsTrue(result.FilteringBehavior is FilteringBehavior.EndpointIndependent
 			or FilteringBehavior.AddressDependent
@@ -144,7 +144,7 @@ namespace UnitTest
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
-			Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
 			Assert.IsTrue(result.MappingBehavior is MappingBehavior.Direct
 						  or MappingBehavior.EndpointIndependent
 						  or MappingBehavior.AddressDependent
@@ -167,7 +167,7 @@ namespace UnitTest
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
-			Assert.AreNotEqual(result.LocalEndPoint.Address, IPAddress.Any);
+			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
 			Assert.IsTrue(
 				result.MappingBehavior is MappingBehavior.Direct
 				or MappingBehavior.EndpointIndependent

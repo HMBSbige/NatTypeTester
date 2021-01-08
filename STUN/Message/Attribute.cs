@@ -31,7 +31,7 @@ namespace STUN.Message
 
 		public int RealLength => Type == AttributeType.Useless ? 0 : 4 + Length + (4 - Length % 4) % 4;
 
-		public IAttribute? Value { get; set; }
+		public IAttribute Value { get; set; } = new UselessAttribute();
 
 		private readonly byte[] _magicCookie;
 		private readonly byte[] _transactionId;
@@ -60,10 +60,7 @@ namespace STUN.Message
 
 			res.AddRange(Convert.ToUInt16(Type).ToBe());
 			res.AddRange(Length.ToBe());
-			if (Value != null)
-			{
-				res.AddRange(Value.Bytes);
-			}
+			res.AddRange(Value.Bytes);
 
 			var n = (4 - res.Count % 4) % 4; // 填充的字节数
 			res.AddRange(BitUtils.GetRandomBytes(n));
@@ -105,7 +102,10 @@ namespace STUN.Message
 				AttributeType.ErrorCode => new ErrorCodeAttribute(),
 				_ => new UselessAttribute()
 			};
-			Value = t.TryParse(value) ? t : null;
+			if (t.TryParse(value))
+			{
+				Value = t;
+			}
 
 			return 4 + Length + (4 - Length % 4) % 4; // 对齐
 		}

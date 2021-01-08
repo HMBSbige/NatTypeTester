@@ -28,7 +28,7 @@ namespace STUN.Utils
 			}
 
 			var mapped = (MappedAddressAttribute)mappedAddressAttribute.Value;
-			return new IPEndPoint(mapped.Address, mapped.Port);
+			return new IPEndPoint(mapped.Address!, mapped.Port);
 		}
 
 		public static IPEndPoint? GetChangedAddressAttribute(this StunMessage5389? response)
@@ -41,7 +41,7 @@ namespace STUN.Utils
 			}
 
 			var address = (ChangedAddressAttribute)changedAddressAttribute.Value;
-			return new IPEndPoint(address.Address, address.Port);
+			return new IPEndPoint(address.Address!, address.Port);
 		}
 
 		public static IPEndPoint? GetXorMappedAddressAttribute(this StunMessage5389? response)
@@ -56,7 +56,7 @@ namespace STUN.Utils
 			}
 
 			var mapped = (AddressAttribute)mappedAddressAttribute.Value;
-			return new IPEndPoint(mapped.Address, mapped.Port);
+			return new IPEndPoint(mapped.Address!, mapped.Port);
 		}
 
 		public static IPEndPoint? GetOtherAddressAttribute(this StunMessage5389? response)
@@ -71,7 +71,7 @@ namespace STUN.Utils
 			}
 
 			var address = (AddressAttribute)addressAttribute.Value;
-			return new IPEndPoint(address.Address, address.Port);
+			return new IPEndPoint(address.Address!, address.Port);
 		}
 	}
 }

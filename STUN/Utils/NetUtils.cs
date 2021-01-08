@@ -9,8 +9,13 @@ namespace STUN.Utils
 	{
 		public const string DefaultLocalEnd = @"0.0.0.0:0";
 
-		public static IPEndPoint? ParseEndpoint(string str)
+		public static IPEndPoint? ParseEndpoint(string? str)
 		{
+			if (str is null)
+			{
+				return null;
+			}
+
 			var ipPort = str.Trim().Split(':');
 			if (ipPort.Length < 2)
 			{

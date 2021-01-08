@@ -6,8 +6,12 @@ namespace STUN.Proxy
 {
 	public static class ProxyFactory
 	{
-		public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint? local, IPEndPoint proxy, string? user = null, string? password = null)
+		public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint? local, IPEndPoint? proxy, string? user = null, string? password = null)
 		{
+			if (proxy is null)
+			{
+				throw new ArgumentNullException(nameof(proxy), @"Proxy server is null");
+			}
 			return type switch
 			{
 				ProxyType.Plain => new NoneUdpProxy(local),
