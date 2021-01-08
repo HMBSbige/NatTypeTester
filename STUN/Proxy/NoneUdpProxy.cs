@@ -1,3 +1,4 @@
+using STUN.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -45,17 +46,9 @@ namespace STUN.Proxy
 			await _udpClient.SendAsync(bytes, bytes.Length, remote);
 
 			var res = new byte[ushort.MaxValue];
-			var flag = SocketFlags.None;
 
-			var length = _udpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref receive, out var ipPacketInformation);
-
-			var local = ipPacketInformation.Address;
-
-			Debug.WriteLine($@"{(IPEndPoint)receive} => {local} {length} 字节");
-
-			return (res.Take(length).ToArray(),
-					(IPEndPoint)receive
-					, local);
+			var (local, length, rec) = await _udpClient.Client.ReceiveMessageFromAsync(receive, res, SocketFlags.None);
+			return (res.Take(length).ToArray(), rec, local);
 		}
 
 		public void Dispose()

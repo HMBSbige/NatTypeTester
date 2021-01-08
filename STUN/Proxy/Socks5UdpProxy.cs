@@ -188,7 +188,7 @@ namespace STUN.Proxy
 			var state = _assoc.GetState();
 			if (state != TcpState.Established)
 			{
-				throw new InvalidOperationException("No UDP association, maybe already disconnected or not connected");
+				throw new InvalidOperationException(@"No UDP association, maybe already disconnected or not connected");
 			}
 
 			var remoteBytes = GetEndPointByte(remote);
@@ -198,9 +198,8 @@ namespace STUN.Proxy
 
 			await _udpClient.SendAsync(proxyBytes, proxyBytes.Length, _assocEndPoint);
 			var res = new byte[ushort.MaxValue];
-			var flag = SocketFlags.None;
-			EndPoint ep = new IPEndPoint(0, 0);
-			var length = _udpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref ep, out var ipPacketInformation);
+
+			var (local, length, _) = await _udpClient.Client.ReceiveMessageFromAsync(_assocEndPoint!, res, SocketFlags.None);
 
 			if (res[0] != 0 || res[1] != 0 || res[2] != 0)
 			{
@@ -219,7 +218,7 @@ namespace STUN.Proxy
 			return (
 				ret,
 				new IPEndPoint(ip, port),
-				ipPacketInformation.Address);
+				local);
 		}
 
 		public Task DisconnectAsync()
