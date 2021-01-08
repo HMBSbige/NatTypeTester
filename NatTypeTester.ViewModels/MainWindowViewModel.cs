@@ -1,6 +1,5 @@
 using DynamicData;
 using DynamicData.Binding;
-using NatTypeTester.Model;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using STUN.Client;
@@ -17,7 +16,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace NatTypeTester.ViewModels
 {
@@ -142,7 +140,6 @@ namespace NatTypeTester.ViewModels
 
 					Result3489 = client.Status;
 					await client.Query3489Async();
-					//TODO
 				}
 				else
 				{
@@ -151,7 +148,7 @@ namespace NatTypeTester.ViewModels
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+				//TODO MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 
@@ -173,7 +170,6 @@ namespace NatTypeTester.ViewModels
 
 					Result5389 = client.Status;
 					await client.QueryAsync();
-					//TODO
 				}
 				else
 				{
@@ -182,7 +178,7 @@ namespace NatTypeTester.ViewModels
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+				//TODO MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 	}

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
-namespace NatTypeTester.Model
+namespace STUN.Utils
 {
 	public class StunServer
 	{

@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\STUN\STUN.csproj" />
+    <ProjectReference Include="..\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
   </ItemGroup>
 
 </Project>
