@@ -30,7 +30,9 @@ namespace NatTypeTester
 			}
 
 			using var client = new StunClient5389UDP(server, port, local);
-			var res = await client.QueryAsync();
+			await client.QueryAsync();
+			var res = client.Status;
+
 			Console.WriteLine($@"Other address is {res.OtherEndPoint}");
 			Console.WriteLine($@"Binding test: {res.BindingTestResult}");
 			Console.WriteLine($@"Local address: {res.LocalEndPoint}");

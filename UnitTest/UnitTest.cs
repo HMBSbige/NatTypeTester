@@ -86,7 +86,8 @@ namespace UnitTest
 		public async Task BindingTest()
 		{
 			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-			var result = await client.BindingTestAsync();
+			await client.BindingTestAsync();
+			var result = client.Status;
 
 			Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
 			Assert.IsNotNull(result.LocalEndPoint);
@@ -101,17 +102,19 @@ namespace UnitTest
 		public async Task MappingBehaviorTest()
 		{
 			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-			var result = await client.MappingBehaviorTestAsync();
+			await client.MappingBehaviorTestAsync();
+			var result = client.Status;
 
 			Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
 			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
-			Assert.IsTrue(result.MappingBehavior is MappingBehavior.Direct
-			or MappingBehavior.EndpointIndependent
-			or MappingBehavior.AddressDependent
-			or MappingBehavior.AddressAndPortDependent
+			Assert.IsTrue(result.MappingBehavior is
+				MappingBehavior.Direct or
+				MappingBehavior.EndpointIndependent or
+				MappingBehavior.AddressDependent or
+				MappingBehavior.AddressAndPortDependent
 			);
 			Assert.AreEqual(result.FilteringBehavior, FilteringBehavior.Unknown);
 		}
@@ -120,7 +123,8 @@ namespace UnitTest
 		public async Task FilteringBehaviorTest()
 		{
 			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-			var result = await client.FilteringBehaviorTestAsync();
+			await client.FilteringBehaviorTestAsync();
+			var result = client.Status;
 
 			Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
 			Assert.IsNotNull(result.LocalEndPoint);
@@ -128,9 +132,10 @@ namespace UnitTest
 			Assert.IsNotNull(result.OtherEndPoint);
 			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
 			Assert.AreEqual(result.MappingBehavior, MappingBehavior.Unknown);
-			Assert.IsTrue(result.FilteringBehavior is FilteringBehavior.EndpointIndependent
-			or FilteringBehavior.AddressDependent
-			or FilteringBehavior.AddressAndPortDependent
+			Assert.IsTrue(result.FilteringBehavior is
+				FilteringBehavior.EndpointIndependent or
+				FilteringBehavior.AddressDependent or
+				FilteringBehavior.AddressAndPortDependent
 			);
 		}
 
@@ -138,21 +143,24 @@ namespace UnitTest
 		public async Task CombiningTest()
 		{
 			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
-			var result = await client.QueryAsync();
+			await client.QueryAsync();
+			var result = client.Status;
 
 			Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
 			Assert.IsNotNull(result.LocalEndPoint);
 			Assert.IsNotNull(result.PublicEndPoint);
 			Assert.IsNotNull(result.OtherEndPoint);
 			Assert.AreNotEqual(result.LocalEndPoint!.Address, IPAddress.Any);
-			Assert.IsTrue(result.MappingBehavior is MappingBehavior.Direct
-						  or MappingBehavior.EndpointIndependent
-						  or MappingBehavior.AddressDependent
-						  or MappingBehavior.AddressAndPortDependent
+			Assert.IsTrue(result.MappingBehavior is
+				MappingBehavior.Direct or
+				MappingBehavior.EndpointIndependent or
+				MappingBehavior.AddressDependent or
+				MappingBehavior.AddressAndPortDependent
 			);
-			Assert.IsTrue(result.FilteringBehavior is FilteringBehavior.EndpointIndependent
-						  or FilteringBehavior.AddressDependent
-						  or FilteringBehavior.AddressAndPortDependent
+			Assert.IsTrue(result.FilteringBehavior is
+				FilteringBehavior.EndpointIndependent or
+				FilteringBehavior.AddressDependent or
+				FilteringBehavior.AddressAndPortDependent
 			);
 		}
 
@@ -161,7 +169,8 @@ namespace UnitTest
 		{
 			using var proxy = ProxyFactory.CreateProxy(ProxyType.Socks5, IPEndPoint.Parse(@"0.0.0.0:0"), IPEndPoint.Parse(@"127.0.0.1:10000"));
 			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0), proxy);
-			var result = await client.QueryAsync();
+			await client.QueryAsync();
+			var result = client.Status;
 
 			Assert.AreEqual(result.BindingTestResult, BindingTestResult.Success);
 			Assert.IsNotNull(result.LocalEndPoint);

@@ -1,16 +1,11 @@
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using STUN.Enums;
-using System.Net;
 
 namespace STUN.StunResult
 {
-	public class ClassicStunResult : ReactiveObject
+	public class ClassicStunResult : StunResult
 	{
 		[Reactive]
 		public NatType NatType { get; set; } = NatType.Unknown;
-
-		[Reactive]
-		public IPEndPoint? PublicEndPoint { get; set; }
 	}
 }

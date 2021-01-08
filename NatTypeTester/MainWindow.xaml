@@ -122,7 +122,7 @@
 								x:Name="ProxyUsernameTextBox" Grid.Row="1"
 								Margin="0,5" IsReadOnly="False"
 								VerticalContentAlignment="Center" VerticalAlignment="Center"
-								ui:ControlHelper.Header="User ID" />
+								ui:ControlHelper.Header="Username" />
 							<TextBox 
 								x:Name="ProxyPasswordTextBox" Grid.Row="2"
 								Margin="0,5"

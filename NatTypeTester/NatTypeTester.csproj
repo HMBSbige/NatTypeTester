@@ -23,9 +23,9 @@
     <PackageReference Include="Costura.Fody" Version="4.1.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Fody" Version="6.3.0" />
     <PackageReference Include="ModernWpfUI" Version="0.9.3" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="13.0.27" />
+    <PackageReference Include="ReactiveUI.Fody" Version="13.0.27" />
     <PackageReference Include="ReactiveUI.WPF" Version="13.0.27" />
   </ItemGroup>
 

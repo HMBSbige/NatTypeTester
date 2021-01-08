@@ -1,3 +1,4 @@
+using ReactiveUI.Fody.Helpers;
 using STUN.DnsClients;
 using STUN.Enums;
 using STUN.Message;
@@ -8,8 +9,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,19 +20,6 @@ namespace STUN.Client
 	/// </summary>
 	public class StunClient3489 : IDisposable
 	{
-		#region Subject
-
-		private readonly Subject<NatType> _natTypeSubj = new();
-		public IObservable<NatType> NatTypeChanged => _natTypeSubj.AsObservable();
-
-		protected readonly Subject<IPEndPoint?> PubSubj = new();
-		public IObservable<IPEndPoint?> PubChanged => PubSubj.AsObservable();
-
-		protected readonly Subject<IPEndPoint?> LocalSubj = new();
-		public IObservable<IPEndPoint?> LocalChanged => LocalSubj.AsObservable();
-
-		#endregion
-
 		public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
 
 		public TimeSpan Timeout
@@ -45,9 +31,12 @@ namespace STUN.Client
 		protected readonly IPAddress Server;
 		protected readonly ushort Port;
 
-		public IPEndPoint RemoteEndPoint => new(Server, Port);
+		protected IPEndPoint RemoteEndPoint => new(Server, Port);
 
 		protected readonly IUdpProxy Proxy;
+
+		[Reactive]
+		public ClassicStunResult Status { get; } = new();
 
 		public StunClient3489(string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null, IDnsQuery? dnsQuery = null)
 		{
@@ -71,17 +60,22 @@ namespace STUN.Client
 			Port = port;
 
 			Timeout = TimeSpan.FromSeconds(1.6);
+			Status.LocalEndPoint = local;
 		}
 
-		public async Task<ClassicStunResult> Query3489Async()
+		private void Init()
 		{
-			var res = new ClassicStunResult();
-			_natTypeSubj.OnNext(res.NatType);
-			PubSubj.OnNext(res.PublicEndPoint);
+			Status.PublicEndPoint = default;
+			Status.LocalEndPoint = default;
+			Status.NatType = NatType.Unknown;
+		}
 
-			using var cts = new CancellationTokenSource(Timeout);
+		public async Task Query3489Async()
+		{
 			try
 			{
+				Init();
+				using var cts = new CancellationTokenSource(Timeout);
 				await Proxy.ConnectAsync(cts.Token);
 				// test I
 				var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
@@ -89,13 +83,13 @@ namespace STUN.Client
 				var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint, cts.Token);
 				if (response1 is null || remote1 is null)
 				{
-					res.NatType = NatType.UdpBlocked;
-					return res;
+					Status.NatType = NatType.UdpBlocked;
+					return;
 				}
 
 				if (local1 is not null)
 				{
-					LocalSubj.OnNext(LocalEndPoint);
+					Status.LocalEndPoint = LocalEndPoint;
 				}
 
 				var mappedAddress1 = response1.GetMappedAddressAttribute();
@@ -107,11 +101,11 @@ namespace STUN.Client
 				|| Equals(changedAddress1.Address, remote1.Address)
 				|| changedAddress1.Port == remote1.Port)
 				{
-					res.NatType = NatType.UnsupportedServer;
-					return res;
+					Status.NatType = NatType.UnsupportedServer;
+					return;
 				}
 
-				PubSubj.OnNext(mappedAddress1); // 显示 test I 得到的映射地址
+				Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
 
 				var test2 = new StunMessage5389
 				{
@@ -129,13 +123,15 @@ namespace STUN.Client
 					// No NAT
 					if (response2 is null)
 					{
-						res.NatType = NatType.SymmetricUdpFirewall;
-						res.PublicEndPoint = mappedAddress1;
-						return res;
+						Status.NatType = NatType.SymmetricUdpFirewall;
+						Status.PublicEndPoint = mappedAddress1;
 					}
-					res.NatType = NatType.OpenInternet;
-					res.PublicEndPoint = mappedAddress2;
-					return res;
+					else
+					{
+						Status.NatType = NatType.OpenInternet;
+						Status.PublicEndPoint = mappedAddress2;
+					}
+					return;
 				}
 
 				// NAT
@@ -143,9 +139,9 @@ namespace STUN.Client
 				{
 					// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
 					var type = Equals(remote1.Address, remote2.Address) || remote1.Port == remote2.Port ? NatType.UnsupportedServer : NatType.FullCone;
-					res.NatType = type;
-					res.PublicEndPoint = mappedAddress2;
-					return res;
+					Status.NatType = type;
+					Status.PublicEndPoint = mappedAddress2;
+					return;
 				}
 
 				// Test I(#2)
@@ -155,15 +151,15 @@ namespace STUN.Client
 
 				if (mappedAddress12 is null)
 				{
-					res.NatType = NatType.Unknown;
-					return res;
+					Status.NatType = NatType.Unknown;
+					return;
 				}
 
 				if (!Equals(mappedAddress12, mappedAddress1))
 				{
-					res.NatType = NatType.Symmetric;
-					res.PublicEndPoint = mappedAddress12;
-					return res;
+					Status.NatType = NatType.Symmetric;
+					Status.PublicEndPoint = mappedAddress12;
+					return;
 				}
 
 				// Test III
@@ -177,19 +173,17 @@ namespace STUN.Client
 				var mappedAddress3 = response3.GetMappedAddressAttribute();
 				if (mappedAddress3 is not null)
 				{
-					res.NatType = NatType.RestrictedCone;
-					res.PublicEndPoint = mappedAddress3;
-					return res;
+					Status.NatType = NatType.RestrictedCone;
+					Status.PublicEndPoint = mappedAddress3;
+					return;
 				}
-				res.NatType = NatType.PortRestrictedCone;
-				res.PublicEndPoint = mappedAddress12;
-				return res;
+
+				Status.NatType = NatType.PortRestrictedCone;
+				Status.PublicEndPoint = mappedAddress12;
 			}
 			finally
 			{
 				await Proxy.DisconnectAsync();
-				_natTypeSubj.OnNext(res.NatType);
-				PubSubj.OnNext(res.PublicEndPoint);
 			}
 		}
 
@@ -231,9 +225,6 @@ namespace STUN.Client
 		public virtual void Dispose()
 		{
 			Proxy.Dispose();
-			_natTypeSubj.OnCompleted();
-			PubSubj.OnCompleted();
-			LocalSubj.OnCompleted();
 		}
 	}
 }

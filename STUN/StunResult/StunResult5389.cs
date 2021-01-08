@@ -1,18 +1,11 @@
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using STUN.Enums;
 using System.Net;
 
 namespace STUN.StunResult
 {
-	public class StunResult5389 : ReactiveObject
+	public class StunResult5389 : StunResult
 	{
-		[Reactive]
-		public IPEndPoint? PublicEndPoint { get; set; }
-
-		[Reactive]
-		public IPEndPoint? LocalEndPoint { get; set; }
-
 		[Reactive]
 		public IPEndPoint? OtherEndPoint { get; set; }
 

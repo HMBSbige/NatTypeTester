@@ -2,8 +2,8 @@ using ModernWpf;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
 using STUN.Enums;
+using STUN.Utils;
 using System;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
@@ -71,28 +71,29 @@ namespace NatTypeTester
 				#region RFC3489
 
 				this.OneWayBind(ViewModel,
-						vm => vm.ClassicNatType,
-						v => v.NatTypeTextBox.Text
+						vm => vm.Result3489.NatType,
+						v => v.NatTypeTextBox.Text,
+						type => type.ToString()
 				).DisposeWith(d);
 
 				this.Bind(ViewModel,
-						vm => vm.LocalEnd,
-						v => v.LocalEndTextBox.Text
+						vm => vm.Result3489.LocalEndPoint,
+						v => v.LocalEndTextBox.Text,
+						ipe => ipe is null ? string.Empty : ipe.ToString(),
+						NetUtils.ParseEndpoint
 				).DisposeWith(d);
 
 				this.OneWayBind(ViewModel,
-						vm => vm.PublicEnd,
-						v => v.PublicEndTextBox.Text
+						vm => vm.Result3489.PublicEndPoint,
+						v => v.PublicEndTextBox.Text,
+						ipe => ipe is null ? string.Empty : ipe.ToString()
 				).DisposeWith(d);
 
-				this.BindCommand(ViewModel,
-								viewModel => viewModel.TestClassicNatType,
-								view => view.TestButton)
-						.DisposeWith(d);
+				this.BindCommand(ViewModel, viewModel => viewModel.TestClassicNatType, view => view.TestButton).DisposeWith(d);
 
 				RFC3489Tab.Events().KeyDown
 						.Where(x => x.Key == Key.Enter && TestButton.IsEnabled)
-						.Subscribe(y => { TestButton.Command.Execute(Unit.Default); })
+						.Subscribe(async _ => await ViewModel.TestClassicNatType.Execute(default))
 						.DisposeWith(d);
 
 				#endregion
@@ -100,38 +101,41 @@ namespace NatTypeTester
 				#region RFC5780
 
 				this.OneWayBind(ViewModel,
-						vm => vm.BindingTest,
-						v => v.BindingTestTextBox.Text
+						vm => vm.Result5389.BindingTestResult,
+						v => v.BindingTestTextBox.Text,
+						res => res.ToString()
 				).DisposeWith(d);
 
 				this.OneWayBind(ViewModel,
-						vm => vm.MappingBehavior,
-						v => v.MappingBehaviorTextBox.Text
+						vm => vm.Result5389.MappingBehavior,
+						v => v.MappingBehaviorTextBox.Text,
+						res => res.ToString()
 				).DisposeWith(d);
 
 				this.OneWayBind(ViewModel,
-						vm => vm.FilteringBehavior,
-						v => v.FilteringBehaviorTextBox.Text
+						vm => vm.Result5389.FilteringBehavior,
+						v => v.FilteringBehaviorTextBox.Text,
+						res => res.ToString()
 				).DisposeWith(d);
 
 				this.Bind(ViewModel,
-						vm => vm.LocalAddress,
-						v => v.LocalAddressTextBox.Text
+						vm => vm.Result5389.LocalEndPoint,
+						v => v.LocalAddressTextBox.Text,
+						ipe => ipe is null ? string.Empty : ipe.ToString(),
+						NetUtils.ParseEndpoint
 				).DisposeWith(d);
 
 				this.OneWayBind(ViewModel,
-						vm => vm.MappingAddress,
-						v => v.MappingAddressTextBox.Text
+						vm => vm.Result5389.PublicEndPoint,
+						v => v.MappingAddressTextBox.Text,
+						ipe => ipe is null ? string.Empty : ipe.ToString()
 				).DisposeWith(d);
 
-				this.BindCommand(ViewModel,
-								viewModel => viewModel.DiscoveryNatType,
-								view => view.DiscoveryButton)
-						.DisposeWith(d);
+				this.BindCommand(ViewModel, viewModel => viewModel.DiscoveryNatType, view => view.DiscoveryButton).DisposeWith(d);
 
 				RFC5780Tab.Events().KeyDown
 						.Where(x => x.Key == Key.Enter && DiscoveryButton.IsEnabled)
-						.Subscribe(y => { DiscoveryButton.Command.Execute(Unit.Default); })
+						.Subscribe(async _ => await ViewModel.DiscoveryNatType.Execute(default))
 						.DisposeWith(d);
 
 				#endregion

@@ -7,8 +7,6 @@ namespace STUN.Utils
 {
 	public static class NetUtils
 	{
-		public const string DefaultLocalEnd = @"0.0.0.0:0";
-
 		public static IPEndPoint? ParseEndpoint(string? str)
 		{
 			if (str is null)

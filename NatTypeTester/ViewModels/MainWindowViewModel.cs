@@ -6,13 +6,17 @@ using ReactiveUI.Fody.Helpers;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Proxy;
+using STUN.StunResult;
 using STUN.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace NatTypeTester.ViewModels
@@ -22,13 +26,7 @@ namespace NatTypeTester.ViewModels
 		#region RFC3489
 
 		[Reactive]
-		public string? ClassicNatType { get; set; }
-
-		[Reactive]
-		public string LocalEnd { get; set; } = NetUtils.DefaultLocalEnd;
-
-		[Reactive]
-		public string? PublicEnd { get; set; }
+		public ClassicStunResult Result3489 { get; set; }
 
 		public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
 
@@ -37,19 +35,7 @@ namespace NatTypeTester.ViewModels
 		#region RFC5780
 
 		[Reactive]
-		public string? BindingTest { get; set; }
-
-		[Reactive]
-		public string? MappingBehavior { get; set; }
-
-		[Reactive]
-		public string? FilteringBehavior { get; set; }
-
-		[Reactive]
-		public string? LocalAddress { get; set; }
-
-		[Reactive]
-		public string? MappingAddress { get; set; }
+		public StunResult5389 Result5389 { get; set; }
 
 		public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
 
@@ -92,14 +78,23 @@ namespace NatTypeTester.ViewModels
 
 		public MainWindowViewModel()
 		{
+			Result3489 = new ClassicStunResult
+			{
+				LocalEndPoint = new IPEndPoint(IPAddress.Any, 0)
+			};
+			Result5389 = new StunResult5389
+			{
+				LocalEndPoint = new IPEndPoint(IPAddress.Any, 0)
+			};
+
 			LoadStunServer();
 			List.Connect()
 				.DistinctValues(x => x)
 				.ObserveOnDispatcher()
 				.Bind(StunServers)
 				.Subscribe();
-			TestClassicNatType = ReactiveCommand.CreateFromObservable(TestClassicNatTypeImpl);
-			DiscoveryNatType = ReactiveCommand.CreateFromObservable(DiscoveryNatTypeImpl);
+			TestClassicNatType = ReactiveCommand.CreateFromTask(TestClassicNatTypeImpl);
+			DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeImpl);
 		}
 
 		private async void LoadStunServer()
@@ -129,92 +124,66 @@ namespace NatTypeTester.ViewModels
 			}
 		}
 
-		private IObservable<Unit> TestClassicNatTypeImpl()
+		private async Task TestClassicNatTypeImpl(CancellationToken token)
 		{
-			return Observable.FromAsync(async () =>
+			try
 			{
-				try
+				var server = new StunServer();
+				if (server.Parse(StunServer))
 				{
-					var server = new StunServer();
-					if (server.Parse(StunServer))
-					{
-						using var proxy = ProxyFactory.CreateProxy(
-							ProxyType,
-							NetUtils.ParseEndpoint(LocalEnd),
-							NetUtils.ParseEndpoint(ProxyServer),
-							ProxyUser, ProxyPassword
-							);
+					using var proxy = ProxyFactory.CreateProxy(
+						ProxyType,
+						Result3489.LocalEndPoint,
+						NetUtils.ParseEndpoint(ProxyServer),
+						ProxyUser, ProxyPassword
+						);
 
-						using var client = new StunClient3489(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalEnd), proxy);
+					using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
 
-						client.NatTypeChanged.ObserveOn(RxApp.MainThreadScheduler)
-								.Subscribe(t => ClassicNatType = $@"{t}");
-						client.PubChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => PublicEnd = $@"{t}");
-						client.LocalChanged.ObserveOn(RxApp.MainThreadScheduler).Subscribe(t => LocalEnd = $@"{t}");
-						await client.Query3489Async();
-					}
-					else
-					{
-						throw new Exception(@"Wrong STUN Server!");
-					}
+					Result3489 = client.Status;
+					await client.Query3489Async();
+					//TODO
 				}
-				catch (Exception ex)
+				else
 				{
-					MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+					throw new Exception(@"Wrong STUN Server!");
 				}
-			}).SubscribeOn(RxApp.TaskpoolScheduler);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
-		private IObservable<Unit> DiscoveryNatTypeImpl()
+		private async Task DiscoveryNatTypeImpl(CancellationToken token)
 		{
-			return Observable.FromAsync(async () =>
+			try
 			{
-				try
+				var server = new StunServer();
+				if (server.Parse(StunServer))
 				{
-					var server = new StunServer();
-					if (server.Parse(StunServer))
-					{
-						using var proxy = ProxyFactory.CreateProxy(
-							ProxyType,
-							NetUtils.ParseEndpoint(LocalEnd),
-							NetUtils.ParseEndpoint(ProxyServer),
-							ProxyUser, ProxyPassword
-							);
+					using var proxy = ProxyFactory.CreateProxy(
+						ProxyType,
+						Result5389.LocalEndPoint,
+						NetUtils.ParseEndpoint(ProxyServer),
+						ProxyUser, ProxyPassword
+						);
 
-						using var client = new StunClient5389UDP(server.Hostname, server.Port, NetUtils.ParseEndpoint(LocalAddress), proxy);
+					using var client = new StunClient5389UDP(server.Hostname, server.Port, Result5389.LocalEndPoint, proxy);
 
-						client.BindingTestResultChanged
-								.ObserveOn(RxApp.MainThreadScheduler)
-								.Subscribe(t => BindingTest = $@"{t}");
-
-						client.MappingBehaviorChanged
-								.ObserveOn(RxApp.MainThreadScheduler)
-								.Subscribe(t => MappingBehavior = $@"{t}");
-
-						client.FilteringBehaviorChanged
-								.ObserveOn(RxApp.MainThreadScheduler)
-								.Subscribe(t => FilteringBehavior = $@"{t}");
-
-						client.PubChanged
-								.ObserveOn(RxApp.MainThreadScheduler)
-								.Subscribe(t => MappingAddress = $@"{t}");
-
-						client.LocalChanged
-								.ObserveOn(RxApp.MainThreadScheduler)
-								.Subscribe(t => LocalAddress = $@"{t}");
-
-						await client.QueryAsync();
-					}
-					else
-					{
-						throw new Exception(@"Wrong STUN Server!");
-					}
+					Result5389 = client.Status;
+					await client.QueryAsync();
+					//TODO
 				}
-				catch (Exception ex)
+				else
 				{
-					MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+					throw new Exception(@"Wrong STUN Server!");
 				}
-			}).SubscribeOn(RxApp.TaskpoolScheduler);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 	}
 }
