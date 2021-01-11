@@ -7,7 +7,7 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>3.3</Version>
+    <Version>3.4</Version>
     <Authors>HMBSbige</Authors>
   </PropertyGroup>
 
