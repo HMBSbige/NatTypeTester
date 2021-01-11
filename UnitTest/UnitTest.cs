@@ -69,17 +69,24 @@ namespace UnitTest
 		}
 
 		[TestMethod]
-		public void ParseEndpointTest()
+		[DataRow(@"1.2.3.4")]
+		[DataRow(@"1.2.256.5:80")]
+		[DataRow(@"2001:db8:1234:5678:11:2233:4455:6677:32853")]
+		[DataRow(@"2001:db8:1234:5678:11:2233:4455:6677")]
+		public void ParseEndpointTestFail(string ipStr)
 		{
-			Assert.IsNull(NetUtils.ParseEndpoint(@"1.2.3.4"));
-			Assert.IsNull(NetUtils.ParseEndpoint(@"1.2.256.5:80"));
-			Assert.AreEqual(NetUtils.ParseEndpoint(@"0.0.0.0:123"), IPEndPoint.Parse(@"0.0.0.0:123"));
-			Assert.AreEqual(NetUtils.ParseEndpoint(@"192.168.1.1:2136"), IPEndPoint.Parse(@"192.168.1.1:2136"));
-			Assert.AreEqual(NetUtils.ParseEndpoint(@"[2001:db8:1234:5678:11:2233:4455:6677]:32853"), IPEndPoint.Parse(@"[2001:db8:1234:5678:11:2233:4455:6677]:32853"));
-			Assert.IsNull(NetUtils.ParseEndpoint(@"2001:db8:1234:5678:11:2233:4455:6677:32853"));
-			Assert.IsNull(NetUtils.ParseEndpoint(@"2001:db8:1234:5678:11:2233:4455:6677"));
-			Assert.AreEqual(NetUtils.ParseEndpoint(@"[2001:db8:1234:5678:11:2233:4455:6677]:0"), IPEndPoint.Parse(@"[2001:db8:1234:5678:11:2233:4455:6677]:0"));
-			Assert.AreEqual(NetUtils.ParseEndpoint(@"[::1]:0"), IPEndPoint.Parse(@"[::1]:0"));
+			Assert.IsNull(NetUtils.ParseEndpoint(ipStr));
+		}
+
+		[TestMethod]
+		[DataRow(@"0.0.0.0:123")]
+		[DataRow(@"192.168.1.1:2136")]
+		[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:32853")]
+		[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
+		[DataRow(@"[::1]:0")]
+		public void ParseEndpointTestSuccess(string ipStr)
+		{
+			Assert.AreEqual(NetUtils.ParseEndpoint(ipStr), IPEndPoint.Parse(ipStr));
 		}
 
 		[TestMethod]
