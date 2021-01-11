@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "STUN", "STUN\STUN.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTest", "UnitTest\UnitTest.csproj", "{AA8AF9BF-5CFB-4725-B42A-7B3B3890A279}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester.ViewModels", "NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj", "{D7626B0E-17B0-4743-888F-A32797442750}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NatTypeTester.Models", "NatTypeTester.Models\NatTypeTester.Models.csproj", "{FC61BC61-E24B-4E78-ABA4-C6CB6C05EFC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{AA8AF9BF-5CFB-4725-B42A-7B3B3890A279}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA8AF9BF-5CFB-4725-B42A-7B3B3890A279}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA8AF9BF-5CFB-4725-B42A-7B3B3890A279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7626B0E-17B0-4743-888F-A32797442750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7626B0E-17B0-4743-888F-A32797442750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7626B0E-17B0-4743-888F-A32797442750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7626B0E-17B0-4743-888F-A32797442750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC61BC61-E24B-4E78-ABA4-C6CB6C05EFC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC61BC61-E24B-4E78-ABA4-C6CB6C05EFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC61BC61-E24B-4E78-ABA4-C6CB6C05EFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC61BC61-E24B-4E78-ABA4-C6CB6C05EFC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

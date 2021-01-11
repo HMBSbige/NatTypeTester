@@ -1,24 +1,11 @@
-﻿using System.Net;
-using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using STUN.Enums;
 
 namespace STUN.StunResult
 {
-    public class ClassicStunResult : ReactiveObject
-    {
-        private NatType _natType = NatType.Unknown;
-        private IPEndPoint _publicEndPoint;
-
-        public NatType NatType
-        {
-            get => _natType;
-            set => this.RaiseAndSetIfChanged(ref _natType, value);
-        }
-
-        public IPEndPoint PublicEndPoint
-        {
-            get => _publicEndPoint;
-            set => this.RaiseAndSetIfChanged(ref _publicEndPoint, value);
-        }
-    }
+	public class ClassicStunResult : StunResult
+	{
+		[Reactive]
+		public NatType NatType { get; set; } = NatType.Unknown;
+	}
 }

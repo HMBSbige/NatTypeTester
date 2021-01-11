@@ -1,4 +1,4 @@
-﻿using STUN.Interfaces;
+using STUN.Utils;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -9,59 +9,50 @@ using System.Threading.Tasks;
 
 namespace STUN.Proxy
 {
-    public class NoneUdpProxy : IUdpProxy
-    {
-        public TimeSpan Timeout
-        {
-            get => TimeSpan.FromMilliseconds(UdpClient.Client.ReceiveTimeout);
-            set => UdpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
-        }
+	public class NoneUdpProxy : IUdpProxy
+	{
+		public TimeSpan Timeout
+		{
+			get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
+			set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+		}
 
-        public IPEndPoint LocalEndPoint => (IPEndPoint)UdpClient.Client.LocalEndPoint;
+		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
 
-        protected UdpClient UdpClient;
+		private readonly UdpClient _udpClient;
 
-        public NoneUdpProxy(IPEndPoint local)
-        {
-            UdpClient = local == null ? new UdpClient() : new UdpClient(local);
-        }
+		public NoneUdpProxy(IPEndPoint? local)
+		{
+			_udpClient = local is null ? new UdpClient() : new UdpClient(local);
+		}
 
-        public Task ConnectAsync(CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
+		public Task ConnectAsync(CancellationToken token = default)
+		{
+			return Task.CompletedTask;
+		}
 
-        public Task DisconnectAsync()
-        {
-            UdpClient.Close();
-            return Task.CompletedTask;
-        }
+		public Task DisconnectAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-        public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
-        {
-            var localEndPoint = (IPEndPoint)UdpClient.Client.LocalEndPoint;
+		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
+		{
+			var localEndPoint = (IPEndPoint)_udpClient.Client.LocalEndPoint;
 
-            Debug.WriteLine($@"{localEndPoint} => {remote} {bytes.Length} 字节");
+			Debug.WriteLine($@"{localEndPoint} => {remote} {bytes.Length} 字节");
 
-            await UdpClient.SendAsync(bytes, bytes.Length, remote);
+			await _udpClient.SendAsync(bytes, bytes.Length, remote);
 
-            var res = new byte[ushort.MaxValue];
-            var flag = SocketFlags.None;
+			var res = new byte[ushort.MaxValue];
 
-            var length = UdpClient.Client.ReceiveMessageFrom(res, 0, res.Length, ref flag, ref receive, out var ipPacketInformation);
+			var (local, length, rec) = await _udpClient.Client.ReceiveMessageFromAsync(receive, res, SocketFlags.None);
+			return (res.Take(length).ToArray(), rec, local);
+		}
 
-            var local = ipPacketInformation.Address;
-
-            Debug.WriteLine($@"{(IPEndPoint)receive} => {local} {length} 字节");
-
-            return (res.Take(length).ToArray(),
-                    (IPEndPoint)receive
-                    , local);
-        }
-
-        public void Dispose()
-        {
-            UdpClient?.Dispose();
-        }
-    }
+		public void Dispose()
+		{
+			_udpClient.Dispose();
+		}
+	}
 }

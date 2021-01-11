@@ -1,5 +1,6 @@
-﻿using STUN.Enums;
-using STUN.Interfaces;
+using ReactiveUI.Fody.Helpers;
+using STUN.DnsClients;
+using STUN.Enums;
 using STUN.Message;
 using STUN.Proxy;
 using STUN.StunResult;
@@ -8,234 +9,219 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace STUN.Client
 {
-    /// <summary>
-    /// https://tools.ietf.org/html/rfc3489#section-10.1
-    /// https://upload.wikimedia.org/wikipedia/commons/6/63/STUN_Algorithm3.svg
-    /// </summary>
-    public class StunClient3489 : IDisposable
-    {
-        #region Subject
+	/// <summary>
+	/// https://tools.ietf.org/html/rfc3489#section-10.1
+	/// https://upload.wikimedia.org/wikipedia/commons/6/63/STUN_Algorithm3.svg
+	/// </summary>
+	public class StunClient3489 : IDisposable
+	{
+		public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
 
-        private readonly Subject<NatType> _natTypeSubj = new Subject<NatType>();
-        public IObservable<NatType> NatTypeChanged => _natTypeSubj.AsObservable();
+		public TimeSpan Timeout
+		{
+			get => Proxy.Timeout;
+			set => Proxy.Timeout = value;
+		}
 
-        protected readonly Subject<IPEndPoint> PubSubj = new Subject<IPEndPoint>();
-        public IObservable<IPEndPoint> PubChanged => PubSubj.AsObservable();
+		protected readonly IPAddress Server;
+		protected readonly ushort Port;
 
-        protected readonly Subject<IPEndPoint> LocalSubj = new Subject<IPEndPoint>();
-        public IObservable<IPEndPoint> LocalChanged => LocalSubj.AsObservable();
+		protected IPEndPoint RemoteEndPoint => new(Server, Port);
 
-        #endregion
+		protected readonly IUdpProxy Proxy;
 
-        public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
+		[Reactive]
+		public ClassicStunResult Status { get; } = new();
 
-        public TimeSpan Timeout
-        {
-            get => Proxy.Timeout;
-            set => Proxy.Timeout = value;
-        }
+		public StunClient3489(string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null, IDnsQuery? dnsQuery = null)
+		{
+			Proxy = proxy ?? new NoneUdpProxy(local);
 
-        protected readonly IPAddress Server;
-        protected readonly ushort Port;
+			if (string.IsNullOrEmpty(server))
+			{
+				throw new ArgumentException(@"Please specify STUN server !");
+			}
 
-        public IPEndPoint RemoteEndPoint => Server == null ? null : new IPEndPoint(Server, Port);
+			if (port < 1)
+			{
+				throw new ArgumentException(@"Port value must be >= 1 !");
+			}
 
-        protected readonly IUdpProxy Proxy;
+			dnsQuery ??= new DefaultDnsQuery();
 
-        public StunClient3489(string server, ushort port = 3478, IPEndPoint local = null, IUdpProxy proxy = null, IDnsQuery dnsQuery = null)
-        {
-            Proxy = proxy ?? new NoneUdpProxy(local);
+			var ip = dnsQuery.Query(server);
 
-            if (string.IsNullOrEmpty(server))
-            {
-                throw new ArgumentException(@"Please specify STUN server !");
-            }
+			Server = ip ?? throw new ArgumentException(@"Wrong STUN server !");
+			Port = port;
 
-            if (port < 1)
-            {
-                throw new ArgumentException(@"Port value must be >= 1 !");
-            }
+			Timeout = TimeSpan.FromSeconds(1.6);
+			Status.LocalEndPoint = local;
+		}
 
-            dnsQuery ??= new DefaultDnsQuery();
+		private void Init()
+		{
+			Status.PublicEndPoint = default;
+			Status.LocalEndPoint = default;
+			Status.NatType = NatType.Unknown;
+		}
 
-            Server = dnsQuery.Query(server);
-            if (Server == null)
-            {
-                throw new ArgumentException(@"Wrong STUN server !");
-            }
-            Port = port;
+		public async Task Query3489Async()
+		{
+			try
+			{
+				Init();
+				using var cts = new CancellationTokenSource(Timeout);
+				await Proxy.ConnectAsync(cts.Token);
+				// test I
+				var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
 
-            Timeout = TimeSpan.FromSeconds(1.6);
-        }
+				var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint, cts.Token);
+				if (response1 is null || remote1 is null)
+				{
+					Status.NatType = NatType.UdpBlocked;
+					return;
+				}
 
-        public async Task<ClassicStunResult> Query3489Async()
-        {
-            var res = new ClassicStunResult();
-            _natTypeSubj.OnNext(res.NatType);
-            PubSubj.OnNext(res.PublicEndPoint);
+				Status.LocalEndPoint = local1 is null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
 
-            using var cts = new CancellationTokenSource(Timeout);
-            try
-            {
-                await Proxy.ConnectAsync(cts.Token);
-                // test I
-                var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
+				var mappedAddress1 = response1.GetMappedAddressAttribute();
+				var changedAddress1 = response1.GetChangedAddressAttribute();
 
-                var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint, cts.Token);
-                if (response1 == null)
-                {
-                    res.NatType = NatType.UdpBlocked;
-                    return res;
-                }
+				// 某些单 IP 服务器的迷惑操作
+				if (mappedAddress1 is null
+				|| changedAddress1 is null
+				|| Equals(changedAddress1.Address, remote1.Address)
+				|| changedAddress1.Port == remote1.Port)
+				{
+					Status.NatType = NatType.UnsupportedServer;
+					return;
+				}
 
-                if (local1 != null)
-                {
-                    LocalSubj.OnNext(LocalEndPoint);
-                }
+				Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
 
-                var mappedAddress1 = AttributeExtensions.GetMappedAddressAttribute(response1);
-                var changedAddress1 = AttributeExtensions.GetChangedAddressAttribute(response1);
+				var test2 = new StunMessage5389
+				{
+					StunMessageType = StunMessageType.BindingRequest,
+					MagicCookie = 0,
+					Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
+				};
 
-                // 某些单 IP 服务器的迷惑操作
-                if (mappedAddress1 == null
-                || changedAddress1 == null
-                || Equals(changedAddress1.Address, remote1.Address)
-                || changedAddress1.Port == remote1.Port)
-                {
-                    res.NatType = NatType.UnsupportedServer;
-                    return res;
-                }
+				// test II
+				var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1, cts.Token);
+				var mappedAddress2 = response2.GetMappedAddressAttribute();
 
-                PubSubj.OnNext(mappedAddress1); // 显示 test I 得到的映射地址
+				if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
+				{
+					// No NAT
+					if (response2 is null)
+					{
+						Status.NatType = NatType.SymmetricUdpFirewall;
+						Status.PublicEndPoint = mappedAddress1;
+					}
+					else
+					{
+						Status.NatType = NatType.OpenInternet;
+						Status.PublicEndPoint = mappedAddress2;
+					}
+					return;
+				}
 
-                var test2 = new StunMessage5389
-                {
-                    StunMessageType = StunMessageType.BindingRequest,
-                    MagicCookie = 0,
-                    Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
-                };
+				// NAT
+				if (response2 is not null && remote2 is not null)
+				{
+					// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
+					var type = Equals(remote1.Address, remote2.Address) || remote1.Port == remote2.Port ? NatType.UnsupportedServer : NatType.FullCone;
+					Status.NatType = type;
+					Status.PublicEndPoint = mappedAddress2;
+					return;
+				}
 
-                // test II
-                var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1, cts.Token);
-                var mappedAddress2 = AttributeExtensions.GetMappedAddressAttribute(response2);
+				// Test I(#2)
+				var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
+				var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1, cts.Token);
+				var mappedAddress12 = response12.GetMappedAddressAttribute();
 
-                if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
-                {
-                    // No NAT
-                    if (response2 == null)
-                    {
-                        res.NatType = NatType.SymmetricUdpFirewall;
-                        res.PublicEndPoint = mappedAddress1;
-                        return res;
-                    }
-                    res.NatType = NatType.OpenInternet;
-                    res.PublicEndPoint = mappedAddress2;
-                    return res;
-                }
+				if (mappedAddress12 is null)
+				{
+					Status.NatType = NatType.Unknown;
+					return;
+				}
 
-                // NAT
-                if (response2 != null)
-                {
-                    // 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
-                    var type = Equals(remote1.Address, remote2.Address) || remote1.Port == remote2.Port ? NatType.UnsupportedServer : NatType.FullCone;
-                    res.NatType = type;
-                    res.PublicEndPoint = mappedAddress2;
-                    return res;
-                }
+				if (!Equals(mappedAddress12, mappedAddress1))
+				{
+					Status.NatType = NatType.Symmetric;
+					Status.PublicEndPoint = mappedAddress12;
+					return;
+				}
 
-                // Test I(#2)
-                var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
-                var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1, cts.Token);
-                var mappedAddress12 = AttributeExtensions.GetMappedAddressAttribute(response12);
+				// Test III
+				var test3 = new StunMessage5389
+				{
+					StunMessageType = StunMessageType.BindingRequest,
+					MagicCookie = 0,
+					Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
+				};
+				var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1, cts.Token);
+				var mappedAddress3 = response3.GetMappedAddressAttribute();
+				if (mappedAddress3 is not null)
+				{
+					Status.NatType = NatType.RestrictedCone;
+					Status.PublicEndPoint = mappedAddress3;
+					return;
+				}
 
-                if (mappedAddress12 == null)
-                {
-                    res.NatType = NatType.Unknown;
-                    return res;
-                }
+				Status.NatType = NatType.PortRestrictedCone;
+				Status.PublicEndPoint = mappedAddress12;
+			}
+			finally
+			{
+				await Proxy.DisconnectAsync();
+			}
+		}
 
-                if (!Equals(mappedAddress12, mappedAddress1))
-                {
-                    res.NatType = NatType.Symmetric;
-                    res.PublicEndPoint = mappedAddress12;
-                    return res;
-                }
+		protected async Task<(StunMessage5389?, IPEndPoint?, IPAddress?)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
+		{
+			try
+			{
+				var b1 = sendMessage.Bytes.ToArray();
+				//var t = DateTime.Now;
 
-                // Test III
-                var test3 = new StunMessage5389
-                {
-                    StunMessageType = StunMessageType.BindingRequest,
-                    MagicCookie = 0,
-                    Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
-                };
-                var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1, cts.Token);
-                var mappedAddress3 = AttributeExtensions.GetMappedAddressAttribute(response3);
-                if (mappedAddress3 != null)
-                {
-                    res.NatType = NatType.RestrictedCone;
-                    res.PublicEndPoint = mappedAddress3;
-                    return res;
-                }
-                res.NatType = NatType.PortRestrictedCone;
-                res.PublicEndPoint = mappedAddress12;
-                return res;
-            }
-            finally
-            {
-                await Proxy.DisconnectAsync();
-                _natTypeSubj.OnNext(res.NatType);
-                PubSubj.OnNext(res.PublicEndPoint);
-            }
-        }
+				// Simple retransmissions
+				//https://tools.ietf.org/html/rfc3489#section-9.3
+				//while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
+				{
+					try
+					{
+						var (receive1, ipe, local) = await Proxy.ReceiveAsync(b1, remote, receive, token);
 
-        protected async Task<(StunMessage5389, IPEndPoint, IPAddress)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
-        {
-            try
-            {
-                var b1 = sendMessage.Bytes.ToArray();
-                //var t = DateTime.Now;
+						var message = new StunMessage5389();
+						if (message.TryParse(receive1) &&
+							message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
+						{
+							return (message, ipe, local);
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine(ex);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex);
+			}
+			return (null, null, null);
+		}
 
-                // Simple retransmissions
-                //https://tools.ietf.org/html/rfc3489#section-9.3
-                //while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
-                {
-                    try
-                    {
-                        var (receive1, ipe, local) = await Proxy.ReceiveAsync(b1, remote, receive, token);
-
-                        var message = new StunMessage5389();
-                        if (message.TryParse(receive1) &&
-                            message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
-                        {
-                            return (message, ipe, local);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-            return (null, null, null);
-        }
-
-        public virtual void Dispose()
-        {
-            Proxy?.Dispose();
-            _natTypeSubj.OnCompleted();
-            PubSubj.OnCompleted();
-            LocalSubj.OnCompleted();
-        }
-    }
+		public virtual void Dispose()
+		{
+			Proxy.Dispose();
+		}
+	}
 }

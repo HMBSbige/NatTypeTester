@@ -1,17 +1,16 @@
-﻿using ReactiveUI;
-using Splat;
-using System.Reflection;
+using NatTypeTester.Services;
 using System.Windows;
 
 namespace NatTypeTester
 {
-    public partial class App
-    {
-        private void Application_Startup(object sender, StartupEventArgs e)
-        {
-            Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
-            MainWindow = new MainWindow();
-            MainWindow.Show();
-        }
-    }
+	public partial class App
+	{
+		private void Application_Startup(object sender, StartupEventArgs e)
+		{
+			DI.Register();
+
+			MainWindow = DI.GetService<MainWindow>();
+			MainWindow.Show();
+		}
+	}
 }

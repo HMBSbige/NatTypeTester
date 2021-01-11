@@ -1,9 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net472;net48;netcoreapp3.1</TargetFrameworks>
-    <RootNamespace>NatTypeTester_Console</RootNamespace>
+    <TargetFrameworks>net48;net5.0</TargetFrameworks>
+    <RootNamespace>NatTypeTester</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>NatTypeTester.Console</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

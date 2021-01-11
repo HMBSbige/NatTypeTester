@@ -1,12 +1,12 @@
-﻿namespace STUN.Enums
+namespace STUN.Enums
 {
-    // Only UDP is supported
+	// Only UDP is supported
 
-    public enum TransportType
-    {
-        Udp,
-        Tcp,
-        Tls,
-        Dtls,
-    }
+	public enum TransportType
+	{
+		Udp,
+		Tcp,
+		Tls,
+		Dtls,
+	}
 }

@@ -6,7 +6,8 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <LangVersion>latest</LangVersion>
-    <Version>3.3</Version>
+    <Nullable>enable</Nullable>
+    <Version>3.4</Version>
     <Authors>HMBSbige</Authors>
   </PropertyGroup>
 
@@ -22,14 +23,15 @@
     <PackageReference Include="Costura.Fody" Version="4.1.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Fody" Version="6.3.0" />
-    <PackageReference Include="ModernWpfUI" Version="0.9.2" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="11.5.35" />
-    <PackageReference Include="ReactiveUI.WPF" Version="11.5.35" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="ModernWpfUI" Version="0.9.3" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="13.0.38" />
+    <PackageReference Include="ReactiveUI.WPF" Version="13.0.38" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="9.8.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\STUN\STUN.csproj" />
+    <ProjectReference Include="..\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
   </ItemGroup>
 
 </Project>
