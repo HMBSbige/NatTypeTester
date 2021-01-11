@@ -1,4 +1,5 @@
 using ModernWpf;
+using NatTypeTester.Dialogs;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
 using STUN.Enums;
@@ -6,6 +7,7 @@ using STUN.Utils;
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -96,6 +98,8 @@ namespace NatTypeTester
 						.Subscribe(async _ => await ViewModel.TestClassicNatType.Execute(default))
 						.DisposeWith(d);
 
+				ViewModel.TestClassicNatType.ThrownExceptions.Subscribe(async ex => await HandleExceptionAsync(ex)).DisposeWith(d);
+
 				#endregion
 
 				#region RFC5780
@@ -138,8 +142,21 @@ namespace NatTypeTester
 						.Subscribe(async _ => await ViewModel.DiscoveryNatType.Execute(default))
 						.DisposeWith(d);
 
+				ViewModel.DiscoveryNatType.ThrownExceptions.Subscribe(async ex => await HandleExceptionAsync(ex)).DisposeWith(d);
+
 				#endregion
 			});
+		}
+
+		private static async Task HandleExceptionAsync(Exception ex)
+		{
+			using var dialog = new DisposableContentDialog
+			{
+				Title = nameof(NatTypeTester),
+				Content = ex.Message,
+				PrimaryButtonText = @"OK"
+			};
+			await dialog.ShowAsync();
 		}
 	}
 }

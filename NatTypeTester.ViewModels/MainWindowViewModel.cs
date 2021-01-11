@@ -124,69 +124,51 @@ namespace NatTypeTester.ViewModels
 
 		private async Task TestClassicNatTypeImpl(CancellationToken token)
 		{
-			try
+			var server = new StunServer();
+			if (!server.Parse(StunServer))
 			{
-				var server = new StunServer();
-				if (server.Parse(StunServer))
-				{
-					using var proxy = ProxyFactory.CreateProxy(
-						ProxyType,
-						Result3489.LocalEndPoint,
-						NetUtils.ParseEndpoint(ProxyServer),
-						ProxyUser, ProxyPassword
-						);
-
-					using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
-
-					Result3489 = client.Status;
-					await client.Query3489Async();
-
-					Result3489.LocalEndPoint = client.LocalEndPoint;
-				}
-				else
-				{
-					throw new Exception(@"Wrong STUN Server!");
-				}
+				throw new Exception(@"Wrong STUN Server!");
 			}
-			catch (Exception ex)
-			{
-				//TODO MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
-			}
+
+			using var proxy = ProxyFactory.CreateProxy(
+					ProxyType,
+					Result3489.LocalEndPoint,
+					NetUtils.ParseEndpoint(ProxyServer),
+					ProxyUser, ProxyPassword
+			);
+
+			using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
+
+			Result3489 = client.Status;
+			await client.Query3489Async();
+
+			Result3489.LocalEndPoint = client.LocalEndPoint;
 		}
 
 		private async Task DiscoveryNatTypeImpl(CancellationToken token)
 		{
-			try
+			var server = new StunServer();
+			if (!server.Parse(StunServer))
 			{
-				var server = new StunServer();
-				if (server.Parse(StunServer))
-				{
-					using var proxy = ProxyFactory.CreateProxy(
-						ProxyType,
-						Result5389.LocalEndPoint,
-						NetUtils.ParseEndpoint(ProxyServer),
-						ProxyUser, ProxyPassword
-						);
-
-					using var client = new StunClient5389UDP(server.Hostname, server.Port, Result5389.LocalEndPoint, proxy);
-
-					Result5389 = client.Status;
-					await client.QueryAsync();
-
-					var cache = new StunResult5389();
-					cache.Clone(client.Status);
-					cache.LocalEndPoint = client.LocalEndPoint;
-					Result5389 = cache;
-				}
-				else
-				{
-					throw new Exception(@"Wrong STUN Server!");
-				}
+				throw new Exception(@"Wrong STUN Server!");
 			}
-			catch (Exception ex)
-			{
-				//TODO MessageBox.Show(ex.Message, nameof(NatTypeTester), MessageBoxButton.OK, MessageBoxImage.Error);
-			}
+
+			using var proxy = ProxyFactory.CreateProxy(
+					ProxyType,
+					Result5389.LocalEndPoint,
+					NetUtils.ParseEndpoint(ProxyServer),
+					ProxyUser, ProxyPassword
+			);
+
+			using var client = new StunClient5389UDP(server.Hostname, server.Port, Result5389.LocalEndPoint, proxy);
+
+			Result5389 = client.Status;
+			await client.QueryAsync();
+
+			var cache = new StunResult5389();
+			cache.Clone(client.Status);
+			cache.LocalEndPoint = client.LocalEndPoint;
+			Result5389 = cache;
 		}
 	}
 }

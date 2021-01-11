@@ -25,7 +25,6 @@
     </PackageReference>
     <PackageReference Include="ModernWpfUI" Version="0.9.3" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="13.0.38" />
-    <PackageReference Include="ReactiveUI.Fody" Version="13.0.38" />
     <PackageReference Include="ReactiveUI.WPF" Version="13.0.38" />
   </ItemGroup>
 
