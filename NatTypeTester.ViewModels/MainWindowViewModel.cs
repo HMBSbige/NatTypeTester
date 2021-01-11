@@ -1,48 +1,21 @@
 using DynamicData;
 using DynamicData.Binding;
+using NatTypeTester.Models;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using STUN.Client;
-using STUN.Enums;
-using STUN.Proxy;
-using STUN.StunResult;
 using STUN.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NatTypeTester.ViewModels
 {
-	public class MainWindowViewModel : ReactiveObject
+	public class MainWindowViewModel : ReactiveObject, IScreen
 	{
-		#region RFC3489
+		public RoutingState Router { get; } = new();
 
-		[Reactive]
-		public ClassicStunResult Result3489 { get; set; }
-
-		public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
-
-		#endregion
-
-		#region RFC5780
-
-		[Reactive]
-		public StunResult5389 Result5389 { get; set; }
-
-		public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
-
-		#endregion
-
-		#region Servers
-
-		[Reactive]
-		public string StunServer { get; set; } = @"stun.syncthing.net";
+		public Config Config { get; }
 
 		private readonly IEnumerable<string> _defaultServers = new HashSet<string>
 		{
@@ -56,43 +29,16 @@ namespace NatTypeTester.ViewModels
 		private SourceList<string> List { get; } = new();
 		public readonly IObservableCollection<string> StunServers = new ObservableCollectionExtended<string>();
 
-		#endregion
-
-		#region Proxy
-
-		[Reactive]
-		public ProxyType ProxyType { get; set; } = ProxyType.Socks5;
-
-		[Reactive]
-		public string ProxyServer { get; set; } = @"127.0.0.1:1080";
-
-		[Reactive]
-		public string? ProxyUser { get; set; }
-
-		[Reactive]
-		public string? ProxyPassword { get; set; }
-
-		#endregion
-
-		public MainWindowViewModel()
+		public MainWindowViewModel(Config config)
 		{
-			Result3489 = new ClassicStunResult
-			{
-				LocalEndPoint = new IPEndPoint(IPAddress.Any, 0)
-			};
-			Result5389 = new StunResult5389
-			{
-				LocalEndPoint = new IPEndPoint(IPAddress.Any, 0)
-			};
+			Config = config;
 
 			LoadStunServer();
 			List.Connect()
 				.DistinctValues(x => x)
-				.ObserveOnDispatcher()
+				.ObserveOn(RxApp.MainThreadScheduler)
 				.Bind(StunServers)
 				.Subscribe();
-			TestClassicNatType = ReactiveCommand.CreateFromTask(TestClassicNatTypeImpl);
-			DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeImpl);
 		}
 
 		private async void LoadStunServer()
@@ -101,7 +47,7 @@ namespace NatTypeTester.ViewModels
 			{
 				List.Add(server);
 			}
-			StunServer = _defaultServers.First();
+			Config.StunServer = _defaultServers.First();
 
 			const string path = @"stun.txt";
 
@@ -120,55 +66,6 @@ namespace NatTypeTester.ViewModels
 					List.Add(stun.ToString());
 				}
 			}
-		}
-
-		private async Task TestClassicNatTypeImpl(CancellationToken token)
-		{
-			var server = new StunServer();
-			if (!server.Parse(StunServer))
-			{
-				throw new Exception(@"Wrong STUN Server!");
-			}
-
-			using var proxy = ProxyFactory.CreateProxy(
-					ProxyType,
-					Result3489.LocalEndPoint,
-					NetUtils.ParseEndpoint(ProxyServer),
-					ProxyUser, ProxyPassword
-			);
-
-			using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
-
-			Result3489 = client.Status;
-			await client.Query3489Async();
-
-			Result3489.LocalEndPoint = client.LocalEndPoint;
-		}
-
-		private async Task DiscoveryNatTypeImpl(CancellationToken token)
-		{
-			var server = new StunServer();
-			if (!server.Parse(StunServer))
-			{
-				throw new Exception(@"Wrong STUN Server!");
-			}
-
-			using var proxy = ProxyFactory.CreateProxy(
-					ProxyType,
-					Result5389.LocalEndPoint,
-					NetUtils.ParseEndpoint(ProxyServer),
-					ProxyUser, ProxyPassword
-			);
-
-			using var client = new StunClient5389UDP(server.Hostname, server.Port, Result5389.LocalEndPoint, proxy);
-
-			Result5389 = client.Status;
-			await client.QueryAsync();
-
-			var cache = new StunResult5389();
-			cache.Clone(client.Status);
-			cache.LocalEndPoint = client.LocalEndPoint;
-			Result5389 = cache;
 		}
 	}
 }

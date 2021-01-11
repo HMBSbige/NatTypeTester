@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NatTypeTester.Models\NatTypeTester.Models.csproj" />
+    <ProjectReference Include="..\STUN\STUN.csproj" />
   </ItemGroup>
 
 </Project>

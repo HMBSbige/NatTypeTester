@@ -1,6 +1,4 @@
-using ReactiveUI;
-using Splat;
-using System.Reflection;
+using NatTypeTester.Services;
 using System.Windows;
 
 namespace NatTypeTester
@@ -9,8 +7,9 @@ namespace NatTypeTester
 	{
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
-			Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
-			MainWindow = new MainWindow();
+			DI.Register();
+
+			MainWindow = DI.GetService<MainWindow>();
 			MainWindow.Show();
 		}
 	}

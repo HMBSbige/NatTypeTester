@@ -7,9 +7,9 @@
     xmlns:viewModels="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
 	xmlns:ui="http://schemas.modernwpf.com/2019"
 	Title="NatTypeTester"
-	Width="500"
 	WindowStartupLocation="CenterScreen"
-	Height="480"
+	Height="480" Width="500"
+	MinHeight="480" MinWidth="500"
 	ui:WindowHelper.UseModernWindowStyle="True">
 
 	<Grid>
@@ -27,112 +27,24 @@
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>
-
-			<TabControl  TabStripPlacement="Left">
-				<TabItem Header="RFC 5780" x:Name="RFC5780Tab">
-					<Grid>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto"/>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-							<RowDefinition />
-						</Grid.RowDefinitions>
-						<TextBox
-							x:Name="BindingTestTextBox" Grid.Row="0"
-							Margin="10,5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Binding test" />
-						<TextBox
-							x:Name="MappingBehaviorTextBox" Grid.Row="1"
-							Margin="10,5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Mapping behavior" />
-						<TextBox
-							x:Name="FilteringBehaviorTextBox" Grid.Row="2"
-							Margin="10,5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Filtering behavior" />
-						<TextBox
-							x:Name="LocalAddressTextBox" Grid.Row="3"
-							Margin="10,5" IsReadOnly="False"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Local end" />
-						<TextBox
-							x:Name="MappingAddressTextBox" Grid.Row="4"
-							Margin="10,5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Public end" />
-
-						<Button x:Name="DiscoveryButton" Grid.Row="5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Test" Margin="0,10,10,10" />
-					</Grid>
-				</TabItem>
-				<TabItem Header="RFC 3489" x:Name="RFC3489Tab">
-					<Grid>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-							<RowDefinition />
-						</Grid.RowDefinitions>
-
-						<TextBox x:Name="NatTypeTextBox" Grid.Row="0"
-							Margin="10,5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="NAT type" />
-						<TextBox x:Name="LocalEndTextBox" Grid.Row="1"
-							Margin="10,5"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Local end" />
-						<TextBox x:Name="PublicEndTextBox" Grid.Row="2"
-							Margin="10,5" IsReadOnly="True"
-							VerticalContentAlignment="Center" VerticalAlignment="Center"
-							ui:ControlHelper.Header="Public end" />
-
-						<Button x:Name="TestButton" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Test" Margin="0,0,10,10"/>
-					</Grid>
-				</TabItem>
-				<TabItem Header="Proxy">
-					<Grid>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="Auto" />
-						</Grid.RowDefinitions>
-						<Grid Margin="10,0" Grid.Column="0">
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto"/>
-								<RowDefinition Height="Auto"/>
-							</Grid.RowDefinitions>
-							<RadioButton Grid.Row="0" Content="Don't use Proxy" GroupName="ProxyTypeGroup" x:Name="ProxyTypeNoneRadio" IsChecked="True"/>
-							<RadioButton Grid.Row="1" Content="SOCKS5" GroupName="ProxyTypeGroup" x:Name="ProxyTypeSocks5Radio" IsChecked="False" />
-						</Grid>
-						<Grid x:Name="ProxyConfigGrid" Margin="10,5" Grid.Row="1" IsEnabled="False">
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto"/>
-							</Grid.RowDefinitions>
-							<TextBox
-								x:Name="ProxyServerTextBox" Grid.Row="0"
-								Margin="0,5" IsReadOnly="False"
-								VerticalContentAlignment="Center" VerticalAlignment="Center"
-								ui:ControlHelper.Header="Server" />
-							<TextBox
-								x:Name="ProxyUsernameTextBox" Grid.Row="1"
-								Margin="0,5" IsReadOnly="False"
-								VerticalContentAlignment="Center" VerticalAlignment="Center"
-								ui:ControlHelper.Header="Username" />
-							<TextBox 
-								x:Name="ProxyPasswordTextBox" Grid.Row="2"
-								Margin="0,5"
-								VerticalContentAlignment="Center" VerticalAlignment="Center"
-								ui:ControlHelper.Header="Password" />
-						</Grid>
-					</Grid>
-				</TabItem>
-			</TabControl>
-
-		</DockPanel>
+            <ui:NavigationView
+                x:Name="NavigationView"
+                IsBackButtonVisible="Collapsed"
+                PaneDisplayMode="LeftCompact"
+                IsTabStop="False"
+                IsPaneOpen="False">
+                <ui:NavigationView.MenuItems>
+                    <ui:NavigationViewItem Icon="60835" Content="RFC 5780" Tag="1" />
+                    <ui:NavigationViewItem Icon="59753" Content="RFC 3489" Tag="2" />
+                </ui:NavigationView.MenuItems>
+                <reactiveUi:RoutedViewHost
+                    x:Name="RoutedViewHost"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Transition="Fade"
+                    Direction="Up"
+                    Duration="0:0:0.3" />
+            </ui:NavigationView>
+        </DockPanel>
 	</Grid>
 </reactiveUi:ReactiveWindow>

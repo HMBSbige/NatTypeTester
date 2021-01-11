@@ -1,24 +1,24 @@
 using ModernWpf;
-using NatTypeTester.Dialogs;
+using ModernWpf.Controls;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
-using STUN.Enums;
-using STUN.Utils;
 using System;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 
 namespace NatTypeTester
 {
 	public partial class MainWindow
 	{
-		public MainWindow()
+		public MainWindow(MainWindowViewModel viewModel,
+			RFC5780ViewModel rfc5780ViewModel,
+			RFC3489ViewModel rfc3489ViewModel,
+			SettingViewModel settingViewModel
+			)
 		{
 			InitializeComponent();
-			ViewModel = new MainWindowViewModel();
+			ViewModel = viewModel;
 			ThemeManager.Current.ApplicationTheme = null;
 
 			this.WhenActivated(d =>
@@ -26,7 +26,7 @@ namespace NatTypeTester
 				#region Server
 
 				this.Bind(ViewModel,
-						vm => vm.StunServer,
+						vm => vm.Config.StunServer,
 						v => v.ServersComboBox.Text
 				).DisposeWith(d);
 
@@ -37,126 +37,37 @@ namespace NatTypeTester
 
 				#endregion
 
-				#region Proxy
-
-				this.Bind(ViewModel,
-						vm => vm.ProxyServer,
-						v => v.ProxyServerTextBox.Text
-				).DisposeWith(d);
-
-				this.Bind(ViewModel,
-						vm => vm.ProxyUser,
-						v => v.ProxyUsernameTextBox.Text
-				).DisposeWith(d);
-
-				this.Bind(ViewModel,
-						vm => vm.ProxyPassword,
-						v => v.ProxyPasswordTextBox.Text
-				).DisposeWith(d);
-
-				this.WhenAnyValue(x => x.ProxyTypeNoneRadio.IsChecked, x => x.ProxyTypeSocks5Radio.IsChecked)
-					.Subscribe(values =>
+				this.Bind(ViewModel, vm => vm.Router, v => v.RoutedViewHost.Router).DisposeWith(d);
+				Observable.FromEventPattern<NavigationViewSelectionChangedEventArgs>(NavigationView, nameof(NavigationView.SelectionChanged))
+				.Subscribe(args =>
+				{
+					if (args.EventArgs.IsSettingsSelected)
 					{
-						ProxyConfigGrid.IsEnabled = !values.Item1.GetValueOrDefault(false);
-						if (values.Item1.GetValueOrDefault(false))
+						ViewModel.Router.Navigate.Execute(settingViewModel);
+						return;
+					}
+
+					if (args.EventArgs.SelectedItem is not NavigationViewItem { Tag: string tag })
+					{
+						return;
+					}
+
+					switch (tag)
+					{
+						case @"1":
 						{
-							ViewModel.ProxyType = ProxyType.Plain;
+							ViewModel.Router.Navigate.Execute(rfc5780ViewModel);
+							break;
 						}
-						else if (values.Item2.GetValueOrDefault(false))
+						case @"2":
 						{
-							ViewModel.ProxyType = ProxyType.Socks5;
+							ViewModel.Router.Navigate.Execute(rfc3489ViewModel);
+							break;
 						}
-					}).DisposeWith(d);
-
-				#endregion
-
-				#region RFC3489
-
-				this.OneWayBind(ViewModel,
-						vm => vm.Result3489.NatType,
-						v => v.NatTypeTextBox.Text,
-						type => type.ToString()
-				).DisposeWith(d);
-
-				this.Bind(ViewModel,
-						vm => vm.Result3489.LocalEndPoint,
-						v => v.LocalEndTextBox.Text,
-						ipe => ipe is null ? string.Empty : ipe.ToString(),
-						NetUtils.ParseEndpoint
-				).DisposeWith(d);
-
-				this.OneWayBind(ViewModel,
-						vm => vm.Result3489.PublicEndPoint,
-						v => v.PublicEndTextBox.Text,
-						ipe => ipe is null ? string.Empty : ipe.ToString()
-				).DisposeWith(d);
-
-				this.BindCommand(ViewModel, viewModel => viewModel.TestClassicNatType, view => view.TestButton).DisposeWith(d);
-
-				RFC3489Tab.Events().KeyDown
-						.Where(x => x.Key == Key.Enter && TestButton.IsEnabled)
-						.Subscribe(async _ => await ViewModel.TestClassicNatType.Execute(default))
-						.DisposeWith(d);
-
-				ViewModel.TestClassicNatType.ThrownExceptions.Subscribe(async ex => await HandleExceptionAsync(ex)).DisposeWith(d);
-
-				#endregion
-
-				#region RFC5780
-
-				this.OneWayBind(ViewModel,
-						vm => vm.Result5389.BindingTestResult,
-						v => v.BindingTestTextBox.Text,
-						res => res.ToString()
-				).DisposeWith(d);
-
-				this.OneWayBind(ViewModel,
-						vm => vm.Result5389.MappingBehavior,
-						v => v.MappingBehaviorTextBox.Text,
-						res => res.ToString()
-				).DisposeWith(d);
-
-				this.OneWayBind(ViewModel,
-						vm => vm.Result5389.FilteringBehavior,
-						v => v.FilteringBehaviorTextBox.Text,
-						res => res.ToString()
-				).DisposeWith(d);
-
-				this.Bind(ViewModel,
-						vm => vm.Result5389.LocalEndPoint,
-						v => v.LocalAddressTextBox.Text,
-						ipe => ipe is null ? string.Empty : ipe.ToString(),
-						NetUtils.ParseEndpoint
-				).DisposeWith(d);
-
-				this.OneWayBind(ViewModel,
-						vm => vm.Result5389.PublicEndPoint,
-						v => v.MappingAddressTextBox.Text,
-						ipe => ipe is null ? string.Empty : ipe.ToString()
-				).DisposeWith(d);
-
-				this.BindCommand(ViewModel, viewModel => viewModel.DiscoveryNatType, view => view.DiscoveryButton).DisposeWith(d);
-
-				RFC5780Tab.Events().KeyDown
-						.Where(x => x.Key == Key.Enter && DiscoveryButton.IsEnabled)
-						.Subscribe(async _ => await ViewModel.DiscoveryNatType.Execute(default))
-						.DisposeWith(d);
-
-				ViewModel.DiscoveryNatType.ThrownExceptions.Subscribe(async ex => await HandleExceptionAsync(ex)).DisposeWith(d);
-
-				#endregion
+					}
+				}).DisposeWith(d);
+				NavigationView.SelectedItem = NavigationView.MenuItems.OfType<NavigationViewItem>().First();
 			});
-		}
-
-		private static async Task HandleExceptionAsync(Exception ex)
-		{
-			using var dialog = new DisposableContentDialog
-			{
-				Title = nameof(NatTypeTester),
-				Content = ex.Message,
-				PrimaryButtonText = @"OK"
-			};
-			await dialog.ShowAsync();
 		}
 	}
 }
