@@ -4,10 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <DefineConstants>ReactiveUI</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ReactiveUI.Fody" Version="13.2.2" />
+    <PackageReference Include="ReactiveUI.Fody" Version="13.2.2" Condition="$(DefineConstants.Contains('ReactiveUI'))" />
   </ItemGroup>
 
 </Project>
