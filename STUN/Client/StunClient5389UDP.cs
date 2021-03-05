@@ -1,4 +1,6 @@
+#if ReactiveUI
 using ReactiveUI.Fody.Helpers;
+#endif
 using STUN.DnsClients;
 using STUN.Enums;
 using STUN.Message;
@@ -18,7 +20,9 @@ namespace STUN.Client
 	/// </summary>
 	public class StunClient5389UDP : StunClient3489
 	{
+#if ReactiveUI
 		[Reactive]
+#endif
 		public new StunResult5389 Status { get; } = new();
 
 		public StunClient5389UDP(string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null, IDnsQuery? dnsQuery = null)

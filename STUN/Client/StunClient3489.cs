@@ -1,4 +1,6 @@
+#if ReactiveUI
 using ReactiveUI.Fody.Helpers;
+#endif
 using STUN.DnsClients;
 using STUN.Enums;
 using STUN.Message;
@@ -35,7 +37,9 @@ namespace STUN.Client
 
 		protected readonly IUdpProxy Proxy;
 
+#if ReactiveUI
 		[Reactive]
+#endif
 		public ClassicStunResult Status { get; } = new();
 
 		public StunClient3489(string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null, IDnsQuery? dnsQuery = null)
