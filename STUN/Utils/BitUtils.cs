@@ -1,3 +1,4 @@
+using DynamicData.Kernel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,12 +27,12 @@ namespace STUN.Utils
 
 		public static ushort FromBe(IEnumerable<byte> b)
 		{
-			return BitConverter.ToUInt16(BitConverter.IsLittleEndian ? b.Reverse().ToArray() : b.ToArray(), 0);
+			return BitConverter.ToUInt16(BitConverter.IsLittleEndian ? b.Reverse().AsArray() : b.AsArray(), 0);
 		}
 
 		public static int FromBeToInt(IEnumerable<byte> b)
 		{
-			return BitConverter.ToInt32(BitConverter.IsLittleEndian ? b.Reverse().ToArray() : b.ToArray(), 0);
+			return BitConverter.ToInt32(BitConverter.IsLittleEndian ? b.Reverse().AsArray() : b.AsArray(), 0);
 		}
 
 		public static IEnumerable<byte> GetRandomBytes(int n)
