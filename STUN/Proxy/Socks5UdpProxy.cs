@@ -239,7 +239,7 @@ namespace STUN.Proxy
 		{
 			var ipByte = ep.Address.GetAddressBytes();
 			var ret = new byte[ipByte.Length + 3];
-			ret[0] = ipByte.Length == 4 ? 1 : 4;
+			ret[0] = ipByte.Length == 4 ? (byte)1 : (byte)4;
 			Array.Copy(ipByte, 0, ret, 1, ipByte.Length);
 			ret[ipByte.Length + 1] = (byte)(ep.Port / 256);
 			ret[ipByte.Length + 2] = (byte)(ep.Port % 256);
