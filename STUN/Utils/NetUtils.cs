@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -57,27 +56,17 @@ namespace STUN.Utils
 			return foo?.State ?? TcpState.Unknown;
 		}
 
-		public static async Task<(IPAddress, int, IPEndPoint)> ReceiveMessageFromAsync(this Socket client, EndPoint receive, byte[] array, SocketFlags flag)
+		public static Task<(IPAddress, int, IPEndPoint)> ReceiveMessageFromAsync(this Socket client, EndPoint receive, byte[] array, SocketFlags flag)
 		{
-			var tcs = new TaskCompletionSource<(IPAddress, int, IPEndPoint)>(TaskCreationOptions.RunContinuationsAsynchronously);
-			_ = Task.Run(() =>
+			return Task.Run(() =>
 			{
-				try
-				{
-					var length = client.ReceiveMessageFrom(array, 0, array.Length, ref flag, ref receive, out var ipPacketInformation);
+				var length = client.ReceiveMessageFrom(array, 0, array.Length, ref flag, ref receive, out var ipPacketInformation);
 
-					var local = ipPacketInformation.Address;
+				var local = ipPacketInformation.Address;
 
-					Debug.WriteLine($@"{(IPEndPoint)receive} => {local} {length} 字节");
-					tcs.SetResult((local, length, (IPEndPoint)receive));
-				}
-				catch (Exception ex)
-				{
-					tcs.SetException(ex);
-				}
+				Debug.WriteLine($@"{(IPEndPoint)receive} => {local} {length} 字节");
+				return (local, length, (IPEndPoint)receive);
 			});
-
-			return await tcs.Task;
 		}
 	}
 }
