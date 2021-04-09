@@ -9,7 +9,7 @@ namespace NatTypeTester
 		{
 			DI.Register();
 
-			MainWindow = DI.GetService<MainWindow>();
+			MainWindow = DI.GetRequiredService<MainWindow>();
 			MainWindow.Show();
 		}
 	}
