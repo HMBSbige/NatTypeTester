@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ReactiveUI.Fody" Version="13.2.10" Condition="$(DefineConstants.Contains('ReactiveUI'))" />
+    <PackageReference Include="ReactiveUI.Fody" Version="13.2.18" Condition="$(DefineConstants.Contains('ReactiveUI'))" />
   </ItemGroup>
 
 </Project>
