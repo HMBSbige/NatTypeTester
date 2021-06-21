@@ -25,8 +25,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="13.3.2" />
-    <PackageReference Include="ReactiveUI.WPF" Version="13.3.2" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="14.1.1" />
+    <PackageReference Include="ReactiveUI.WPF" Version="14.1.1" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="11.1.1" />
   </ItemGroup>
 
