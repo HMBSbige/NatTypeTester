@@ -1,14 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
+  <Import Project="..\common.props" />
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <Version>3.4</Version>
-    <Authors>HMBSbige</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -23,11 +21,12 @@
     <PackageReference Include="Costura.Fody" Version="5.3.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="14.1.1" />
     <PackageReference Include="ReactiveUI.WPF" Version="14.1.1" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="11.1.1" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="4.3.3" />
   </ItemGroup>
 
   <ItemGroup>

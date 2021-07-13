@@ -1,9 +1,10 @@
 using ReactiveUI.Fody.Helpers;
 using STUN.Enums;
+using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.Models
 {
-	public class Config
+	public class Config : ISingletonDependency
 	{
 		[Reactive]
 		public string StunServer { get; set; } = @"stun.syncthing.net";

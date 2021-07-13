@@ -6,10 +6,11 @@ using System;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester
 {
-	public partial class MainWindow
+	public partial class MainWindow : ISingletonDependency
 	{
 		public MainWindow(MainWindowViewModel viewModel,
 			RFC5780ViewModel rfc5780ViewModel,

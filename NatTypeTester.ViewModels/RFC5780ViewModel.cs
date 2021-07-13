@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using NatTypeTester.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -13,9 +14,10 @@ using System.Threading.Tasks;
 
 namespace NatTypeTester.ViewModels
 {
-	public class RFC5780ViewModel : ReactiveObject, IRoutableViewModel
+	[UsedImplicitly]
+	public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 	{
-		public string UrlPathSegment { get; } = @"RFC5780";
+		public string UrlPathSegment => @"RFC5780";
 		public IScreen HostScreen { get; }
 
 		private readonly Config _config;

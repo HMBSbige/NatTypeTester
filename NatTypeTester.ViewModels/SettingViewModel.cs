@@ -1,11 +1,13 @@
+using JetBrains.Annotations;
 using NatTypeTester.Models;
 using ReactiveUI;
 
 namespace NatTypeTester.ViewModels
 {
-	public class SettingViewModel : ReactiveObject, IRoutableViewModel
+	[UsedImplicitly]
+	public class SettingViewModel : ViewModelBase, IRoutableViewModel
 	{
-		public string UrlPathSegment { get; } = @"Settings";
+		public string UrlPathSegment => @"Settings";
 		public IScreen HostScreen { get; }
 
 		public Config Config { get; }

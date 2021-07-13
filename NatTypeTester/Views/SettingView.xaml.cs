@@ -1,11 +1,15 @@
+using JetBrains.Annotations;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
 using STUN.Enums;
 using System.Reactive.Disposables;
+using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.Views
 {
-	public partial class SettingView
+	[ExposeServices(typeof(IViewFor<SettingViewModel>))]
+	[UsedImplicitly]
+	public partial class SettingView : ITransientDependency
 	{
 		public SettingView(SettingViewModel viewModel)
 		{

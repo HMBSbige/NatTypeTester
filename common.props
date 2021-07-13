@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Version>3.4</Version>
+    <Nullable>enable</Nullable>    
+    <Authors>HMBSbige</Authors>
+  </PropertyGroup>
+</Project>

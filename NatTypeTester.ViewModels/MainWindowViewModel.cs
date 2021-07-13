@@ -8,10 +8,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.ViewModels
 {
-	public class MainWindowViewModel : ReactiveObject, IScreen
+	[ExposeServices(
+		typeof(MainWindowViewModel),
+		typeof(IScreen)
+	)]
+	public class MainWindowViewModel : ViewModelBase, IScreen
 	{
 		public RoutingState Router { get; } = new();
 

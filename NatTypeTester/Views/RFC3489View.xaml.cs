@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using NatTypeTester.Utils;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
@@ -7,10 +8,13 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.Views
 {
-	public partial class RFC3489View
+	[ExposeServices(typeof(IViewFor<RFC3489ViewModel>))]
+	[UsedImplicitly]
+	public partial class RFC3489View : ITransientDependency
 	{
 		public RFC3489View(RFC3489ViewModel viewModel)
 		{
