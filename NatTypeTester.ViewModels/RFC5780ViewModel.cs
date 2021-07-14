@@ -18,20 +18,17 @@ namespace NatTypeTester.ViewModels
 	public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 	{
 		public string UrlPathSegment => @"RFC5780";
-		public IScreen HostScreen { get; }
+		public IScreen HostScreen => LazyServiceProvider.LazyGetRequiredService<IScreen>();
 
-		private readonly Config _config;
+		private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 
 		[Reactive]
 		public StunResult5389 Result5389 { get; set; }
 
 		public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
 
-		public RFC5780ViewModel(IScreen hostScreen, Config config)
+		public RFC5780ViewModel()
 		{
-			HostScreen = hostScreen;
-			_config = config;
-
 			Result5389 = new StunResult5389 { LocalEndPoint = new IPEndPoint(IPAddress.Any, 0) };
 			DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeImpl);
 		}
@@ -39,16 +36,16 @@ namespace NatTypeTester.ViewModels
 		private async Task DiscoveryNatTypeImpl(CancellationToken token)
 		{
 			var server = new StunServer();
-			if (!server.Parse(_config.StunServer))
+			if (!server.Parse(Config.StunServer))
 			{
 				throw new Exception(@"Wrong STUN Server!");
 			}
 
 			using var proxy = ProxyFactory.CreateProxy(
-					_config.ProxyType,
+					Config.ProxyType,
 					Result5389.LocalEndPoint,
-					NetUtils.ParseEndpoint(_config.ProxyServer),
-					_config.ProxyUser, _config.ProxyPassword
+					NetUtils.ParseEndpoint(Config.ProxyServer),
+					Config.ProxyUser, Config.ProxyPassword
 			);
 
 			using var client = new StunClient5389UDP(server.Hostname, server.Port, Result5389.LocalEndPoint, proxy);

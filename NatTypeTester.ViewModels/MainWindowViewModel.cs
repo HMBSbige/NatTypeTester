@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.ViewModels
@@ -18,9 +19,9 @@ namespace NatTypeTester.ViewModels
 	)]
 	public class MainWindowViewModel : ViewModelBase, IScreen
 	{
-		public RoutingState Router { get; } = new();
+		public RoutingState Router => LazyServiceProvider.LazyGetRequiredService<RoutingState>();
 
-		public Config Config { get; }
+		public Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 
 		private readonly IEnumerable<string> _defaultServers = new HashSet<string>
 		{
@@ -34,11 +35,8 @@ namespace NatTypeTester.ViewModels
 		private SourceList<string> List { get; } = new();
 		public readonly IObservableCollection<string> StunServers = new ObservableCollectionExtended<string>();
 
-		public MainWindowViewModel(Config config)
+		public MainWindowViewModel()
 		{
-			Config = config;
-
-			LoadStunServer();
 			List.Connect()
 				.DistinctValues(x => x)
 				.ObserveOn(RxApp.MainThreadScheduler)
@@ -46,31 +44,33 @@ namespace NatTypeTester.ViewModels
 				.Subscribe();
 		}
 
-		private async void LoadStunServer()
+		public void LoadStunServer()
 		{
 			foreach (var server in _defaultServers)
 			{
 				List.Add(server);
 			}
+
 			Config.StunServer = _defaultServers.First();
 
-			const string path = @"stun.txt";
-
-			if (!File.Exists(path))
+			Task.Run(() =>
 			{
-				return;
-			}
+				const string path = @"stun.txt";
 
-			using var sw = new StreamReader(path);
-			string line;
-			var stun = new StunServer();
-			while ((line = await sw.ReadLineAsync()) != null)
-			{
-				if (!string.IsNullOrWhiteSpace(line) && stun.Parse(line))
+				if (!File.Exists(path))
 				{
-					List.Add(stun.ToString());
+					return;
 				}
-			}
+
+				var stun = new StunServer();
+				foreach (var line in File.ReadLines(path))
+				{
+					if (!string.IsNullOrWhiteSpace(line) && stun.Parse(line))
+					{
+						List.Add(stun.ToString());
+					}
+				}
+			});
 		}
 	}
 }

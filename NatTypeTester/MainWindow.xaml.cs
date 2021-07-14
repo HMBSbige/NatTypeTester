@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using ModernWpf;
 using ModernWpf.Controls;
 using NatTypeTester.ViewModels;
@@ -12,15 +13,13 @@ namespace NatTypeTester
 {
 	public partial class MainWindow : ISingletonDependency
 	{
-		public MainWindow(MainWindowViewModel viewModel,
-			RFC5780ViewModel rfc5780ViewModel,
-			RFC3489ViewModel rfc3489ViewModel,
-			SettingViewModel settingViewModel
-			)
+		public IServiceProvider ServiceProvider { get; set; } = null!;
+
+		public MainWindow(MainWindowViewModel viewModel)
 		{
 			InitializeComponent();
 			ViewModel = viewModel;
-			ThemeManager.Current.ApplicationTheme = null;
+			ThemeManager.Current.ApplicationTheme = default;
 
 			this.WhenActivated(d =>
 			{
@@ -44,7 +43,7 @@ namespace NatTypeTester
 				{
 					if (args.EventArgs.IsSettingsSelected)
 					{
-						ViewModel.Router.Navigate.Execute(settingViewModel);
+						ViewModel.Router.Navigate.Execute(ServiceProvider.GetRequiredService<SettingViewModel>());
 						return;
 					}
 
@@ -57,17 +56,19 @@ namespace NatTypeTester
 					{
 						case @"1":
 						{
-							ViewModel.Router.Navigate.Execute(rfc5780ViewModel);
+							ViewModel.Router.Navigate.Execute(ServiceProvider.GetRequiredService<RFC5780ViewModel>());
 							break;
 						}
 						case @"2":
 						{
-							ViewModel.Router.Navigate.Execute(rfc3489ViewModel);
+							ViewModel.Router.Navigate.Execute(ServiceProvider.GetRequiredService<RFC3489ViewModel>());
 							break;
 						}
 					}
 				}).DisposeWith(d);
 				NavigationView.SelectedItem = NavigationView.MenuItems.OfType<NavigationViewItem>().First();
+
+				ViewModel.LoadStunServer();
 			});
 		}
 	}

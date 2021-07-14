@@ -8,14 +8,8 @@ namespace NatTypeTester.ViewModels
 	public class SettingViewModel : ViewModelBase, IRoutableViewModel
 	{
 		public string UrlPathSegment => @"Settings";
-		public IScreen HostScreen { get; }
+		public IScreen HostScreen => LazyServiceProvider.LazyGetRequiredService<IScreen>();
 
-		public Config Config { get; }
-
-		public SettingViewModel(IScreen hostScreen, Config config)
-		{
-			HostScreen = hostScreen;
-			Config = config;
-		}
+		public Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 	}
 }

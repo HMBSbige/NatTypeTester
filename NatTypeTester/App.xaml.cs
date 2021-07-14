@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Splat.Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Windows;
 using Volo.Abp;
@@ -41,16 +42,14 @@ namespace NatTypeTester
 		private void Initialize(IServiceProvider serviceProvider)
 		{
 			_application.Initialize(serviceProvider);
+			serviceProvider.UseMicrosoftDependencyResolver();
 		}
 
 		private static IHost CreateHostBuilder()
 		{
 			return Host.CreateDefaultBuilder()
 					.UseAutofac()
-					.ConfigureServices((hostContext, services) =>
-					{
-						services.AddApplication<NatTypeTesterModule>();
-					})
+					.ConfigureServices((_, services) => services.AddApplication<NatTypeTesterModule>())
 					.Build();
 		}
 	}

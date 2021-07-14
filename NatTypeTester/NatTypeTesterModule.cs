@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NatTypeTester.Models;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
@@ -22,6 +23,11 @@ namespace NatTypeTester
 			context.Services.UseMicrosoftDependencyResolver();
 			Locator.CurrentMutable.InitializeSplat();
 			Locator.CurrentMutable.InitializeReactiveUI(RegistrationNamespace.Wpf);
+		}
+
+		public override void ConfigureServices(ServiceConfigurationContext context)
+		{
+			context.Services.TryAddTransient<RoutingState>();
 		}
 	}
 }

@@ -18,20 +18,17 @@ namespace NatTypeTester.ViewModels
 	public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 	{
 		public string UrlPathSegment => @"RFC3489";
-		public IScreen HostScreen { get; }
+		public IScreen HostScreen => LazyServiceProvider.LazyGetRequiredService<IScreen>();
 
-		private readonly Config _config;
+		private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 
 		[Reactive]
 		public ClassicStunResult Result3489 { get; set; }
 
 		public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
 
-		public RFC3489ViewModel(IScreen hostScreen, Config config)
+		public RFC3489ViewModel()
 		{
-			HostScreen = hostScreen;
-			_config = config;
-
 			Result3489 = new ClassicStunResult { LocalEndPoint = new IPEndPoint(IPAddress.Any, 0) };
 			TestClassicNatType = ReactiveCommand.CreateFromTask(TestClassicNatTypeImpl);
 		}
@@ -39,16 +36,16 @@ namespace NatTypeTester.ViewModels
 		private async Task TestClassicNatTypeImpl(CancellationToken token)
 		{
 			var server = new StunServer();
-			if (!server.Parse(_config.StunServer))
+			if (!server.Parse(Config.StunServer))
 			{
 				throw new Exception(@"Wrong STUN Server!");
 			}
 
 			using var proxy = ProxyFactory.CreateProxy(
-					_config.ProxyType,
+					Config.ProxyType,
 					Result3489.LocalEndPoint,
-					NetUtils.ParseEndpoint(_config.ProxyServer),
-					_config.ProxyUser, _config.ProxyPassword
+					NetUtils.ParseEndpoint(Config.ProxyServer),
+					Config.ProxyUser, Config.ProxyPassword
 			);
 
 			using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);

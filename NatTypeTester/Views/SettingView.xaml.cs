@@ -11,10 +11,9 @@ namespace NatTypeTester.Views
 	[UsedImplicitly]
 	public partial class SettingView : ITransientDependency
 	{
-		public SettingView(SettingViewModel viewModel)
+		public SettingView()
 		{
 			InitializeComponent();
-			ViewModel = viewModel;
 
 			this.WhenActivated(d =>
 			{
