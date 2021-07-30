@@ -1,47 +1,56 @@
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace STUN.Utils
 {
 	public static class NetUtils
 	{
-		public static IPEndPoint? ParseEndpoint(string? str)
-		{
-			if (str is null)
-			{
-				return null;
-			}
+		private static Regex HostnameRegex{get;}=new Regex(@"^[a-zA-Z0-9\.\-]+$",RegexOptions.Compiled);
+		private static Regex IpV4Regex{get;}=new Regex(@"^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$",RegexOptions.Compiled);
+		private static Regex IpV6Regex{get;}=new Regex(@"^\[[a-fA-F0-9\:]+\]$",RegexOptions.Compiled);
 
-			var ipPort = str.Trim().Split(':');
-			if (ipPort.Length < 2)
-			{
-				return null;
-			}
+		public static IPEndPoint? ParseEndpoint(string? str){
+			if (string.IsNullOrWhiteSpace(str)){return null;}
 
-			IPAddress? ip = null;
-			if (ipPort.Length == 2 && IPAddress.TryParse(ipPort[0], out ip))
-			{
-				if (!IPAddress.TryParse(ipPort[0], out ip))
-				{
+#pragma warning disable CS8602 // 解引用可能出现空引用。
+			//此处分析器异常，上面已做空值判断
+			var splitIndex=str.LastIndexOf(":");
+#pragma warning restore CS8602 // 解引用可能出现空引用。
+
+			var addressString=str.Substring(0,splitIndex);
+			var portString=str.Substring(splitIndex+1);
+			if(!ushort.TryParse(portString,out var port) || port<ushort.MinValue || port>ushort.MaxValue){return null;}
+			
+			if(HostnameRegex.IsMatch(addressString)){
+				IPAddress[] addressArray;
+				try{
+					//此处使用异步较好
+					addressArray=Dns.GetHostAddresses(addressString);
+				}catch{
 					return null;
 				}
-			}
-			else if (ipPort.Length > 2)
-			{
-				var ipStr = string.Join(@":", ipPort, 0, ipPort.Length - 1);
-				if (!ipStr.StartsWith(@"[") || !ipStr.EndsWith(@"]") || !IPAddress.TryParse(ipStr, out ip))
-				{
+				if(addressArray.GetLength(0)<1){return null;}
+				try{
+					return new IPEndPoint(addressArray[0],port);
+				}catch{
 					return null;
 				}
+				
 			}
 
-			if (ip != null && ushort.TryParse(ipPort.Last(), out var port))
-			{
-				return new IPEndPoint(ip, port);
+			if (IpV6Regex.IsMatch(addressString) || IpV4Regex.IsMatch(addressString)){
+				if(!IPAddress.TryParse(addressString,out IPAddress address)){return null;}
+				try{
+					return new IPEndPoint(address,port);
+				}catch{
+					return null;
+				}
 			}
 
 			return null;
