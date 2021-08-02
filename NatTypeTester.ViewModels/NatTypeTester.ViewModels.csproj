@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="ReactiveUI.Fody" Version="14.1.1" />
-    <PackageReference Include="Volo.Abp.Core" Version="4.3.3" />
+    <PackageReference Include="Volo.Abp.Core" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>
