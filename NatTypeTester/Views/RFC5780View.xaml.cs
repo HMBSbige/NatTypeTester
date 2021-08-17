@@ -67,7 +67,7 @@ namespace NatTypeTester.Views
 						.Subscribe(_ => DiscoveryButton.Command.Execute(default))
 						.DisposeWith(d);
 
-				ViewModel.DiscoveryNatType.ThrownExceptions.Subscribe(async ex => await ex.HandleExceptionWithContentDialogAsync()).DisposeWith(d);
+				ViewModel.DiscoveryNatType.ThrownExceptions.Subscribe(ex => _ = ex.HandleExceptionWithContentDialogAsync()).DisposeWith(d);
 			});
 		}
 	}
