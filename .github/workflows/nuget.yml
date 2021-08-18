@@ -1,0 +1,25 @@
+name: Nuget
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ProjectName: [ STUN ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build
+      shell: pwsh
+      run: dotnet build -c Release ${{ matrix.ProjectName }}\${{ matrix.ProjectName }}.csproj
+
+    - name: Push nuget packages
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      shell: pwsh
+      run: |
+        dotnet nuget push ${{ matrix.ProjectName }}\bin\Release\*.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        dotnet nuget push ${{ matrix.ProjectName }}\bin\Release\*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
