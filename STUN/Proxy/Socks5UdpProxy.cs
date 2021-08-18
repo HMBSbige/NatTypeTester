@@ -28,7 +28,7 @@ namespace STUN.Proxy
 			}
 		}
 
-		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
+		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint!;
 
 		private readonly UdpClient _udpClient;
 
@@ -53,7 +53,7 @@ namespace STUN.Proxy
 			try
 			{
 				var buf = new byte[1024];
-				await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port);
+				await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port, token);
 				var s = _assoc.GetStream();
 				using var _ = token.Register(() => s.Close());
 				var requestPasswordAuth = !string.IsNullOrEmpty(_user);

@@ -2,48 +2,156 @@ name: CI
 on: [push, pull_request]
 env:
   ProjectName: NatTypeTester
+  NET_TFM: net5.0-windows10.0.20348.0
+  Configuration: Release
 
 jobs:
+  check_format:
+    name: Check format
+    runs-on: windows-latest
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Install dotnet-format
+        run: dotnet tool update -g dotnet-format
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: dotnet build
+
+      - name: Run dotnet format check
+        run: dotnet format -wsa -v diag --check --no-restore
+
   build:
     name: Build
+    needs: check_format
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: windows-latest
-    env:
-      NET_TFM: net48
-      Configuration: Release
+    strategy:
+      matrix:
+        Rid: [generic, win-x64, win-x86]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Build ${{ matrix.Rid }}
+        shell: pwsh
+        run: .\build.ps1 ${{ matrix.Rid }}
+
+      - name: Upload ${{ matrix.Rid }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.ProjectName }}-${{ matrix.Rid }}
+          path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\${{ matrix.Rid }}\publish\
+
+  nuget:
+    name: Nuget
+    needs: check_format
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        PackageName: [STUN]
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
 
-    - name: Build
-      shell: pwsh
-      run: msbuild -v:m -m -r -p:Configuration=Release NatTypeTester/NatTypeTester.csproj
+      - name: Build
+        shell: pwsh
+        run: dotnet build -c Release ${{ matrix.PackageName }}\${{ matrix.PackageName }}.csproj
 
-    - name: Upload
-      continue-on-error: true
-      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.ProjectName }}
-        path: ${{ env.ProjectName }}/bin/${{ env.Configuration }}/${{ env.NET_TFM }}/NatTypeTester.exe
+      - name: Push nuget packages
+        shell: pwsh
+        run: |
+          dotnet nuget push ${{ matrix.PackageName }}\bin\Release\*.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+          dotnet nuget push ${{ matrix.PackageName }}\bin\Release\*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
-    - name: Get tag
-      if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
-      id: tag
-      uses: dawidd6/action-get-tag@v1
+  release:
+    name: Release
+    needs: nuget
+    runs-on: windows-latest
 
-    - name: Create a new GitHub release if a new tag is pushed
-      uses: softprops/action-gh-release@v1
-      if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        name: v${{ steps.tag.outputs.tag }}
-        prerelease: true
-        draft: false
-        files: ${{ env.ProjectName }}/bin/${{ env.Configuration }}/${{ env.NET_TFM }}/NatTypeTester.exe
-        body: |
-          ## 更新日志：
-          * 这是 GitHub Actions 自动化部署，更新日志应该很快会手动更新
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Build
+        shell: pwsh
+        run: .\build.ps1
+
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+
+      - name: Package generic
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
+          $zip_path = "C:\builtfiles\$env:ProjectName-generic-${{ steps.tag.outputs.tag }}.7z"
+          7z a -mx9 "$zip_path" ".\$env:ProjectName\bin\$env:Configuration\$env:NET_TFM\generic\publish\"
+          7z rn "$zip_path" publish $env:ProjectName
+          echo "GENERIC_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Package win-x64
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
+          $zip_path = "C:\builtfiles\$env:ProjectName-win-x64-${{ steps.tag.outputs.tag }}.7z"
+          7z a -mx9 "$zip_path" ".\$env:ProjectName\bin\$env:Configuration\$env:NET_TFM\win-x64\publish\"
+          7z rn "$zip_path" publish $env:ProjectName
+          echo "WINX64_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Package win-x86
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
+          $zip_path = "C:\builtfiles\$env:ProjectName-win-x86-${{ steps.tag.outputs.tag }}.7z"
+          7z a -mx9 "$zip_path" ".\$env:ProjectName\bin\$env:Configuration\$env:NET_TFM\win-x86\publish\"
+          7z rn "$zip_path" publish $env:ProjectName
+          echo "WINX86_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Changelog
+        uses: glennawatson/ChangeLog@v1
+        id: changelog
+
+      - name: Create a new GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          draft: false
+          artifacts: C:\builtfiles\*
+          body: |
+            ${{ steps.changelog.outputs.commitLog }}
+            ## Hash
+            | Filename | SHA-256 |
+            | :- | :- |
+            | <sub>${{ env.ProjectName }}-generic-${{ steps.tag.outputs.tag }}.7z</sub> | <sub>${{ env.GENERIC_SHA256 }}</sub> |
+            | <sub>${{ env.ProjectName }}-win-x64-${{ steps.tag.outputs.tag }}.7z</sub> | <sub>${{ env.WINX64_SHA256 }}</sub> |
+            | <sub>${{ env.ProjectName }}-win-x86-${{ steps.tag.outputs.tag }}.7z</sub> | <sub>${{ env.WINX86_SHA256 }}</sub> |

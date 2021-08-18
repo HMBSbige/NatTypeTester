@@ -1,8 +1,8 @@
 <Project>
-  <PropertyGroup>
+  <PropertyGroup>  
+    <TargetFramework>net5.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <Version>3.4</Version>
-    <Nullable>enable</Nullable>    
+    <Nullable>enable</Nullable>
     <Authors>HMBSbige</Authors>
   </PropertyGroup>
 </Project>

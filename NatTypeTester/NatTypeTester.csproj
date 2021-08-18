@@ -1,26 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\common.props" />
 
   <PropertyGroup>
+    <TargetFramework>net5.0-windows10.0.20348.0</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net48</TargetFramework>
     <UseWPF>true</UseWPF>
+    <Version>3.4</Version>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="5.4.0">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="14.3.10" />

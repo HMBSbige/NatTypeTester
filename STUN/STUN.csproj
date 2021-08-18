@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\common.props" />
+
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
     <NoWarn>CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

@@ -17,7 +17,7 @@ namespace STUN.Proxy
 			set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
 		}
 
-		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint;
+		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint!;
 
 		private readonly UdpClient _udpClient;
 
@@ -38,9 +38,7 @@ namespace STUN.Proxy
 
 		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
 		{
-			var localEndPoint = (IPEndPoint)_udpClient.Client.LocalEndPoint;
-
-			Debug.WriteLine($@"{localEndPoint} => {remote} {bytes.Length} 字节");
+			Debug.WriteLine($@"{LocalEndPoint} => {remote} {bytes.Length} 字节");
 
 			await _udpClient.SendAsync(bytes, bytes.Length, remote);
 

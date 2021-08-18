@@ -69,7 +69,7 @@ namespace STUN.Message.Attributes
 			return true;
 		}
 
-		public override string ToString()
+		public override string? ToString()
 		{
 			return Address?.AddressFamily switch
 			{

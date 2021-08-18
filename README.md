@@ -1,16 +1,19 @@
 # NatTypeTester
-[![CI](https://github.com/HMBSbige/NatTypeTester/workflows/CI/badge.svg)](https://github.com/HMBSbige/NatTypeTester/actions)
+Channel | Status
+-|-
+CI | [![CI](https://github.com/HMBSbige/NatTypeTester/workflows/CI/badge.svg)](https://github.com/HMBSbige/NatTypeTester/actions)
+Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)](https://www.nuget.org/packages/Stun.Net/)
 
 ## RFC supports
 
-- [x] [RFC 3489](https://tools.ietf.org/html/rfc3489)
-- [x] [RFC 5389](https://tools.ietf.org/html/rfc5389)
-- [x] [RFC 5769](https://tools.ietf.org/html/rfc5769)
-- [x] [RFC 5780](https://tools.ietf.org/html/rfc5780)
-- [ ] [RFC 7350](https://tools.ietf.org/html/rfc7350)
-- [ ] [RFC 7443](https://tools.ietf.org/html/rfc7443)
-- [ ] [RFC 7635](https://tools.ietf.org/html/rfc7635)
-- [ ] [RFC 8489](https://tools.ietf.org/html/rfc8489)
+- [x] [RFC 3489](https://datatracker.ietf.org/doc/html/rfc3489)
+- [x] [RFC 5389](https://datatracker.ietf.org/doc/html/rfc5389)
+- [x] [RFC 5769](https://datatracker.ietf.org/doc/html/rfc5769)
+- [x] [RFC 5780](https://datatracker.ietf.org/doc/html/rfc5780)
+- [ ] [RFC 7350](https://datatracker.ietf.org/doc/html/rfc7350)
+- [ ] [RFC 7443](https://datatracker.ietf.org/doc/html/rfc7443)
+- [ ] [RFC 7635](https://datatracker.ietf.org/doc/html/rfc7635)
+- [ ] [RFC 8489](https://datatracker.ietf.org/doc/html/rfc8489)
 
 ## Internet Protocol
 

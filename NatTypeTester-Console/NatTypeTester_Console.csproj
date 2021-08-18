@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\common.props" />
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net48;net5.0</TargetFrameworks>
     <RootNamespace>NatTypeTester</RootNamespace>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
     <AssemblyName>NatTypeTester.Console</AssemblyName>
   </PropertyGroup>
 
