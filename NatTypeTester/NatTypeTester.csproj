@@ -23,8 +23,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="14.3.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="14.3.1" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="14.3.10" />
+    <PackageReference Include="ReactiveUI.WPF" Version="14.3.10" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="12.1.6" />
     <PackageReference Include="Volo.Abp.Autofac" Version="4.4.0" />
   </ItemGroup>
