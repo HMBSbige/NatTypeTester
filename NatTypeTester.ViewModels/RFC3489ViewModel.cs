@@ -9,6 +9,7 @@ using STUN.Utils;
 using System;
 using System.Net;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,9 +52,16 @@ namespace NatTypeTester.ViewModels
 			using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
 
 			Result3489 = client.Status;
-			await client.Query3489Async();
+			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+					.ObserveOn(RxApp.MainThreadScheduler)
+					.Subscribe(_ => this.RaisePropertyChanged(nameof(Result3489))))
+			{
+				await client.Query3489Async();
+			}
 
 			Result3489.LocalEndPoint = client.LocalEndPoint;
+
+			this.RaisePropertyChanged(nameof(Result3489));
 		}
 	}
 }

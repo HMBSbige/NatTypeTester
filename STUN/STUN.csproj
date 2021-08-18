@@ -4,11 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <DefineConstants>TRACE;ReactiveUI</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="ReactiveUI.Fody" Version="14.3.10" Condition="$(DefineConstants.Contains('ReactiveUI'))" />
-  </ItemGroup>
 
 </Project>
