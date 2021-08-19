@@ -16,4 +16,8 @@
     <PackageId>Stun.Net</PackageId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dns.Net.Abstractions" Version="0.1.0" />
+  </ItemGroup>
+
 </Project>

@@ -1,3 +1,4 @@
+using Dns.Net.Abstractions;
 using JetBrains.Annotations;
 using NatTypeTester.Models;
 using ReactiveUI;
@@ -22,6 +23,8 @@ namespace NatTypeTester.ViewModels
 		public IScreen HostScreen => LazyServiceProvider.LazyGetRequiredService<IScreen>();
 
 		private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
+
+		private IDnsClient DnsClient => LazyServiceProvider.LazyGetRequiredService<IDnsClient>();
 
 		[Reactive]
 		public ClassicStunResult Result3489 { get; set; }
@@ -49,7 +52,7 @@ namespace NatTypeTester.ViewModels
 					Config.ProxyUser, Config.ProxyPassword
 			);
 
-			using var client = new StunClient3489(server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
+			using var client = new StunClient3489(DnsClient, server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
 
 			Result3489 = client.Status;
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))

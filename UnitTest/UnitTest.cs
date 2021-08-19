@@ -1,3 +1,4 @@
+using Dns.Net.Clients;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STUN.Client;
 using STUN.Enums;
@@ -92,7 +93,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task BindingTest()
 		{
-			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+			using var client = new StunClient5389UDP(new DefaultDnsClient(), @"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
 			await client.BindingTestAsync();
 			var result = client.Status;
 
@@ -108,7 +109,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task MappingBehaviorTest()
 		{
-			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+			using var client = new StunClient5389UDP(new DefaultDnsClient(), @"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
 			await client.MappingBehaviorTestAsync();
 			var result = client.Status;
 
@@ -129,7 +130,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task FilteringBehaviorTest()
 		{
-			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+			using var client = new StunClient5389UDP(new DefaultDnsClient(), @"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
 			await client.FilteringBehaviorTestAsync();
 			var result = client.Status;
 
@@ -149,7 +150,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task CombiningTest()
 		{
-			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
+			using var client = new StunClient5389UDP(new DefaultDnsClient(), @"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0));
 			await client.QueryAsync();
 			var result = client.Status;
 
@@ -175,7 +176,7 @@ namespace UnitTest
 		public async Task ProxyTest()
 		{
 			using var proxy = ProxyFactory.CreateProxy(ProxyType.Socks5, IPEndPoint.Parse(@"0.0.0.0:0"), IPEndPoint.Parse(@"127.0.0.1:10000"));
-			using var client = new StunClient5389UDP(@"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0), proxy);
+			using var client = new StunClient5389UDP(new DefaultDnsClient(), @"stun.syncthing.net", 3478, new IPEndPoint(IPAddress.Any, 0), proxy);
 			await client.QueryAsync();
 			var result = client.Status;
 

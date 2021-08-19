@@ -1,3 +1,5 @@
+using Dns.Net.Abstractions;
+using Dns.Net.Clients;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NatTypeTester.Models;
@@ -28,6 +30,7 @@ namespace NatTypeTester
 		public override void ConfigureServices(ServiceConfigurationContext context)
 		{
 			context.Services.TryAddTransient<RoutingState>();
+			context.Services.TryAddTransient<IDnsClient, DefaultDnsClient>();
 		}
 	}
 }

@@ -1,4 +1,4 @@
-using STUN.DnsClients;
+using Dns.Net.Abstractions;
 using STUN.Enums;
 using STUN.Message;
 using STUN.Proxy;
@@ -36,7 +36,7 @@ namespace STUN.Client
 
 		public ClassicStunResult Status { get; } = new();
 
-		public StunClient3489(string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null, IDnsQuery? dnsQuery = null)
+		public StunClient3489(IDnsClient dnsQuery, string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
 		{
 			Proxy = proxy ?? new NoneUdpProxy(local);
 
@@ -50,11 +50,9 @@ namespace STUN.Client
 				throw new ArgumentException(@"Port value must be >= 1 !");
 			}
 
-			dnsQuery ??= new DefaultDnsQuery();
-
 			var ip = dnsQuery.Query(server);
 
-			Server = ip ?? throw new ArgumentException(@"Wrong STUN server !");
+			Server = ip;
 			Port = port;
 
 			Timeout = TimeSpan.FromSeconds(1.6);
