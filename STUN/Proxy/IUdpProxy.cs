@@ -10,7 +10,7 @@ namespace STUN.Proxy
 		TimeSpan Timeout { get; set; }
 		IPEndPoint LocalEndPoint { get; }
 		Task ConnectAsync(CancellationToken token = default);
-		Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default);
+		Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(ReadOnlyMemory<byte> bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default);
 		Task DisconnectAsync();
 	}
 }

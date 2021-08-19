@@ -1,12 +1,12 @@
 using Dns.Net.Abstractions;
 using STUN.Enums;
-using STUN.Message;
+using STUN.Messages;
 using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;
 using System;
+using System.Buffers;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -184,7 +184,9 @@ namespace STUN.Client
 		{
 			try
 			{
-				var b1 = sendMessage.Bytes.ToArray();
+				using var memoryOwner = MemoryPool<byte>.Shared.Rent(ushort.MaxValue);
+				var sendBuffer = memoryOwner.Memory;
+				var length = sendMessage.WriteTo(sendBuffer.Span);
 				//var t = DateTime.Now;
 
 				// Simple retransmissions
@@ -193,11 +195,11 @@ namespace STUN.Client
 				{
 					try
 					{
-						var (receive1, ipe, local) = await Proxy.ReceiveAsync(b1, remote, receive, token);
+						var (receive1, ipe, local) = await Proxy.ReceiveAsync(sendBuffer[..length], remote, receive, token);
 
 						var message = new StunMessage5389();
 						if (message.TryParse(receive1) &&
-							message.ClassicTransactionId.IsEqual(sendMessage.ClassicTransactionId))
+							message.IsSameTransaction(sendMessage))
 						{
 							return (message, ipe, local);
 						}

@@ -1,6 +1,6 @@
 using STUN.Enums;
-using STUN.Message;
-using STUN.Message.Attributes;
+using STUN.Messages;
+using STUN.Messages.StunAttributeValues;
 using System.Linq;
 using System.Net;
 
@@ -8,13 +8,13 @@ namespace STUN.Utils
 {
 	public static class AttributeExtensions
 	{
-		public static Attribute BuildChangeRequest(bool changeIp, bool changePort)
+		public static StunAttribute BuildChangeRequest(bool changeIp, bool changePort)
 		{
-			return new()
+			return new StunAttribute
 			{
 				Type = AttributeType.ChangeRequest,
 				Length = 4,
-				Value = new ChangeRequestAttribute { ChangeIp = changeIp, ChangePort = changePort }
+				Value = new ChangeRequestStunAttributeValue { ChangeIp = changeIp, ChangePort = changePort }
 			};
 		}
 
@@ -27,7 +27,7 @@ namespace STUN.Utils
 				return null;
 			}
 
-			var mapped = (MappedAddressAttribute)mappedAddressAttribute.Value;
+			var mapped = (MappedAddressStunAttributeValue)mappedAddressAttribute.Value;
 			return new IPEndPoint(mapped.Address!, mapped.Port);
 		}
 
@@ -40,7 +40,7 @@ namespace STUN.Utils
 				return null;
 			}
 
-			var address = (ChangedAddressAttribute)changedAddressAttribute.Value;
+			var address = (ChangedAddressStunAttributeValue)changedAddressAttribute.Value;
 			return new IPEndPoint(address.Address!, address.Port);
 		}
 
@@ -55,7 +55,7 @@ namespace STUN.Utils
 				return null;
 			}
 
-			var mapped = (AddressAttribute)mappedAddressAttribute.Value;
+			var mapped = (AddressStunAttributeValue)mappedAddressAttribute.Value;
 			return new IPEndPoint(mapped.Address!, mapped.Port);
 		}
 
@@ -70,7 +70,7 @@ namespace STUN.Utils
 				return null;
 			}
 
-			var address = (AddressAttribute)addressAttribute.Value;
+			var address = (AddressStunAttributeValue)addressAttribute.Value;
 			return new IPEndPoint(address.Address!, address.Port);
 		}
 	}

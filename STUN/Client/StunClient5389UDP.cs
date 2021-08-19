@@ -1,6 +1,6 @@
 using Dns.Net.Abstractions;
 using STUN.Enums;
-using STUN.Message;
+using STUN.Messages;
 using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;

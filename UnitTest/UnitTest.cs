@@ -2,7 +2,7 @@ using Dns.Net.Clients;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STUN.Client;
 using STUN.Enums;
-using STUN.Message.Attributes;
+using STUN.Messages.StunAttributeValues;
 using STUN.Proxy;
 using STUN.Utils;
 using System;
@@ -15,12 +15,12 @@ namespace UnitTest
 	[TestClass]
 	public class UnitTest
 	{
-		private readonly byte[] _magicCookie = { 0x21, 0x12, 0xa4, 0x42 };
-		private readonly byte[] _transactionId =
+		private static ReadOnlySpan<byte> MagicCookieAndTransactionId => new byte[]
 		{
-				0xb7, 0xe7, 0xa7, 0x01,
-				0xbc, 0x34, 0xd6, 0x86,
-				0xfa, 0x87, 0xdf, 0xae
+			0x21, 0x12, 0xa4, 0x42,
+			0xb7, 0xe7, 0xa7, 0x01,
+			0xbc, 0x34, 0xd6, 0x86,
+			0xfa, 0x87, 0xdf, 0xae
 		};
 
 		private static readonly byte[] XorPort = { 0xa1, 0x47 };
@@ -46,27 +46,33 @@ namespace UnitTest
 		[TestMethod]
 		public void TestXorMapped()
 		{
-			var t = new XorMappedAddressAttribute(_magicCookie, _transactionId)
+			var t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId)
 			{
 				Port = Port,
 				Family = IpFamily.IPv4,
 				Address = IPv4
 			};
-			Assert.IsTrue(_ipv4Response.SequenceEqual(t.Bytes));
+			Span<byte> temp = stackalloc byte[ushort.MaxValue];
 
-			t = new XorMappedAddressAttribute(_magicCookie, _transactionId);
+			var length4 = t.WriteTo(temp);
+			Assert.AreNotEqual(0, length4);
+			Assert.IsTrue(temp[..length4].SequenceEqual(_ipv4Response));
+
+			t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
 			Assert.IsTrue(t.TryParse(_ipv4Response));
 			Assert.AreEqual(t.Port, Port);
 			Assert.AreEqual(t.Family, IpFamily.IPv4);
 			Assert.AreEqual(t.Address, IPv4);
 
-			t = new XorMappedAddressAttribute(_magicCookie, _transactionId);
+			t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
 			Assert.IsTrue(t.TryParse(_ipv6Response));
 			Assert.AreEqual(t.Port, Port);
 			Assert.AreEqual(t.Family, IpFamily.IPv6);
 			Assert.AreEqual(t.Address, IPv6);
 
-			Assert.IsTrue(_ipv6Response.SequenceEqual(t.Bytes));
+			var length6 = t.WriteTo(temp);
+			Assert.AreNotEqual(0, length6);
+			Assert.IsTrue(temp[..length6].SequenceEqual(_ipv6Response));
 		}
 
 		[TestMethod]

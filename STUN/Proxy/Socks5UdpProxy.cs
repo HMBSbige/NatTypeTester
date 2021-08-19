@@ -183,7 +183,7 @@ namespace STUN.Proxy
 			}
 		}
 
-		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
+		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(ReadOnlyMemory<byte> bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
 		{
 			var state = _assoc.GetState();
 			if (state != TcpState.Established)
@@ -194,7 +194,7 @@ namespace STUN.Proxy
 			var remoteBytes = GetEndPointByte(remote);
 			var proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
 			Array.Copy(remoteBytes, 0, proxyBytes, 3, remoteBytes.Length);
-			Array.Copy(bytes, 0, proxyBytes, remoteBytes.Length + 3, bytes.Length);
+			bytes.Span.CopyTo(proxyBytes.AsSpan(remoteBytes.Length + 3));
 
 			await _udpClient.SendAsync(proxyBytes, proxyBytes.Length, _assocEndPoint);
 			var res = new byte[ushort.MaxValue];

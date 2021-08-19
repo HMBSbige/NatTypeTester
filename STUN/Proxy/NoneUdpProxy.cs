@@ -36,11 +36,13 @@ namespace STUN.Proxy
 			return Task.CompletedTask;
 		}
 
-		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(byte[] bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
+		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(ReadOnlyMemory<byte> bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
 		{
 			Debug.WriteLine($@"{LocalEndPoint} => {remote} {bytes.Length} 字节");
 
-			await _udpClient.SendAsync(bytes, bytes.Length, remote);
+			//TODO .NET6.0
+			var buffer = bytes.ToArray();
+			await _udpClient.SendAsync(buffer, buffer.Length, remote);
 
 			var res = new byte[ushort.MaxValue];
 
