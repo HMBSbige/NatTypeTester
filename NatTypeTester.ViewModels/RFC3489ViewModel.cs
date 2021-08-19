@@ -48,7 +48,7 @@ namespace NatTypeTester.ViewModels
 			using var proxy = ProxyFactory.CreateProxy(
 					Config.ProxyType,
 					Result3489.LocalEndPoint,
-					NetUtils.ParseEndpoint(Config.ProxyServer),
+					IPEndPoint.Parse(Config.ProxyServer),
 					Config.ProxyUser, Config.ProxyPassword
 			);
 

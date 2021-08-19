@@ -1,6 +1,5 @@
 using Dns.Net.Clients;
 using STUN.Client;
-using STUN.Utils;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -27,7 +26,7 @@ namespace NatTypeTester
 			}
 			if (args.Length > 2)
 			{
-				local = NetUtils.ParseEndpoint(args[2]);
+				local = IPEndPoint.Parse(args[2]);
 			}
 
 			using var client = new StunClient5389UDP(new DefaultDnsClient(), server, port, local);

@@ -2,7 +2,6 @@ using JetBrains.Annotations;
 using NatTypeTester.Utils;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
-using STUN.Utils;
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -23,41 +22,15 @@ namespace NatTypeTester.Views
 
 			this.WhenActivated(d =>
 			{
-				this.OneWayBind(ViewModel,
-								vm => vm.Result5389.BindingTestResult,
-								v => v.BindingTestTextBox.Text,
-								res => res.ToString()
-						)
-						.DisposeWith(d);
+				this.OneWayBind(ViewModel, vm => vm.Result5389.BindingTestResult, v => v.BindingTestTextBox.Text).DisposeWith(d);
 
-				this.OneWayBind(ViewModel,
-								vm => vm.Result5389.MappingBehavior,
-								v => v.MappingBehaviorTextBox.Text,
-								res => res.ToString()
-						)
-						.DisposeWith(d);
+				this.OneWayBind(ViewModel, vm => vm.Result5389.MappingBehavior, v => v.MappingBehaviorTextBox.Text).DisposeWith(d);
 
-				this.OneWayBind(ViewModel,
-								vm => vm.Result5389.FilteringBehavior,
-								v => v.FilteringBehaviorTextBox.Text,
-								res => res.ToString()
-						)
-						.DisposeWith(d);
+				this.OneWayBind(ViewModel, vm => vm.Result5389.FilteringBehavior, v => v.FilteringBehaviorTextBox.Text).DisposeWith(d);
 
-				this.Bind(ViewModel,
-								vm => vm.Result5389.LocalEndPoint,
-								v => v.LocalAddressTextBox.Text,
-								ipe => ipe is null ? string.Empty : ipe.ToString(),
-								NetUtils.ParseEndpoint
-						)
-						.DisposeWith(d);
+				this.Bind(ViewModel, vm => vm.Result5389.LocalEndPoint, v => v.LocalAddressTextBox.Text).DisposeWith(d);
 
-				this.OneWayBind(ViewModel,
-								vm => vm.Result5389.PublicEndPoint,
-								v => v.MappingAddressTextBox.Text,
-								ipe => ipe is null ? string.Empty : ipe.ToString()
-						)
-						.DisposeWith(d);
+				this.OneWayBind(ViewModel, vm => vm.Result5389.PublicEndPoint, v => v.MappingAddressTextBox.Text).DisposeWith(d);
 
 				this.BindCommand(ViewModel, vm => vm.DiscoveryNatType, v => v.DiscoveryButton).DisposeWith(d);
 

@@ -2,7 +2,6 @@ using JetBrains.Annotations;
 using NatTypeTester.Utils;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
-using STUN.Utils;
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -23,27 +22,11 @@ namespace NatTypeTester.Views
 
 			this.WhenActivated(d =>
 			{
-				this.OneWayBind(ViewModel,
-								vm => vm.Result3489.NatType,
-								v => v.NatTypeTextBox.Text,
-								type => type.ToString()
-						)
-						.DisposeWith(d);
+				this.OneWayBind(ViewModel, vm => vm.Result3489.NatType, v => v.NatTypeTextBox.Text).DisposeWith(d);
 
-				this.Bind(ViewModel,
-								vm => vm.Result3489.LocalEndPoint,
-								v => v.LocalEndTextBox.Text,
-								ipe => ipe is null ? string.Empty : ipe.ToString(),
-								NetUtils.ParseEndpoint
-						)
-						.DisposeWith(d);
+				this.Bind(ViewModel, vm => vm.Result3489.LocalEndPoint, v => v.LocalEndTextBox.Text).DisposeWith(d);
 
-				this.OneWayBind(ViewModel,
-								vm => vm.Result3489.PublicEndPoint,
-								v => v.PublicEndTextBox.Text,
-								ipe => ipe is null ? string.Empty : ipe.ToString()
-						)
-						.DisposeWith(d);
+				this.OneWayBind(ViewModel, vm => vm.Result3489.PublicEndPoint, v => v.PublicEndTextBox.Text).DisposeWith(d);
 
 				this.BindCommand(ViewModel, vm => vm.TestClassicNatType, v => v.TestButton).DisposeWith(d);
 

@@ -4,7 +4,6 @@ using STUN.Client;
 using STUN.Enums;
 using STUN.Messages.StunAttributeValues;
 using STUN.Proxy;
-using STUN.Utils;
 using System;
 using System.Linq;
 using System.Net;
@@ -73,27 +72,6 @@ namespace UnitTest
 			var length6 = t.WriteTo(temp);
 			Assert.AreNotEqual(0, length6);
 			Assert.IsTrue(temp[..length6].SequenceEqual(_ipv6Response));
-		}
-
-		[TestMethod]
-		[DataRow(@"1.2.3.4")]
-		[DataRow(@"1.2.256.5:80")]
-		[DataRow(@"2001:db8:1234:5678:11:2233:4455:6677:32853")]
-		[DataRow(@"2001:db8:1234:5678:11:2233:4455:6677")]
-		public void ParseEndpointTestFail(string ipStr)
-		{
-			Assert.IsNull(NetUtils.ParseEndpoint(ipStr));
-		}
-
-		[TestMethod]
-		[DataRow(@"0.0.0.0:123")]
-		[DataRow(@"192.168.1.1:2136")]
-		[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:32853")]
-		[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
-		[DataRow(@"[::1]:0")]
-		public void ParseEndpointTestSuccess(string ipStr)
-		{
-			Assert.AreEqual(NetUtils.ParseEndpoint(ipStr), IPEndPoint.Parse(ipStr));
 		}
 
 		[TestMethod]
