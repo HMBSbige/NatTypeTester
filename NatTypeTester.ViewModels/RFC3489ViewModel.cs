@@ -2,7 +2,6 @@ using Dns.Net.Abstractions;
 using JetBrains.Annotations;
 using NatTypeTester.Models;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using STUN.Client;
 using STUN.Proxy;
 using STUN.StunResult;
@@ -26,7 +25,6 @@ namespace NatTypeTester.ViewModels
 
 		private IDnsClient DnsClient => LazyServiceProvider.LazyGetRequiredService<IDnsClient>();
 
-		[Reactive]
 		public ClassicStunResult Result3489 { get; set; }
 
 		public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }

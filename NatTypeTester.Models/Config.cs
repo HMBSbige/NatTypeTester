@@ -1,24 +1,46 @@
-using ReactiveUI.Fody.Helpers;
+using JetBrains.Annotations;
+using ReactiveUI;
 using STUN.Enums;
 using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.Models
 {
-	public class Config : ISingletonDependency
+	[UsedImplicitly]
+	public record Config : ReactiveRecord, ISingletonDependency
 	{
-		[Reactive]
-		public string StunServer { get; set; } = @"stun.syncthing.net";
+		private string _stunServer = @"stun.syncthing.net";
+		public string StunServer
+		{
+			get => _stunServer;
+			set => this.RaiseAndSetIfChanged(ref _stunServer, value);
+		}
 
-		[Reactive]
-		public ProxyType ProxyType { get; set; } = ProxyType.Plain;
+		private ProxyType _proxyType = ProxyType.Plain;
+		public ProxyType ProxyType
+		{
+			get => _proxyType;
+			set => this.RaiseAndSetIfChanged(ref _proxyType, value);
+		}
 
-		[Reactive]
-		public string ProxyServer { get; set; } = @"127.0.0.1:1080";
+		private string _proxyServer = @"127.0.0.1:1080";
+		public string ProxyServer
+		{
+			get => _proxyServer;
+			set => this.RaiseAndSetIfChanged(ref _proxyServer, value);
+		}
 
-		[Reactive]
-		public string? ProxyUser { get; set; }
+		private string? _proxyUser;
+		public string? ProxyUser
+		{
+			get => _proxyUser;
+			set => this.RaiseAndSetIfChanged(ref _proxyUser, value);
+		}
 
-		[Reactive]
-		public string? ProxyPassword { get; set; }
+		private string? _proxyPassword;
+		public string? ProxyPassword
+		{
+			get => _proxyPassword;
+			set => this.RaiseAndSetIfChanged(ref _proxyPassword, value);
+		}
 	}
 }
