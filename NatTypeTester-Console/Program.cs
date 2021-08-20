@@ -1,4 +1,5 @@
 using Dns.Net.Clients;
+using STUN;
 using STUN.Client;
 using System;
 using System.Net;
@@ -9,24 +10,22 @@ namespace NatTypeTester
 	internal static class Program
 	{
 		/// <summary>
-		/// stun.qq.com 3478 0.0.0.0:0
+		/// stun.qq.com:3478 0.0.0.0:0
 		/// </summary>
 		private static async Task Main(string[] args)
 		{
 			var server = @"stun.syncthing.net";
 			ushort port = 3478;
-			IPEndPoint? local = null;
-			if (args.Length > 0 && (Uri.CheckHostName(args[0]) == UriHostNameType.Dns || IPAddress.TryParse(args[0], out _)))
+			var local = new IPEndPoint(IPAddress.Any, 0);
+
+			if (args.Length > 0 && StunServer.TryParse(args[0], out var stun))
 			{
-				server = args[0];
+				server = stun.Hostname;
+				port = stun.Port;
 			}
 			if (args.Length > 1)
 			{
-				ushort.TryParse(args[1], out port);
-			}
-			if (args.Length > 2)
-			{
-				local = IPEndPoint.Parse(args[2]);
+				IPEndPoint.TryParse(args[2], out local);
 			}
 
 			using var client = new StunClient5389UDP(new DefaultDnsClient(), server, port, local);
