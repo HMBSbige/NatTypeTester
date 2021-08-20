@@ -1,4 +1,3 @@
-using Dns.Net.Abstractions;
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
@@ -19,8 +18,8 @@ namespace STUN.Client
 	{
 		public new StunResult5389 Status { get; } = new();
 
-		public StunClient5389UDP(IDnsClient dnsQuery, string server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
-		: base(dnsQuery, server, port, local, proxy)
+		public StunClient5389UDP(IPAddress server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
+		: base(server, port, local, proxy)
 		{
 			Timeout = TimeSpan.FromSeconds(3);
 			Status.LocalEndPoint = local;

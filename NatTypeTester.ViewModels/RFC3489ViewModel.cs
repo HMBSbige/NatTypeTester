@@ -47,7 +47,8 @@ namespace NatTypeTester.ViewModels
 					Config.ProxyUser, Config.ProxyPassword
 			);
 
-			using var client = new StunClient3489(DnsClient, server.Hostname, server.Port, Result3489.LocalEndPoint, proxy);
+			var ip = await DnsClient.QueryAsync(server.Hostname, token);
+			using var client = new StunClient3489(ip, server.Port, Result3489.LocalEndPoint, proxy);
 
 			Result3489 = client.Status;
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
