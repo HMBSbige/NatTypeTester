@@ -55,7 +55,7 @@ namespace NatTypeTester.ViewModels
 					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe(_ => this.RaisePropertyChanged(nameof(Result3489))))
 			{
-				await client.Query3489Async();
+				await client.QueryAsync(token);
 			}
 
 			Result3489.LocalEndPoint = client.LocalEndPoint;

@@ -23,10 +23,9 @@ namespace STUN.StunResult
 			FilteringBehavior = result.FilteringBehavior;
 		}
 
-		public void Reset()
+		public override void Reset()
 		{
-			PublicEndPoint = default;
-			LocalEndPoint = default;
+			base.Reset();
 			OtherEndPoint = default;
 			BindingTestResult = BindingTestResult.Unknown;
 			MappingBehavior = MappingBehavior.Unknown;

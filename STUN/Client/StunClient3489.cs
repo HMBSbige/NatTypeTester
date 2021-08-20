@@ -19,93 +19,91 @@ namespace STUN.Client
 	/// </summary>
 	public class StunClient3489 : IDisposable
 	{
-		public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
+		public IPEndPoint LocalEndPoint => _proxy.LocalEndPoint;
 
 		public TimeSpan Timeout
 		{
-			get => Proxy.Timeout;
-			set => Proxy.Timeout = value;
+			get => _proxy.Timeout;
+			set => _proxy.Timeout = value;
 		}
 
-		protected readonly IPAddress Server;
-		protected readonly ushort Port;
+		private readonly IPAddress _server;
+		private readonly ushort _port;
 
-		protected IPEndPoint RemoteEndPoint => new(Server, Port);
+		private IPEndPoint RemoteEndPoint => new(_server, _port);
 
-		protected readonly IUdpProxy Proxy;
+		private readonly IUdpProxy _proxy;
 
 		public ClassicStunResult Status { get; } = new();
 
 		public StunClient3489(IPAddress server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
 		{
 			Requires.NotNull(server, nameof(server));
-			Requires.Argument(port > 0, nameof(port), @"Port value must be >= 1 !");
+			Requires.Argument(port > 0, nameof(port), @"Port value must be > 0!");
 
-			Proxy = proxy ?? new NoneUdpProxy(local);
+			_proxy = proxy ?? new NoneUdpProxy(local);
 
-			Server = server;
-			Port = port;
+			_server = server;
+			_port = port;
 
-			Timeout = TimeSpan.FromSeconds(1.6);
+			Timeout = TimeSpan.FromSeconds(3);
 			Status.LocalEndPoint = local;
 		}
 
-		private void Init()
+		public virtual async ValueTask ConnectAsync(CancellationToken cancellationToken)
 		{
-			Status.PublicEndPoint = default;
-			Status.LocalEndPoint = default;
-			Status.NatType = NatType.Unknown;
+			Status.Reset();
+
+			using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			cts.CancelAfter(Timeout);
+
+			await _proxy.ConnectAsync(cts.Token);
 		}
 
-		public async Task Query3489Async()
+		public virtual async ValueTask DisconnectAsync()
+		{
+			await _proxy.DisconnectAsync();
+		}
+
+		public async Task QueryAsync(CancellationToken cancellationToken = default)
 		{
 			try
 			{
-				Init();
-				using var cts = new CancellationTokenSource(Timeout);
-				await Proxy.ConnectAsync(cts.Token);
-				// test I
-				var test1 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
+				await ConnectAsync(cancellationToken);
 
-				var (response1, remote1, local1) = await TestAsync(test1, RemoteEndPoint, RemoteEndPoint, cts.Token);
-				if (response1 is null || remote1 is null)
+				// test I
+				var response1 = await Test1Async(cancellationToken);
+				if (response1?.Message is null || response1.Remote is null)
 				{
 					Status.NatType = NatType.UdpBlocked;
 					return;
 				}
 
-				Status.LocalEndPoint = local1 is null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
+				Status.LocalEndPoint = response1.LocalAddress is null ? null : new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
 
-				var mappedAddress1 = response1.GetMappedAddressAttribute();
-				var changedAddress1 = response1.GetChangedAddressAttribute();
+				var mappedAddress1 = response1.Message.GetMappedAddressAttribute();
+				var changedAddress = response1.Message.GetChangedAddressAttribute();
+
+				Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
 
 				// 某些单 IP 服务器的迷惑操作
-				if (mappedAddress1 is null
-				|| changedAddress1 is null
-				|| Equals(changedAddress1.Address, remote1.Address)
-				|| changedAddress1.Port == remote1.Port)
+				if (mappedAddress1 is null || changedAddress is null
+					|| Equals(changedAddress.Address, response1.Remote.Address)
+					|| changedAddress.Port == response1.Remote.Port)
 				{
 					Status.NatType = NatType.UnsupportedServer;
 					return;
 				}
 
-				Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
-
-				var test2 = new StunMessage5389
-				{
-					StunMessageType = StunMessageType.BindingRequest,
-					MagicCookie = 0,
-					Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
-				};
-
 				// test II
-				var (response2, remote2, _) = await TestAsync(test2, RemoteEndPoint, changedAddress1, cts.Token);
-				var mappedAddress2 = response2.GetMappedAddressAttribute();
+				var response2 = await Test2Async(changedAddress, cancellationToken);
+				var mappedAddress2 = response2?.Message.GetMappedAddressAttribute();
 
-				if (Equals(mappedAddress1.Address, local1) && mappedAddress1.Port == LocalEndPoint.Port)
+				// is Public IP == link's IP?
+				if (Equals(mappedAddress1.Address, response1.LocalAddress) && mappedAddress1.Port == LocalEndPoint.Port)
 				{
 					// No NAT
-					if (response2 is null)
+					if (response2?.Message is null)
 					{
 						Status.NatType = NatType.SymmetricUdpFirewall;
 						Status.PublicEndPoint = mappedAddress1;
@@ -119,19 +117,18 @@ namespace STUN.Client
 				}
 
 				// NAT
-				if (response2 is not null && remote2 is not null)
+				if (response2?.Message is not null && response2.Remote is not null)
 				{
 					// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
-					var type = Equals(remote1.Address, remote2.Address) || remote1.Port == remote2.Port ? NatType.UnsupportedServer : NatType.FullCone;
+					var type = Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port ? NatType.UnsupportedServer : NatType.FullCone;
 					Status.NatType = type;
 					Status.PublicEndPoint = mappedAddress2;
 					return;
 				}
 
 				// Test I(#2)
-				var test12 = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest, MagicCookie = 0 };
-				var (response12, _, _) = await TestAsync(test12, changedAddress1, changedAddress1, cts.Token);
-				var mappedAddress12 = response12.GetMappedAddressAttribute();
+				var response12 = await Test1_2Async(changedAddress, cancellationToken);
+				var mappedAddress12 = response12?.Message.GetMappedAddressAttribute();
 
 				if (mappedAddress12 is null)
 				{
@@ -147,19 +144,22 @@ namespace STUN.Client
 				}
 
 				// Test III
-				var test3 = new StunMessage5389
+				var response3 = await Test3Async(cancellationToken);
+				var mappedAddress3 = response3?.Message.GetMappedAddressAttribute();
+				if (mappedAddress3 is not null && response3?.Remote is not null)
 				{
-					StunMessageType = StunMessageType.BindingRequest,
-					MagicCookie = 0,
-					Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
-				};
-				var (response3, _, _) = await TestAsync(test3, changedAddress1, changedAddress1, cts.Token);
-				var mappedAddress3 = response3.GetMappedAddressAttribute();
-				if (mappedAddress3 is not null)
-				{
-					Status.NatType = NatType.RestrictedCone;
-					Status.PublicEndPoint = mappedAddress3;
-					return;
+					if (Equals(response3.Remote.Address, response1.Remote.Address) && response3.Remote.Port != response1.Remote.Port)
+					{
+						Status.NatType = NatType.RestrictedCone;
+						Status.PublicEndPoint = mappedAddress3;
+						return;
+					}
+					else
+					{
+						Status.NatType = NatType.UnsupportedServer;
+						Status.PublicEndPoint = mappedAddress3;
+						return;
+					}
 				}
 
 				Status.NatType = NatType.PortRestrictedCone;
@@ -167,50 +167,86 @@ namespace STUN.Client
 			}
 			finally
 			{
-				await Proxy.DisconnectAsync();
+				await DisconnectAsync();
 			}
 		}
 
-		protected async Task<(StunMessage5389?, IPEndPoint?, IPAddress?)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
+		private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken cancellationToken)
 		{
 			try
 			{
 				using var memoryOwner = MemoryPool<byte>.Shared.Rent(ushort.MaxValue);
 				var sendBuffer = memoryOwner.Memory;
 				var length = sendMessage.WriteTo(sendBuffer.Span);
-				//var t = DateTime.Now;
 
-				// Simple retransmissions
-				//https://tools.ietf.org/html/rfc3489#section-9.3
-				//while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
+				using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+				cts.CancelAfter(Timeout);
+				var (receiveBuffer, ipe, local) = await _proxy.ReceiveAsync(sendBuffer[..length], remote, receive, cts.Token);
+
+				var message = new StunMessage5389();
+				if (message.TryParse(receiveBuffer) && message.IsSameTransaction(sendMessage))
 				{
-					try
+					var response = new StunResponse
 					{
-						var (receive1, ipe, local) = await Proxy.ReceiveAsync(sendBuffer[..length], remote, receive, token);
-
-						var message = new StunMessage5389();
-						if (message.TryParse(receive1) &&
-							message.IsSameTransaction(sendMessage))
-						{
-							return (message, ipe, local);
-						}
-					}
-					catch (Exception ex)
-					{
-						Debug.WriteLine(ex);
-					}
+						Message = message,
+						Remote = ipe,
+						LocalAddress = local
+					};
+					return response;
 				}
 			}
 			catch (Exception ex)
 			{
 				Debug.WriteLine(ex);
 			}
-			return (null, null, null);
+			return default;
 		}
 
-		public virtual void Dispose()
+		public virtual async ValueTask<StunResponse?> Test1Async(CancellationToken cancellationToken)
 		{
-			Proxy.Dispose();
+			var message = new StunMessage5389
+			{
+				StunMessageType = StunMessageType.BindingRequest,
+				MagicCookie = 0
+			};
+			return await RequestAsync(message, RemoteEndPoint, RemoteEndPoint, cancellationToken);
+		}
+
+		public virtual async ValueTask<StunResponse?> Test2Async(IPEndPoint other, CancellationToken cancellationToken)
+		{
+			var message = new StunMessage5389
+			{
+				StunMessageType = StunMessageType.BindingRequest,
+				MagicCookie = 0,
+				Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
+			};
+			return await RequestAsync(message, RemoteEndPoint, other, cancellationToken);
+		}
+
+		public virtual async ValueTask<StunResponse?> Test1_2Async(IPEndPoint other, CancellationToken cancellationToken)
+		{
+			var message = new StunMessage5389
+			{
+				StunMessageType = StunMessageType.BindingRequest,
+				MagicCookie = 0
+			};
+			return await RequestAsync(message, other, other, cancellationToken);
+		}
+
+		public virtual async ValueTask<StunResponse?> Test3Async(CancellationToken cancellationToken)
+		{
+			var message = new StunMessage5389
+			{
+				StunMessageType = StunMessageType.BindingRequest,
+				MagicCookie = 0,
+				Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
+			};
+			return await RequestAsync(message, RemoteEndPoint, RemoteEndPoint, cancellationToken);
+		}
+
+		public void Dispose()
+		{
+			_proxy.Dispose();
 		}
 	}
 }

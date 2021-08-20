@@ -18,6 +18,7 @@ namespace STUN.Utils
 			return foo?.State ?? TcpState.Unknown;
 		}
 
+		//TODO .NET6.0
 		public static Task<(IPAddress, int, IPEndPoint)> ReceiveMessageFromAsync(this Socket client, EndPoint receive, byte[] array, SocketFlags flag)
 		{
 			return Task.Run(() =>

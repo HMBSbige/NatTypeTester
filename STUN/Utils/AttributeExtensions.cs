@@ -1,6 +1,7 @@
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Messages.StunAttributeValues;
+using System;
 using System.Linq;
 using System.Net;
 
@@ -15,6 +16,48 @@ namespace STUN.Utils
 				Type = AttributeType.ChangeRequest,
 				Length = 4,
 				Value = new ChangeRequestStunAttributeValue { ChangeIp = changeIp, ChangePort = changePort }
+			};
+		}
+
+		public static StunAttribute BuildMapping(IpFamily family, IPAddress ip, ushort port)
+		{
+			var length = family switch
+			{
+				IpFamily.IPv4 => 4,
+				IpFamily.IPv6 => 16,
+				_ => throw new ArgumentOutOfRangeException(nameof(family), family, null)
+			};
+			return new StunAttribute
+			{
+				Type = AttributeType.MappedAddress,
+				Length = (ushort)(4 + length),
+				Value = new MappedAddressStunAttributeValue
+				{
+					Family = family,
+					Address = ip,
+					Port = port
+				}
+			};
+		}
+
+		public static StunAttribute BuildChangeAddress(IpFamily family, IPAddress ip, ushort port)
+		{
+			var length = family switch
+			{
+				IpFamily.IPv4 => 4,
+				IpFamily.IPv6 => 16,
+				_ => throw new ArgumentOutOfRangeException(nameof(family), family, null)
+			};
+			return new StunAttribute
+			{
+				Type = AttributeType.ChangedAddress,
+				Length = (ushort)(4 + length),
+				Value = new ChangedAddressStunAttributeValue
+				{
+					Family = family,
+					Address = ip,
+					Port = port
+				}
 			};
 		}
 

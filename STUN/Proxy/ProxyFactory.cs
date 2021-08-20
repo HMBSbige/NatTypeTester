@@ -1,23 +1,31 @@
+using Microsoft;
 using STUN.Enums;
-using System;
 using System.Net;
 
 namespace STUN.Proxy
 {
 	public static class ProxyFactory
 	{
-		public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint? local, IPEndPoint? proxy, string? user = null, string? password = null)
+		public static IUdpProxy CreateProxy(
+			ProxyType type, IPEndPoint? local,
+			IPEndPoint? proxy = default, string? user = default, string? password = default)
 		{
-			if (proxy is null)
+			switch (type)
 			{
-				throw new ArgumentNullException(nameof(proxy), @"Proxy server is null");
+				case ProxyType.Plain:
+				{
+					return new NoneUdpProxy(local);
+				}
+				case ProxyType.Socks5:
+				{
+					Requires.Argument(proxy is not null, nameof(proxy), @"Proxy server is null");
+					return new Socks5UdpProxy(local, proxy, user, password);
+				}
+				default:
+				{
+					throw Assumes.NotReachable();
+				}
 			}
-			return type switch
-			{
-				ProxyType.Plain => new NoneUdpProxy(local),
-				ProxyType.Socks5 => new Socks5UdpProxy(local, proxy, user, password),
-				_ => throw new NotSupportedException(type.ToString())
-			};
 		}
 	}
 }

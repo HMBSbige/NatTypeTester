@@ -1,9 +1,12 @@
+using Microsoft;
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;
 using System;
+using System.Buffers;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,13 +17,35 @@ namespace STUN.Client
 	/// https://tools.ietf.org/html/rfc5389#section-7.2.1
 	/// https://tools.ietf.org/html/rfc5780#section-4.2
 	/// </summary>
-	public class StunClient5389UDP : StunClient3489
+	public class StunClient5389UDP : IDisposable
 	{
-		public new StunResult5389 Status { get; } = new();
+		public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
+
+		public TimeSpan Timeout
+		{
+			get => Proxy.Timeout;
+			set => Proxy.Timeout = value;
+		}
+
+		protected readonly IPAddress Server;
+		protected readonly ushort Port;
+
+		protected IPEndPoint RemoteEndPoint => new(Server, Port);
+
+		protected readonly IUdpProxy Proxy;
+
+		public StunResult5389 Status { get; } = new();
 
 		public StunClient5389UDP(IPAddress server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
-		: base(server, port, local, proxy)
 		{
+			Requires.NotNull(server, nameof(server));
+			Requires.Argument(port > 0, nameof(port), @"Port value must be >= 1 !");
+
+			Proxy = proxy ?? new NoneUdpProxy(local);
+
+			Server = server;
+			Port = port;
+
 			Timeout = TimeSpan.FromSeconds(3);
 			Status.LocalEndPoint = local;
 		}
@@ -255,6 +280,49 @@ namespace STUN.Client
 			{
 				await Proxy.DisconnectAsync();
 			}
+		}
+
+		private async Task<(StunMessage5389?, IPEndPoint?, IPAddress?)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
+		{
+			try
+			{
+				using var memoryOwner = MemoryPool<byte>.Shared.Rent(ushort.MaxValue);
+				var sendBuffer = memoryOwner.Memory;
+				var length = sendMessage.WriteTo(sendBuffer.Span);
+				//var t = DateTime.Now;
+
+				// Simple retransmissions
+				//https://tools.ietf.org/html/rfc3489#section-9.3
+				//while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
+				{
+					try
+					{
+						var (receive1, ipe, local) = await Proxy.ReceiveAsync(sendBuffer[..length], remote, receive, token);
+
+						var message = new StunMessage5389();
+						if (message.TryParse(receive1) &&
+							message.IsSameTransaction(sendMessage))
+						{
+							return (message, ipe, local);
+						}
+					}
+					catch (Exception ex)
+					{
+						Debug.WriteLine(ex);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex);
+			}
+
+			return (null, null, null);
+		}
+
+		public void Dispose()
+		{
+			Proxy.Dispose();
 		}
 	}
 }
