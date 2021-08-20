@@ -61,9 +61,9 @@ namespace STUN.Utils
 			};
 		}
 
-		public static IPEndPoint? GetMappedAddressAttribute(this StunMessage5389? response)
+		public static IPEndPoint? GetMappedAddressAttribute(this StunMessage5389 response)
 		{
-			var mappedAddressAttribute = response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
+			var mappedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
 
 			if (mappedAddressAttribute is null)
 			{
@@ -74,9 +74,9 @@ namespace STUN.Utils
 			return new IPEndPoint(mapped.Address!, mapped.Port);
 		}
 
-		public static IPEndPoint? GetChangedAddressAttribute(this StunMessage5389? response)
+		public static IPEndPoint? GetChangedAddressAttribute(this StunMessage5389 response)
 		{
-			var changedAddressAttribute = response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
+			var changedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
 
 			if (changedAddressAttribute is null)
 			{
@@ -87,11 +87,11 @@ namespace STUN.Utils
 			return new IPEndPoint(address.Address!, address.Port);
 		}
 
-		public static IPEndPoint? GetXorMappedAddressAttribute(this StunMessage5389? response)
+		public static IPEndPoint? GetXorMappedAddressAttribute(this StunMessage5389 response)
 		{
 			var mappedAddressAttribute =
-				response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.XorMappedAddress) ??
-				response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
+				response.Attributes.FirstOrDefault(t => t.Type == AttributeType.XorMappedAddress) ??
+				response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
 
 			if (mappedAddressAttribute is null)
 			{
@@ -102,11 +102,11 @@ namespace STUN.Utils
 			return new IPEndPoint(mapped.Address!, mapped.Port);
 		}
 
-		public static IPEndPoint? GetOtherAddressAttribute(this StunMessage5389? response)
+		public static IPEndPoint? GetOtherAddressAttribute(this StunMessage5389 response)
 		{
 			var addressAttribute =
-				response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.OtherAddress) ??
-				response?.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
+				response.Attributes.FirstOrDefault(t => t.Type == AttributeType.OtherAddress) ??
+				response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
 
 			if (addressAttribute is null)
 			{

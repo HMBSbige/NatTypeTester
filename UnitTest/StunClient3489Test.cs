@@ -7,6 +7,7 @@ using STUN.Enums;
 using STUN.Messages;
 using STUN.Utils;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using static STUN.Utils.AttributeExtensions;
@@ -22,6 +23,8 @@ namespace UnitTest
 		private const ushort Port = 3478;
 
 		private static readonly IPEndPoint Any = new(IPAddress.Any, 0);
+		private static readonly IPEndPoint IPv6Any = new(IPAddress.IPv6Any, 0);
+		private static readonly IPEndPoint LocalAddress1 = IPEndPoint.Parse(@"127.0.0.1:114");
 		private static readonly IPEndPoint MappedAddress1 = IPEndPoint.Parse(@"1.1.1.1:114");
 		private static readonly IPEndPoint MappedAddress2 = IPEndPoint.Parse(@"1.1.1.1:514");
 		private static readonly IPEndPoint ServerAddress = IPEndPoint.Parse(@"2.2.2.2:1919");
@@ -33,95 +36,66 @@ namespace UnitTest
 		[TestMethod]
 		public async Task UdpBlockedTestAsync()
 		{
-			var nullMessage = new StunResponse { Message = null, Remote = Any };
-			var nullRemote = new StunResponse { Message = DefaultStunMessage, Remote = null };
-
 			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
 			var client = mock.Object;
 
-			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).Returns(null);
-			await TestAsync();
+			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
 
-			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(nullMessage);
-			await TestAsync();
-
-			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(nullRemote);
-			await TestAsync();
-
-			async Task TestAsync()
-			{
-				Assert.AreEqual(NatType.Unknown, client.Status.NatType);
-				await client.QueryAsync();
-				Assert.AreEqual(NatType.UdpBlocked, client.Status.NatType);
-				client.Status.Reset();
-			}
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.UdpBlocked, client.Status.NatType);
 		}
 
 		[TestMethod]
-		public async Task UnsupportedServerTest1Async()
+		public async Task UnsupportedServerTestAsync()
 		{
 			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
 			var client = mock.Object;
 
-			var unknownResponse = new StunResponse { Message = DefaultStunMessage, Remote = Any };
+			mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
+			var unknownResponse = new StunResponse(DefaultStunMessage, Any, LocalAddress1.Address);
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(unknownResponse);
 			await TestAsync();
 
-			var r1 = new StunResponse
+			var r1 = new StunResponse(new StunMessage5389
 			{
-				Message = new StunMessage5389
+				Attributes = new[]
 				{
-					Attributes = new[]
-					{
-						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-					}
-				},
-				Remote = Any
-			};
+					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
+				}
+			}, ServerAddress, LocalAddress1.Address);
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 			await TestAsync();
 
-			var r2 = new StunResponse
+			var r2 = new StunResponse(new StunMessage5389
 			{
-				Message = new StunMessage5389
+				Attributes = new[]
 				{
-					Attributes = new[]
-					{
-						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-					}
-				},
-				Remote = Any
-			};
+					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+				}
+			}, ServerAddress, LocalAddress1.Address);
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 			await TestAsync();
 
-			var r3 = new StunResponse
+			var r3 = new StunResponse(new StunMessage5389
 			{
-				Message = new StunMessage5389
+				Attributes = new[]
 				{
-					Attributes = new[]
-					{
-						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-						BuildChangeAddress(IpFamily.IPv4, ServerAddress.Address, (ushort)ChangedAddress1.Port)
-					}
-				},
-				Remote = ServerAddress
-			};
+					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+					BuildChangeAddress(IpFamily.IPv4, ServerAddress.Address, (ushort)ChangedAddress1.Port)
+				}
+			}, ServerAddress, LocalAddress1.Address);
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 			await TestAsync();
 
-			var r4 = new StunResponse
+			var r4 = new StunResponse(new StunMessage5389
 			{
-				Message = new StunMessage5389
+				Attributes = new[]
 				{
-					Attributes = new[]
-					{
-						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ServerAddress.Port)
-					}
-				},
-				Remote = ServerAddress
-			};
+					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ServerAddress.Port)
+				}
+			}, ServerAddress, LocalAddress1.Address);
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r4);
 			await TestAsync();
 
@@ -135,28 +109,313 @@ namespace UnitTest
 		}
 
 		[TestMethod]
+		public async Task NoNatTestAsync()
+		{
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var client = mock.Object;
+
+			var openInternetTest1Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				MappedAddress1.Address
+			);
+			var test2Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
+					}
+				},
+				ChangedAddress1,
+				MappedAddress1.Address
+			);
+
+			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(openInternetTest1Response);
+			mock.Setup(x => x.LocalEndPoint).Returns(MappedAddress1);
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test2Response);
+
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.OpenInternet, client.Status.NatType);
+			client.Status.Reset();
+
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
+
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.SymmetricUdpFirewall, client.Status.NatType);
+			client.Status.Reset();
+		}
+
+		[TestMethod]
+		public async Task FullConeTestAsync()
+		{
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var client = mock.Object;
+
+			var test1Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				LocalAddress1.Address
+			);
+			var fullConeResponse = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
+					}
+				},
+				ChangedAddress1,
+				LocalAddress1.Address
+			);
+			var unsupportedResponse1 = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				LocalAddress1.Address
+			);
+			var unsupportedResponse2 = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
+					}
+				},
+				new IPEndPoint(ServerAddress.Address, ChangedAddress1.Port),
+				LocalAddress1.Address
+			);
+			var unsupportedResponse3 = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
+					}
+				},
+				new IPEndPoint(ChangedAddress1.Address, ServerAddress.Port),
+				LocalAddress1.Address
+			);
+
+			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
+			mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fullConeResponse);
+
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.FullCone, client.Status.NatType);
+			client.Status.Reset();
+
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse1);
+			await TestUnsupportedServerAsync();
+
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse2);
+			await TestUnsupportedServerAsync();
+
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse3);
+			await TestUnsupportedServerAsync();
+
+			async Task TestUnsupportedServerAsync()
+			{
+				Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+				await client.QueryAsync();
+				Assert.AreEqual(NatType.UnsupportedServer, client.Status.NatType);
+				client.Status.Reset();
+			}
+		}
+
+		[TestMethod]
+		public async Task SymmetricTestAsync()
+		{
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var client = mock.Object;
+
+			var test1Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				LocalAddress1.Address
+			);
+			var test12Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress2.Address, (ushort)MappedAddress2.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				LocalAddress1.Address
+			);
+			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
+			mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
+			mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
+
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			client.Status.Reset();
+
+			mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test12Response);
+
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.Symmetric, client.Status.NatType);
+		}
+
+		[TestMethod]
+		public async Task RestrictedConeTestAsync()
+		{
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var client = mock.Object;
+
+			var test1Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				LocalAddress1.Address
+			);
+			var test3Response = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ChangedAddress2,
+				LocalAddress1.Address
+			);
+			var test3ErrorResponse = new StunResponse(
+				new StunMessage5389
+				{
+					Attributes = new[]
+					{
+						BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
+						BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
+					}
+				},
+				ServerAddress,
+				LocalAddress1.Address
+			);
+			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
+			mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
+			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
+			mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
+
+			mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3Response);
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.RestrictedCone, client.Status.NatType);
+			client.Status.Reset();
+
+			mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3ErrorResponse);
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.PortRestrictedCone, client.Status.NatType);
+			client.Status.Reset();
+
+			mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
+			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			await client.QueryAsync();
+			Assert.AreEqual(NatType.PortRestrictedCone, client.Status.NatType);
+		}
+
+		[TestMethod]
 		public async Task Test1Async()
 		{
 			var ip = await _dnsClient.QueryAsync(Server);
 			using var client = new StunClient3489(ip);
-			var response = await client.Test1Async(default);
 
-			Assert.IsNotNull(response);
-			Assert.IsNotNull(response.Message);
-			Assert.IsNotNull(response.Remote);
-			Assert.IsNotNull(response.LocalAddress);
+			// test I
+			var response1 = await client.Test1Async(default);
 
-			Assert.AreEqual(ip, response.Remote.Address);
-			Assert.AreEqual(Port, response.Remote.Port);
+			Assert.IsNotNull(response1);
+			Assert.AreEqual(ip, response1.Remote.Address);
+			Assert.AreEqual(Port, response1.Remote.Port);
+			Assert.AreNotEqual(Any, client.LocalEndPoint);
 
-			var mappedAddress = response.Message.GetMappedAddressAttribute();
-			var changedAddress = response.Message.GetChangedAddressAttribute();
+			var mappedAddress = response1.Message.GetMappedAddressAttribute();
+			var changedAddress = response1.Message.GetChangedAddressAttribute();
 
 			Assert.IsNotNull(mappedAddress);
 			Assert.IsNotNull(changedAddress);
 
 			Assert.AreNotEqual(ip, changedAddress.Address);
 			Assert.AreNotEqual(Port, changedAddress.Port);
+
+			// Test I(#2)
+			var response12 = await client.Test1_2Async(changedAddress, default);
+
+			Assert.IsNotNull(response12);
+			Assert.AreEqual(changedAddress.Address, response12.Remote.Address);
+			Assert.AreEqual(changedAddress.Port, response12.Remote.Port);
+		}
+
+#if FullCone
+		[TestMethod]
+#endif
+		public async Task Test2Async()
+		{
+			var ip = await _dnsClient.QueryAsync(Server);
+			using var client = new StunClient3489(ip);
+			var response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, default);
+
+			Assert.IsNotNull(response2);
+
+			Assert.AreNotEqual(ip, response2.Remote.Address);
+			Assert.AreNotEqual(Port, response2.Remote.Port);
+		}
+
+#if FullCone
+		[TestMethod]
+#endif
+		public async Task Test3Async()
+		{
+			var ip = await _dnsClient.QueryAsync(Server);
+			using var client = new StunClient3489(ip);
+			var response = await client.Test3Async(default);
+
+			Assert.IsNotNull(response);
+
+			Assert.AreEqual(ip, response.Remote.Address);
+			Assert.AreNotEqual(Port, response.Remote.Port);
 		}
 	}
 }

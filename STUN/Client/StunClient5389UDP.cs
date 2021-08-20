@@ -113,8 +113,8 @@ namespace STUN.Client
 			var result = new StunResult5389();
 			var test = new StunMessage5389 { StunMessageType = StunMessageType.BindingRequest };
 			var (response1, _, local1) = await TestAsync(test, remote, remote, token);
-			var mappedAddress1 = response1.GetXorMappedAddressAttribute();
-			var otherAddress = response1.GetOtherAddressAttribute();
+			var mappedAddress1 = response1?.GetXorMappedAddressAttribute();
+			var otherAddress = response1?.GetOtherAddressAttribute();
 			var local = local1 is null ? null : new IPEndPoint(local1, LocalEndPoint.Port);
 
 			if (response1 is null)

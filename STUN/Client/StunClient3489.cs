@@ -19,7 +19,7 @@ namespace STUN.Client
 	/// </summary>
 	public class StunClient3489 : IDisposable
 	{
-		public IPEndPoint LocalEndPoint => _proxy.LocalEndPoint;
+		public virtual IPEndPoint LocalEndPoint => _proxy.LocalEndPoint;
 
 		public TimeSpan Timeout
 		{
@@ -27,10 +27,7 @@ namespace STUN.Client
 			set => _proxy.Timeout = value;
 		}
 
-		private readonly IPAddress _server;
-		private readonly ushort _port;
-
-		private IPEndPoint RemoteEndPoint => new(_server, _port);
+		private readonly IPEndPoint _remoteEndPoint;
 
 		private readonly IUdpProxy _proxy;
 
@@ -43,8 +40,7 @@ namespace STUN.Client
 
 			_proxy = proxy ?? new NoneUdpProxy(local);
 
-			_server = server;
-			_port = port;
+			_remoteEndPoint = new IPEndPoint(server, port);
 
 			Timeout = TimeSpan.FromSeconds(3);
 			Status.LocalEndPoint = local;
@@ -73,13 +69,13 @@ namespace STUN.Client
 
 				// test I
 				var response1 = await Test1Async(cancellationToken);
-				if (response1?.Message is null || response1.Remote is null)
+				if (response1 is null)
 				{
 					Status.NatType = NatType.UdpBlocked;
 					return;
 				}
 
-				Status.LocalEndPoint = response1.LocalAddress is null ? null : new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
+				Status.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
 
 				var mappedAddress1 = response1.Message.GetMappedAddressAttribute();
 				var changedAddress = response1.Message.GetChangedAddressAttribute();
@@ -103,7 +99,7 @@ namespace STUN.Client
 				if (Equals(mappedAddress1.Address, response1.LocalAddress) && mappedAddress1.Port == LocalEndPoint.Port)
 				{
 					// No NAT
-					if (response2?.Message is null)
+					if (response2 is null)
 					{
 						Status.NatType = NatType.SymmetricUdpFirewall;
 						Status.PublicEndPoint = mappedAddress1;
@@ -117,7 +113,7 @@ namespace STUN.Client
 				}
 
 				// NAT
-				if (response2?.Message is not null && response2.Remote is not null)
+				if (response2 is not null)
 				{
 					// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
 					var type = Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port ? NatType.UnsupportedServer : NatType.FullCone;
@@ -145,18 +141,14 @@ namespace STUN.Client
 
 				// Test III
 				var response3 = await Test3Async(cancellationToken);
-				var mappedAddress3 = response3?.Message.GetMappedAddressAttribute();
-				if (mappedAddress3 is not null && response3?.Remote is not null)
+				if (response3 is not null)
 				{
-					if (Equals(response3.Remote.Address, response1.Remote.Address) && response3.Remote.Port != response1.Remote.Port)
+					var mappedAddress3 = response3.Message.GetMappedAddressAttribute();
+					if (mappedAddress3 is not null
+						&& Equals(response3.Remote.Address, response1.Remote.Address)
+						&& response3.Remote.Port != response1.Remote.Port)
 					{
 						Status.NatType = NatType.RestrictedCone;
-						Status.PublicEndPoint = mappedAddress3;
-						return;
-					}
-					else
-					{
-						Status.NatType = NatType.UnsupportedServer;
 						Status.PublicEndPoint = mappedAddress3;
 						return;
 					}
@@ -186,13 +178,7 @@ namespace STUN.Client
 				var message = new StunMessage5389();
 				if (message.TryParse(receiveBuffer) && message.IsSameTransaction(sendMessage))
 				{
-					var response = new StunResponse
-					{
-						Message = message,
-						Remote = ipe,
-						LocalAddress = local
-					};
-					return response;
+					return new StunResponse(message, ipe, local);
 				}
 			}
 			catch (Exception ex)
@@ -209,7 +195,7 @@ namespace STUN.Client
 				StunMessageType = StunMessageType.BindingRequest,
 				MagicCookie = 0
 			};
-			return await RequestAsync(message, RemoteEndPoint, RemoteEndPoint, cancellationToken);
+			return await RequestAsync(message, _remoteEndPoint, _remoteEndPoint, cancellationToken);
 		}
 
 		public virtual async ValueTask<StunResponse?> Test2Async(IPEndPoint other, CancellationToken cancellationToken)
@@ -220,7 +206,7 @@ namespace STUN.Client
 				MagicCookie = 0,
 				Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
 			};
-			return await RequestAsync(message, RemoteEndPoint, other, cancellationToken);
+			return await RequestAsync(message, _remoteEndPoint, other, cancellationToken);
 		}
 
 		public virtual async ValueTask<StunResponse?> Test1_2Async(IPEndPoint other, CancellationToken cancellationToken)
@@ -241,7 +227,7 @@ namespace STUN.Client
 				MagicCookie = 0,
 				Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
 			};
-			return await RequestAsync(message, RemoteEndPoint, RemoteEndPoint, cancellationToken);
+			return await RequestAsync(message, _remoteEndPoint, _remoteEndPoint, cancellationToken);
 		}
 
 		public void Dispose()
