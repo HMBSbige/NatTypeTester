@@ -1,11 +1,12 @@
 using Dns.Net.Abstractions;
 using JetBrains.Annotations;
+using Microsoft;
 using NatTypeTester.Models;
 using ReactiveUI;
+using STUN;
 using STUN.Client;
 using STUN.Proxy;
 using STUN.StunResult;
-using STUN.Utils;
 using System;
 using System.Net;
 using System.Reactive;
@@ -37,11 +38,7 @@ namespace NatTypeTester.ViewModels
 
 		private async Task TestClassicNatTypeImpl(CancellationToken token)
 		{
-			var server = new StunServer();
-			if (!server.Parse(Config.StunServer))
-			{
-				throw new Exception(@"Wrong STUN Server!");
-			}
+			Verify.Operation(StunServer.TryParse(Config.StunServer, out var server), @"Wrong STUN Server!");
 
 			using var proxy = ProxyFactory.CreateProxy(
 					Config.ProxyType,

@@ -2,7 +2,7 @@ using DynamicData;
 using DynamicData.Binding;
 using NatTypeTester.Models;
 using ReactiveUI;
-using STUN.Utils;
+using STUN;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,10 +62,9 @@ namespace NatTypeTester.ViewModels
 					return;
 				}
 
-				var stun = new StunServer();
 				foreach (var line in File.ReadLines(path))
 				{
-					if (!string.IsNullOrWhiteSpace(line) && stun.Parse(line))
+					if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out var stun))
 					{
 						List.Add(stun.ToString());
 					}
