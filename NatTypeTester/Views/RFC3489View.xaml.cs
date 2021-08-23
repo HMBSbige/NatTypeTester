@@ -1,11 +1,11 @@
 using JetBrains.Annotations;
 using NatTypeTester.Utils;
 using NatTypeTester.ViewModels;
+using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows.Controls;
 using System.Windows.Input;
 using Volo.Abp.DependencyInjection;
 
@@ -30,8 +30,7 @@ namespace NatTypeTester.Views
 
 				this.BindCommand(ViewModel, vm => vm.TestClassicNatType, v => v.TestButton).DisposeWith(d);
 
-				this.Events()
-						.KeyDown
+				this.Events().KeyDown
 						.Where(x => x.Key == Key.Enter && TestButton.Command.CanExecute(default))
 						.Subscribe(_ => TestButton.Command.Execute(default))
 						.DisposeWith(d);

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using NatTypeTester.ViewModels;
+using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester
@@ -34,16 +34,17 @@ namespace NatTypeTester
 				#endregion
 
 				this.Bind(ViewModel, vm => vm.Router, v => v.RoutedViewHost.Router).DisposeWith(d);
-				Observable.FromEventPattern<NavigationViewSelectionChangedEventArgs>(NavigationView, nameof(NavigationView.SelectionChanged))
-				.Subscribe(args =>
+
+				NavigationView.Events().SelectionChanged
+				.Subscribe(parameter =>
 				{
-					if (args.EventArgs.IsSettingsSelected)
+					if (parameter.args.IsSettingsSelected)
 					{
 						ViewModel.Router.Navigate.Execute(serviceProvider.GetRequiredService<SettingViewModel>());
 						return;
 					}
 
-					if (args.EventArgs.SelectedItem is not NavigationViewItem { Tag: string tag })
+					if (parameter.args.SelectedItem is not NavigationViewItem { Tag: string tag })
 					{
 						return;
 					}
