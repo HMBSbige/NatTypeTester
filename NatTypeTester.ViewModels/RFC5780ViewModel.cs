@@ -44,11 +44,15 @@ namespace NatTypeTester.ViewModels
 		{
 			Verify.Operation(StunServer.TryParse(Config.StunServer, out var server), @"Wrong STUN Server!");
 
-			var proxyIpe = IPEndPoint.Parse(Config.ProxyServer);
+			if (!HostnameEndpoint.TryParse(Config.ProxyServer, out var proxyIpe))
+			{
+				throw new NotSupportedException(@"Unknown proxy address");
+			}
+
 			var socks5Option = new Socks5CreateOption
 			{
-				Address = proxyIpe.Address,
-				Port = (ushort)proxyIpe.Port,
+				Address = await DnsClient.QueryAsync(proxyIpe.Hostname, token),
+				Port = proxyIpe.Port,
 				UsernamePassword = new UsernamePassword
 				{
 					UserName = Config.ProxyUser,

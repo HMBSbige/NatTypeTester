@@ -4,7 +4,7 @@ using STUN;
 namespace UnitTest
 {
 	[TestClass]
-	public class StunServerTest
+	public class HostnameEndpointTest
 	{
 		[TestMethod]
 		[DataRow(@"www.google.com", ushort.MinValue)]
@@ -65,6 +65,20 @@ namespace UnitTest
 			var server = new StunServer();
 			Assert.AreEqual(@"stun.syncthing.net", server.Hostname);
 			Assert.AreEqual(3478, server.Port);
+		}
+
+		[TestMethod]
+		[DataRow(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
+		[DataRow(@"stun.syncthing.net:3478", @"stun.syncthing.net:3478")]
+		[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
+		[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]:3478")]
+		[DataRow(@"1.1.1.1:3478", @"1.1.1.1:3478")]
+		[DataRow(@"1.1.1.1:1919", @"1.1.1.1:1919")]
+		public void HostnameEndpointToString(string str, string expected)
+		{
+			Assert.IsTrue(HostnameEndpoint.TryParse(str, out var server));
+			Assert.IsNotNull(server);
+			Assert.AreEqual(expected, server.ToString());
 		}
 	}
 }

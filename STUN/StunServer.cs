@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
@@ -18,64 +17,22 @@ namespace STUN
 			Port = DefaultPort;
 		}
 
-		private StunServer(string host, ushort port)
+		private StunServer(string hostname, ushort port)
 		{
-			Hostname = host;
+			Hostname = hostname;
 			Port = port;
 		}
 
-		public static bool TryParse(string str, [NotNullWhen(true)] out StunServer? server)
+		public static bool TryParse(string s, [NotNullWhen(true)] out StunServer? result)
 		{
-			server = null;
-			if (string.IsNullOrEmpty(str))
+			if (!HostnameEndpoint.TryParse(s, out var host, DefaultPort))
 			{
+				result = null;
 				return false;
 			}
 
-			var hostLength = str.Length;
-			var pos = str.LastIndexOf(':');
-
-			if (pos > 0)
-			{
-				if (str[pos - 1] is ']')
-				{
-					hostLength = pos;
-				}
-				else if (str.AsSpan(0, pos).LastIndexOf(':') is -1)
-				{
-					hostLength = pos;
-				}
-			}
-
-			var host = str[..hostLength];
-			var type = Uri.CheckHostName(host);
-			switch (type)
-			{
-				case UriHostNameType.Dns:
-				case UriHostNameType.IPv4:
-				case UriHostNameType.IPv6:
-				{
-					break;
-				}
-				default:
-				{
-					return false;
-				}
-			}
-
-			if (hostLength == str.Length)
-			{
-				server = new StunServer(host, DefaultPort);
-				return true;
-			}
-
-			if (ushort.TryParse(str.AsSpan(hostLength + 1), out var port))
-			{
-				server = new StunServer(host, port);
-				return true;
-			}
-
-			return false;
+			result = new StunServer(host.Hostname, host.Port);
+			return true;
 		}
 
 		public override string ToString()
