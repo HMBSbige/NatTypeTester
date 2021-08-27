@@ -8,6 +8,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,15 +18,11 @@ namespace STUN.Client
 	/// https://tools.ietf.org/html/rfc3489#section-10.1
 	/// https://upload.wikimedia.org/wikipedia/commons/6/63/STUN_Algorithm3.svg
 	/// </summary>
-	public class StunClient3489 : IDisposable
+	public class StunClient3489 : IStunClient
 	{
-		public virtual IPEndPoint LocalEndPoint => _proxy.LocalEndPoint;
+		public virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
 
-		public TimeSpan Timeout
-		{
-			get => _proxy.Timeout;
-			set => _proxy.Timeout = value;
-		}
+		public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
 		private readonly IPEndPoint _remoteEndPoint;
 
@@ -33,7 +30,7 @@ namespace STUN.Client
 
 		public ClassicStunResult Status { get; } = new();
 
-		public StunClient3489(IPAddress server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
+		public StunClient3489(IPAddress server, ushort port, IPEndPoint local, IUdpProxy? proxy = null)
 		{
 			Requires.NotNull(server, nameof(server));
 			Requires.Argument(port > 0, nameof(port), @"Port value must be > 0!");
@@ -42,143 +39,135 @@ namespace STUN.Client
 
 			_remoteEndPoint = new IPEndPoint(server, port);
 
-			Timeout = TimeSpan.FromSeconds(3);
 			Status.LocalEndPoint = local;
 		}
 
-		public virtual async ValueTask ConnectAsync(CancellationToken cancellationToken)
+		public virtual async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
 		{
-			Status.Reset();
-
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			cts.CancelAfter(Timeout);
+			cts.CancelAfter(ReceiveTimeout);
 
 			await _proxy.ConnectAsync(cts.Token);
 		}
 
-		public virtual async ValueTask DisconnectAsync()
+		public virtual async ValueTask CloseProxyAsync(CancellationToken cancellationToken = default)
 		{
-			await _proxy.DisconnectAsync();
+			await _proxy.CloseAsync(cancellationToken);
 		}
 
-		public async Task QueryAsync(CancellationToken cancellationToken = default)
+		public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 		{
-			try
+			Status.Reset();
+
+			// test I
+			var response1 = await Test1Async(cancellationToken);
+			if (response1 is null)
 			{
-				await ConnectAsync(cancellationToken);
+				Status.NatType = NatType.UdpBlocked;
+				return;
+			}
 
-				// test I
-				var response1 = await Test1Async(cancellationToken);
-				if (response1 is null)
+			Status.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
+
+			var mappedAddress1 = response1.Message.GetMappedAddressAttribute();
+			var changedAddress = response1.Message.GetChangedAddressAttribute();
+
+			Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
+
+			// 某些单 IP 服务器的迷惑操作
+			if (mappedAddress1 is null || changedAddress is null
+				|| Equals(changedAddress.Address, response1.Remote.Address)
+				|| changedAddress.Port == response1.Remote.Port)
+			{
+				Status.NatType = NatType.UnsupportedServer;
+				return;
+			}
+
+			// test II
+			var response2 = await Test2Async(changedAddress, cancellationToken);
+			var mappedAddress2 = response2?.Message.GetMappedAddressAttribute();
+
+			// is Public IP == link's IP?
+			if (Equals(mappedAddress1.Address, response1.LocalAddress) && mappedAddress1.Port == LocalEndPoint.Port)
+			{
+				// No NAT
+				if (response2 is null)
 				{
-					Status.NatType = NatType.UdpBlocked;
-					return;
+					Status.NatType = NatType.SymmetricUdpFirewall;
+					Status.PublicEndPoint = mappedAddress1;
 				}
-
-				Status.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
-
-				var mappedAddress1 = response1.Message.GetMappedAddressAttribute();
-				var changedAddress = response1.Message.GetChangedAddressAttribute();
-
-				Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
-
-				// 某些单 IP 服务器的迷惑操作
-				if (mappedAddress1 is null || changedAddress is null
-					|| Equals(changedAddress.Address, response1.Remote.Address)
-					|| changedAddress.Port == response1.Remote.Port)
+				else
 				{
-					Status.NatType = NatType.UnsupportedServer;
-					return;
-				}
-
-				// test II
-				var response2 = await Test2Async(changedAddress, cancellationToken);
-				var mappedAddress2 = response2?.Message.GetMappedAddressAttribute();
-
-				// is Public IP == link's IP?
-				if (Equals(mappedAddress1.Address, response1.LocalAddress) && mappedAddress1.Port == LocalEndPoint.Port)
-				{
-					// No NAT
-					if (response2 is null)
-					{
-						Status.NatType = NatType.SymmetricUdpFirewall;
-						Status.PublicEndPoint = mappedAddress1;
-					}
-					else
-					{
-						Status.NatType = NatType.OpenInternet;
-						Status.PublicEndPoint = mappedAddress2;
-					}
-					return;
-				}
-
-				// NAT
-				if (response2 is not null)
-				{
-					// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
-					var type = Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port ? NatType.UnsupportedServer : NatType.FullCone;
-					Status.NatType = type;
+					Status.NatType = NatType.OpenInternet;
 					Status.PublicEndPoint = mappedAddress2;
-					return;
 				}
-
-				// Test I(#2)
-				var response12 = await Test1_2Async(changedAddress, cancellationToken);
-				var mappedAddress12 = response12?.Message.GetMappedAddressAttribute();
-
-				if (mappedAddress12 is null)
-				{
-					Status.NatType = NatType.Unknown;
-					return;
-				}
-
-				if (!Equals(mappedAddress12, mappedAddress1))
-				{
-					Status.NatType = NatType.Symmetric;
-					Status.PublicEndPoint = mappedAddress12;
-					return;
-				}
-
-				// Test III
-				var response3 = await Test3Async(cancellationToken);
-				if (response3 is not null)
-				{
-					var mappedAddress3 = response3.Message.GetMappedAddressAttribute();
-					if (mappedAddress3 is not null
-						&& Equals(response3.Remote.Address, response1.Remote.Address)
-						&& response3.Remote.Port != response1.Remote.Port)
-					{
-						Status.NatType = NatType.RestrictedCone;
-						Status.PublicEndPoint = mappedAddress3;
-						return;
-					}
-				}
-
-				Status.NatType = NatType.PortRestrictedCone;
-				Status.PublicEndPoint = mappedAddress12;
+				return;
 			}
-			finally
+
+			// NAT
+			if (response2 is not null)
 			{
-				await DisconnectAsync();
+				// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
+				var type = Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port ? NatType.UnsupportedServer : NatType.FullCone;
+				Status.NatType = type;
+				Status.PublicEndPoint = mappedAddress2;
+				return;
 			}
+
+			// Test I(#2)
+			var response12 = await Test1_2Async(changedAddress, cancellationToken);
+			var mappedAddress12 = response12?.Message.GetMappedAddressAttribute();
+
+			if (mappedAddress12 is null)
+			{
+				Status.NatType = NatType.Unknown;
+				return;
+			}
+
+			if (!Equals(mappedAddress12, mappedAddress1))
+			{
+				Status.NatType = NatType.Symmetric;
+				Status.PublicEndPoint = mappedAddress12;
+				return;
+			}
+
+			// Test III
+			var response3 = await Test3Async(cancellationToken);
+			if (response3 is not null)
+			{
+				var mappedAddress3 = response3.Message.GetMappedAddressAttribute();
+				if (mappedAddress3 is not null
+					&& Equals(response3.Remote.Address, response1.Remote.Address)
+					&& response3.Remote.Port != response1.Remote.Port)
+				{
+					Status.NatType = NatType.RestrictedCone;
+					Status.PublicEndPoint = mappedAddress3;
+					return;
+				}
+			}
+
+			Status.NatType = NatType.PortRestrictedCone;
+			Status.PublicEndPoint = mappedAddress12;
 		}
 
 		private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken cancellationToken)
 		{
 			try
 			{
-				using var memoryOwner = MemoryPool<byte>.Shared.Rent(ushort.MaxValue);
-				var sendBuffer = memoryOwner.Memory;
-				var length = sendMessage.WriteTo(sendBuffer.Span);
+				using var memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
+				var buffer = memoryOwner.Memory;
+				var length = sendMessage.WriteTo(buffer.Span);
+
+				await _proxy.SendToAsync(buffer[..length], SocketFlags.None, remote, cancellationToken);
 
 				using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-				cts.CancelAfter(Timeout);
-				var (receiveBuffer, ipe, local) = await _proxy.ReceiveAsync(sendBuffer[..length], remote, receive, cts.Token);
+				cts.CancelAfter(ReceiveTimeout);
+				var r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
 
 				var message = new StunMessage5389();
-				if (message.TryParse(receiveBuffer) && message.IsSameTransaction(sendMessage))
+				if (message.TryParse(buffer.Span[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 				{
-					return new StunResponse(message, ipe, local);
+					return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);
 				}
 			}
 			catch (Exception ex)

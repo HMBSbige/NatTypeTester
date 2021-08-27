@@ -1,10 +1,15 @@
+using Microsoft;
+using Socks5.Clients;
+using Socks5.Enums;
+using Socks5.Models;
+using Socks5.Utils;
 using STUN.Utils;
 using System;
-using System.Diagnostics;
+using System.Buffers;
+using System.IO;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,254 +17,115 @@ namespace STUN.Proxy
 {
 	public class Socks5UdpProxy : IUdpProxy
 	{
-		private readonly TcpClient _assoc;
-		private readonly IPEndPoint _socksTcpEndPoint;
-
-		private IPEndPoint? _assocEndPoint;
-
-		public TimeSpan Timeout
+		public Socket Client
 		{
-			get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
-			set
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
 			{
-				var timeout = Convert.ToInt32(value.TotalMilliseconds);
-				_udpClient.Client.ReceiveTimeout = timeout;
-				_assoc.ReceiveTimeout = timeout;
+				Verify.Operation(_socks5Client?.UdpClient is not null, @"Socks5 is not established.");
+				return _socks5Client.UdpClient;
 			}
 		}
 
-		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint!;
+		private readonly Socks5CreateOption _socks5Options;
+		private readonly IPEndPoint _localEndPoint;
 
-		private readonly UdpClient _udpClient;
+		private Socks5Client? _socks5Client;
+		private ServerBound _udpServerBound;
 
-		private readonly string? _user;
-		private readonly string? _password;
-
-		public Socks5UdpProxy(IPEndPoint? local, IPEndPoint proxy)
+		public Socks5UdpProxy(IPEndPoint localEndPoint, Socks5CreateOption socks5Options)
 		{
-			_udpClient = local is null ? new UdpClient() : new UdpClient(local);
-			_assoc = new TcpClient(proxy.AddressFamily);
-			_socksTcpEndPoint = proxy;
+			_socks5Options = socks5Options;
+			Requires.NotNull(localEndPoint, nameof(localEndPoint));
+			Requires.NotNull(socks5Options, nameof(socks5Options));
+			Requires.Argument(socks5Options.Address is not null, nameof(socks5Options), @"SOCKS5 address is null");
+
+			_localEndPoint = localEndPoint;
+			_socks5Options = socks5Options;
 		}
 
-		public Socks5UdpProxy(IPEndPoint? local, IPEndPoint proxy, string? user, string? password) : this(local, proxy)
+		public async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
 		{
-			_user = user;
-			_password = password;
+			Verify.Operation(_socks5Client?.Status is not Status.Established, @"SOCKS5 client has been connected");
+			_socks5Client?.Dispose();
+
+			_socks5Client = new Socks5Client(_socks5Options);
+			_udpServerBound = await _socks5Client.UdpAssociateAsync(_localEndPoint.Address, (ushort)_localEndPoint.Port, cancellationToken);
 		}
 
-		public async Task ConnectAsync(CancellationToken token = default)
+		public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 		{
+			if (_socks5Client is not null)
+			{
+				_socks5Client.Dispose();
+				_socks5Client = null;
+			}
+			return default;
+		}
+
+		public async ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
+		{
+			Verify.Operation(_socks5Client?.Status is Status.Established && _socks5Client.UdpClient is not null, @"Socks5 is not established.");
+
+			var t = ArrayPool<byte>.Shared.Rent(buffer.Length);
 			try
 			{
-				var buf = new byte[1024];
-				await _assoc.ConnectAsync(_socksTcpEndPoint.Address, _socksTcpEndPoint.Port, token);
-				var s = _assoc.GetStream();
-				using var _ = token.Register(() => s.Close());
-				var requestPasswordAuth = !string.IsNullOrEmpty(_user);
-
-				#region Handshake
-
-				// we have no GSS-API support
-				var handShake = requestPasswordAuth ? new byte[] { 5, 2, 0, 2 } : new byte[] { 5, 1, 0 };
-				await s.WriteAsync(handShake, 0, handShake.Length, token);
-
-				// 5 auth(ff=deny)
-				if (await s.ReadAsync(buf, 0, 2, token) != 2)
+				if (_udpServerBound.Type is AddressType.Domain)
 				{
-					throw new ProtocolViolationException();
+					ThrowErrorAddressType();
 				}
 
-				if (buf[0] != 5)
+				var remote = new IPEndPoint(_udpServerBound.Address!, _udpServerBound.Port);
+				var r = await _socks5Client.UdpClient.ReceiveMessageFromAsync(t, socketFlags, remote, cancellationToken);
+				var u = Unpack.Udp(t.AsMemory(0, r.ReceivedBytes));
+
+				u.Data.CopyTo(buffer);
+
+				if (u.Type is AddressType.Domain)
 				{
-					throw new ProtocolViolationException();
+					ThrowErrorAddressType();
 				}
 
-				#endregion
-
-				#region Auth
-
-				var auth = buf[1];
-				switch (auth)
+				return new SocketReceiveMessageFromResult
 				{
-					case 0:
-						break;
-					case 2:
-						var uByte = Encoding.UTF8.GetBytes(_user ?? string.Empty);
-						var pByte = Encoding.UTF8.GetBytes(_password ?? string.Empty);
-						buf[0] = 1;
-						buf[1] = (byte)uByte.Length;
-						Array.Copy(uByte, 0, buf, 2, uByte.Length);
-						buf[uByte.Length + 2] = (byte)pByte.Length;
-						Array.Copy(pByte, 0, buf, uByte.Length + 3, pByte.Length);
-						// 1 userLen user passLen pass
-						await s.WriteAsync(buf, 0, uByte.Length + pByte.Length + 3, token);
-						// 1 state(0=ok)
-						if (await s.ReadAsync(buf, 0, 2, token) != 2)
-						{
-							throw new ProtocolViolationException();
-						}
-
-						if (buf[0] != 1)
-						{
-							throw new ProtocolViolationException();
-						}
-
-						if (buf[1] != 0)
-						{
-							throw new UnauthorizedAccessException();
-						}
-
-						break;
-					case 0xff:
-						throw new UnauthorizedAccessException();
-					default:
-						throw new ProtocolViolationException();
-				}
-
-				#endregion
-
-				#region UDP Assoc Send
-
-				buf[0] = 5;
-				buf[1] = 3;
-				buf[2] = 0;
-
-				var abyte = GetEndPointByte(new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort));
-				var addrLen = abyte.Length;
-				Array.Copy(abyte, 0, buf, 3, addrLen);
-				// 5 cmd(3=udpassoc) 0 atyp(1=v4 3=dns 4=v5) addr port
-				await s.WriteAsync(buf, 0, addrLen + 3, token);
-
-				#endregion
-
-				#region UDP Assoc Response
-
-				if (await s.ReadAsync(buf, 0, 4, token) != 4)
-				{
-					throw new ProtocolViolationException();
-				}
-
-				if (buf[0] != 5 || buf[2] != 0)
-				{
-					throw new ProtocolViolationException();
-				}
-
-				if (buf[1] != 0)
-				{
-					throw new UnauthorizedAccessException();
-				}
-
-				addrLen = GetAddressLength(buf[3]);
-
-				var addr = new byte[addrLen];
-				if (await s.ReadAsync(addr, 0, addrLen, token) != addrLen)
-				{
-					throw new ProtocolViolationException();
-				}
-
-				var assocIP = new IPAddress(addr);
-				if (await s.ReadAsync(buf, 0, 2, token) != 2)
-				{
-					throw new ProtocolViolationException();
-				}
-
-				var assocPort = buf[0] * 256 + buf[1];
-
-				#endregion
-
-				_assocEndPoint = new IPEndPoint(assocIP, assocPort);
+					ReceivedBytes = u.Data.Length,
+					SocketFlags = r.SocketFlags,
+					RemoteEndPoint = new IPEndPoint(u.Address!, u.Port),
+					PacketInformation = r.PacketInformation
+				};
 			}
-			catch (ObjectDisposedException ex) when (ex.ObjectName == typeof(NetworkStream).FullName)
+			finally
 			{
-				await DisconnectAsync();
-				throw new TimeoutException();
+				ArrayPool<byte>.Shared.Return(t);
 			}
-			catch (Exception e)
+
+			static void ThrowErrorAddressType()
 			{
-				Debug.WriteLine(e);
-				await DisconnectAsync();
-				throw;
+				throw new InvalidDataException(@"Received error AddressType");
 			}
 		}
 
-		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(ReadOnlyMemory<byte> bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
+		public async ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 		{
-			var state = _assoc.GetState();
-			if (state != TcpState.Established)
+			Verify.Operation(_socks5Client is not null, @"SOCKS5 client is not connected");
+
+			if (remoteEP is not IPEndPoint remote)
 			{
-				throw new InvalidOperationException(@"No UDP association, maybe already disconnected or not connected");
+				ThrowNotSupportedException();
 			}
 
-			var remoteBytes = GetEndPointByte(remote);
-			var proxyBytes = new byte[bytes.Length + remoteBytes.Length + 3];
-			Array.Copy(remoteBytes, 0, proxyBytes, 3, remoteBytes.Length);
-			bytes.Span.CopyTo(proxyBytes.AsSpan(remoteBytes.Length + 3));
+			return await _socks5Client.SendUdpAsync(buffer, remote.Address, (ushort)remote.Port, cancellationToken);
 
-			await _udpClient.SendAsync(proxyBytes, proxyBytes.Length, _assocEndPoint);
-			var res = new byte[ushort.MaxValue];
-
-			var (local, length, _) = await _udpClient.Client.ReceiveMessageFromAsync(_assocEndPoint!, res, SocketFlags.None);
-
-			if (res[0] != 0 || res[1] != 0 || res[2] != 0)
+			static void ThrowNotSupportedException()
 			{
-				throw new Exception();
+				throw new NotSupportedException();
 			}
-
-			var addressLen = GetAddressLength(res[3]);
-
-			var ipByte = new byte[addressLen];
-			Array.Copy(res, 4, ipByte, 0, addressLen);
-
-			var ip = new IPAddress(ipByte);
-			var port = res[addressLen + 4] * 256 + res[addressLen + 5];
-			var ret = new byte[length - addressLen - 6];
-			Array.Copy(res, addressLen + 6, ret, 0, length - addressLen - 6);
-			return (
-				ret,
-				new IPEndPoint(ip, port),
-				local);
-		}
-
-		public Task DisconnectAsync()
-		{
-			try
-			{
-				_assoc.Close();
-			}
-			catch
-			{
-				// ignored
-			}
-
-			return Task.CompletedTask;
-		}
-
-		private static byte[] GetEndPointByte(IPEndPoint ep)
-		{
-			var ipByte = ep.Address.GetAddressBytes();
-			var ret = new byte[ipByte.Length + 3];
-			ret[0] = ipByte.Length == 4 ? (byte)1 : (byte)4;
-			Array.Copy(ipByte, 0, ret, 1, ipByte.Length);
-			ret[ipByte.Length + 1] = (byte)(ep.Port / 256);
-			ret[ipByte.Length + 2] = (byte)(ep.Port % 256);
-			return ret;
-		}
-
-		private static int GetAddressLength(byte b)
-		{
-			return b switch
-			{
-				1 => 4,
-				4 => 16,
-				_ => throw new NotSupportedException()
-			};
 		}
 
 		public void Dispose()
 		{
-			_udpClient.Dispose();
-			_assoc.Dispose();
+			_socks5Client?.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }

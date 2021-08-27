@@ -1,7 +1,6 @@
+using Microsoft;
 using STUN.Utils;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -11,48 +10,40 @@ namespace STUN.Proxy
 {
 	public class NoneUdpProxy : IUdpProxy
 	{
-		public TimeSpan Timeout
+		public Socket Client { get; }
+
+		public NoneUdpProxy(IPEndPoint localEndPoint)
 		{
-			get => TimeSpan.FromMilliseconds(_udpClient.Client.ReceiveTimeout);
-			set => _udpClient.Client.ReceiveTimeout = Convert.ToInt32(value.TotalMilliseconds);
+			Requires.NotNull(localEndPoint, nameof(localEndPoint));
+
+			Client = new Socket(localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+			Client.Bind(localEndPoint);
 		}
 
-		public IPEndPoint LocalEndPoint => (IPEndPoint)_udpClient.Client.LocalEndPoint!;
-
-		private readonly UdpClient _udpClient;
-
-		public NoneUdpProxy(IPEndPoint? local)
+		public ValueTask ConnectAsync(CancellationToken cancellationToken = default)
 		{
-			_udpClient = local is null ? new UdpClient() : new UdpClient(local);
+			return default;
 		}
 
-		public Task ConnectAsync(CancellationToken token = default)
+		public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 		{
-			return Task.CompletedTask;
+			return default;
 		}
 
-		public Task DisconnectAsync()
+		public ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
 		{
-			return Task.CompletedTask;
+			return Client.ReceiveMessageFromAsync(buffer, socketFlags, remoteEndPoint, cancellationToken);
 		}
 
-		public async Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(ReadOnlyMemory<byte> bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default)
+		public ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 		{
-			Debug.WriteLine($@"{LocalEndPoint} => {remote} {bytes.Length} 字节");
-
-			//TODO .NET6.0
-			var buffer = bytes.ToArray();
-			await _udpClient.SendAsync(buffer, buffer.Length, remote);
-
-			var res = new byte[ushort.MaxValue];
-
-			var (local, length, rec) = await _udpClient.Client.ReceiveMessageFromAsync(receive, res, SocketFlags.None);
-			return (res.Take(length).ToArray(), rec, local);
+			return Client.SendToAsync(buffer, socketFlags, remoteEP, cancellationToken);
 		}
 
 		public void Dispose()
 		{
-			_udpClient.Dispose();
+			Client.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }

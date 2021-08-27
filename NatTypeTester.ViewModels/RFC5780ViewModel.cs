@@ -3,12 +3,14 @@ using JetBrains.Annotations;
 using Microsoft;
 using NatTypeTester.Models;
 using ReactiveUI;
+using Socks5.Models;
 using STUN;
 using STUN.Client;
 using STUN.Proxy;
 using STUN.StunResult;
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
@@ -30,22 +32,32 @@ namespace NatTypeTester.ViewModels
 
 		public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
 
+		private static readonly IPEndPoint DefaultLocalEndpoint = new(IPAddress.Any, 0);
+
 		public RFC5780ViewModel()
 		{
 			Result5389 = new StunResult5389 { LocalEndPoint = new IPEndPoint(IPAddress.Any, 0) };
-			DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeImpl);
+			DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeAsync);
 		}
 
-		private async Task DiscoveryNatTypeImpl(CancellationToken token)
+		private async Task DiscoveryNatTypeAsync(CancellationToken token)
 		{
 			Verify.Operation(StunServer.TryParse(Config.StunServer, out var server), @"Wrong STUN Server!");
 
-			using var proxy = ProxyFactory.CreateProxy(
-					Config.ProxyType,
-					Result5389.LocalEndPoint,
-					IPEndPoint.Parse(Config.ProxyServer),
-					Config.ProxyUser, Config.ProxyPassword
-			);
+			var proxyIpe = IPEndPoint.Parse(Config.ProxyServer);
+			var socks5Option = new Socks5CreateOption
+			{
+				Address = proxyIpe.Address,
+				Port = (ushort)proxyIpe.Port,
+				UsernamePassword = new UsernamePassword
+				{
+					UserName = Config.ProxyUser,
+					Password = Config.ProxyPassword
+				}
+			};
+
+			Result5389.LocalEndPoint ??= DefaultLocalEndpoint;
+			using var proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
 
 			var ip = await DnsClient.QueryAsync(server.Hostname, token);
 			using var client = new StunClient5389UDP(ip, server.Port, Result5389.LocalEndPoint, proxy);
@@ -55,13 +67,20 @@ namespace NatTypeTester.ViewModels
 					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe(_ => this.RaisePropertyChanged(nameof(Result5389))))
 			{
-				await client.QueryAsync();
+				await client.ConnectProxyAsync(token);
+				try
+				{
+					await client.QueryAsync(token);
+					Result5389.LocalEndPoint = new IPEndPoint(client.LocalEndPoint.AddressFamily is AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, client.LocalEndPoint.Port);
+				}
+				finally
+				{
+					await client.CloseProxyAsync(token);
+				}
 			}
 
-			var cache = new StunResult5389();
-			cache.Clone(client.Status);
-			cache.LocalEndPoint = client.LocalEndPoint;
-			Result5389 = cache;
+			Result5389 = new StunResult5389();
+			Result5389.Clone(client.Status);
 
 			this.RaisePropertyChanged(nameof(Result5389));
 		}

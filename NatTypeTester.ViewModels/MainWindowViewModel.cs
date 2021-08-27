@@ -1,5 +1,6 @@
 using DynamicData;
 using DynamicData.Binding;
+using Microsoft.VisualStudio.Threading;
 using NatTypeTester.Models;
 using ReactiveUI;
 using STUN;
@@ -69,7 +70,7 @@ namespace NatTypeTester.ViewModels
 						List.Add(stun.ToString());
 					}
 				}
-			});
+			}).Forget();
 		}
 	}
 }

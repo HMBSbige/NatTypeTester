@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,10 +8,10 @@ namespace STUN.Proxy
 {
 	public interface IUdpProxy : IDisposable
 	{
-		TimeSpan Timeout { get; set; }
-		IPEndPoint LocalEndPoint { get; }
-		Task ConnectAsync(CancellationToken token = default);
-		Task<(byte[], IPEndPoint, IPAddress)> ReceiveAsync(ReadOnlyMemory<byte> bytes, IPEndPoint remote, EndPoint receive, CancellationToken token = default);
-		Task DisconnectAsync();
+		Socket Client { get; }
+		ValueTask ConnectAsync(CancellationToken cancellationToken = default);
+		ValueTask CloseAsync(CancellationToken cancellationToken = default);
+		ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default);
+		ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default);
 	}
 }

@@ -36,7 +36,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task UdpBlockedTestAsync()
 		{
-			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, Any, null);
 			var client = mock.Object;
 
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
@@ -49,7 +49,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task UnsupportedServerTestAsync()
 		{
-			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, Any, null);
 			var client = mock.Object;
 
 			mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
@@ -111,7 +111,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task NoNatTestAsync()
 		{
-			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, Any, null);
 			var client = mock.Object;
 
 			var openInternetTest1Response = new StunResponse(
@@ -158,7 +158,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task FullConeTestAsync()
 		{
-			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, Any, null);
 			var client = mock.Object;
 
 			var test1Response = new StunResponse(
@@ -248,7 +248,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task SymmetricTestAsync()
 		{
-			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, Any, null);
 			var client = mock.Object;
 
 			var test1Response = new StunResponse(
@@ -295,7 +295,7 @@ namespace UnitTest
 		[TestMethod]
 		public async Task RestrictedConeTestAsync()
 		{
-			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, null, null);
+			var mock = new Mock<StunClient3489>(IPAddress.Any, Port, Any, null);
 			var client = mock.Object;
 
 			var test1Response = new StunResponse(
@@ -361,7 +361,7 @@ namespace UnitTest
 		public async Task Test1Async()
 		{
 			var ip = await _dnsClient.QueryAsync(Server);
-			using var client = new StunClient3489(ip);
+			using var client = new StunClient3489(ip, 3478, Any);
 
 			// test I
 			var response1 = await client.Test1Async(default);
@@ -394,7 +394,7 @@ namespace UnitTest
 		public async Task Test2Async()
 		{
 			var ip = await _dnsClient.QueryAsync(Server);
-			using var client = new StunClient3489(ip);
+			using var client = new StunClient3489(ip, 3478, Any);
 			var response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, default);
 
 			Assert.IsNotNull(response2);
@@ -409,7 +409,7 @@ namespace UnitTest
 		public async Task Test3Async()
 		{
 			var ip = await _dnsClient.QueryAsync(Server);
-			using var client = new StunClient3489(ip);
+			using var client = new StunClient3489(ip, 3478, Any);
 			var response = await client.Test3Async(default);
 
 			Assert.IsNotNull(response);

@@ -5,6 +5,7 @@ using System;
 using System.Windows;
 using Volo.Abp;
 
+#pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
 namespace NatTypeTester
 {
 	public partial class App

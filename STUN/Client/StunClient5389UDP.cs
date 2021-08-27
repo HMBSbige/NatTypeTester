@@ -8,6 +8,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,75 +18,70 @@ namespace STUN.Client
 	/// https://tools.ietf.org/html/rfc5389#section-7.2.1
 	/// https://tools.ietf.org/html/rfc5780#section-4.2
 	/// </summary>
-	public class StunClient5389UDP : IDisposable
+	public class StunClient5389UDP : IStunClient
 	{
-		public IPEndPoint LocalEndPoint => Proxy.LocalEndPoint;
+		public virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
 
-		public TimeSpan Timeout
-		{
-			get => Proxy.Timeout;
-			set => Proxy.Timeout = value;
-		}
+		public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
-		protected readonly IPAddress Server;
-		protected readonly ushort Port;
+		private readonly IPEndPoint _remoteEndPoint;
 
-		protected IPEndPoint RemoteEndPoint => new(Server, Port);
-
-		protected readonly IUdpProxy Proxy;
+		private readonly IUdpProxy _proxy;
 
 		public StunResult5389 Status { get; } = new();
 
-		public StunClient5389UDP(IPAddress server, ushort port = 3478, IPEndPoint? local = null, IUdpProxy? proxy = null)
+		public StunClient5389UDP(IPAddress server, ushort port, IPEndPoint local, IUdpProxy? proxy = null)
 		{
 			Requires.NotNull(server, nameof(server));
-			Requires.Argument(port > 0, nameof(port), @"Port value must be >= 1 !");
+			Requires.Argument(port > 0, nameof(port), @"Port value must be > 0!");
 
-			Proxy = proxy ?? new NoneUdpProxy(local);
+			_proxy = proxy ?? new NoneUdpProxy(local);
 
-			Server = server;
-			Port = port;
+			_remoteEndPoint = new IPEndPoint(server, port);
 
-			Timeout = TimeSpan.FromSeconds(3);
 			Status.LocalEndPoint = local;
 		}
 
-		public async Task QueryAsync()
+		public virtual async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
 		{
-			try
+			using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			cts.CancelAfter(ReceiveTimeout);
+
+			await _proxy.ConnectAsync(cts.Token);
+		}
+
+		public virtual async ValueTask CloseProxyAsync(CancellationToken cancellationToken = default)
+		{
+			await _proxy.CloseAsync(cancellationToken);
+		}
+
+		public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
+		{
+			Status.Reset();
+
+			await FilteringBehaviorTestBaseAsync(cancellationToken);
+			if (Status.BindingTestResult != BindingTestResult.Success
+				|| Status.FilteringBehavior == FilteringBehavior.UnsupportedServer
+			)
 			{
-				Status.Reset();
-				using var cts = new CancellationTokenSource(Timeout);
-				await Proxy.ConnectAsync(cts.Token);
-
-				await FilteringBehaviorTestBaseAsync(cts.Token);
-				if (Status.BindingTestResult != BindingTestResult.Success
-					|| Status.FilteringBehavior == FilteringBehavior.UnsupportedServer
-				)
-				{
-					return;
-				}
-
-				if (Equals(Status.PublicEndPoint, Status.LocalEndPoint))
-				{
-					Status.MappingBehavior = MappingBehavior.Direct;
-					return;
-				}
-
-				// MappingBehaviorTest test II
-				var (success2, result2) = await MappingBehaviorTestBase2Async(cts.Token);
-				if (!success2)
-				{
-					return;
-				}
-
-				// MappingBehaviorTest test III
-				await MappingBehaviorTestBase3Async(result2, cts.Token);
+				return;
 			}
-			finally
+
+			if (Equals(Status.PublicEndPoint, Status.LocalEndPoint))
 			{
-				await Proxy.DisconnectAsync();
+				Status.MappingBehavior = MappingBehavior.Direct;
+				return;
 			}
+
+			// MappingBehaviorTest test II
+			var (success2, result2) = await MappingBehaviorTestBase2Async(cancellationToken);
+			if (!success2)
+			{
+				return;
+			}
+
+			// MappingBehaviorTest test III
+			await MappingBehaviorTestBase3Async(result2, cancellationToken);
 		}
 
 		public async Task BindingTestAsync()
@@ -93,19 +89,19 @@ namespace STUN.Client
 			try
 			{
 				Status.Reset();
-				using var cts = new CancellationTokenSource(Timeout);
-				await Proxy.ConnectAsync(cts.Token);
+				using var cts = new CancellationTokenSource(ReceiveTimeout);
+				await _proxy.ConnectAsync(cts.Token);
 				await BindingTestInternalAsync(cts.Token);
 			}
 			finally
 			{
-				await Proxy.DisconnectAsync();
+				await _proxy.ConnectAsync();
 			}
 		}
 
 		private async Task BindingTestInternalAsync(CancellationToken token)
 		{
-			Status.Clone(await BindingTestBaseAsync(RemoteEndPoint, token));
+			Status.Clone(await BindingTestBaseAsync(_remoteEndPoint, token));
 		}
 
 		private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken token)
@@ -142,8 +138,8 @@ namespace STUN.Client
 			try
 			{
 				Status.Reset();
-				using var cts = new CancellationTokenSource(Timeout);
-				await Proxy.ConnectAsync(cts.Token);
+				using var cts = new CancellationTokenSource(ReceiveTimeout);
+				await _proxy.ConnectAsync(cts.Token);
 
 				// test I
 				await BindingTestInternalAsync(cts.Token);
@@ -153,8 +149,8 @@ namespace STUN.Client
 				}
 
 				if (Status.OtherEndPoint is null
-					|| Equals(Status.OtherEndPoint.Address, RemoteEndPoint.Address)
-					|| Status.OtherEndPoint.Port == RemoteEndPoint.Port)
+					|| Equals(Status.OtherEndPoint.Address, _remoteEndPoint.Address)
+					|| Status.OtherEndPoint.Port == _remoteEndPoint.Port)
 				{
 					Status.MappingBehavior = MappingBehavior.UnsupportedServer;
 					return;
@@ -178,13 +174,13 @@ namespace STUN.Client
 			}
 			finally
 			{
-				await Proxy.DisconnectAsync();
+				await _proxy.CloseAsync();
 			}
 		}
 
 		private async Task<(bool, StunResult5389)> MappingBehaviorTestBase2Async(CancellationToken token)
 		{
-			var result2 = await BindingTestBaseAsync(new IPEndPoint(Status.OtherEndPoint!.Address, RemoteEndPoint.Port), token);
+			var result2 = await BindingTestBaseAsync(new IPEndPoint(Status.OtherEndPoint!.Address, _remoteEndPoint.Port), token);
 			if (result2.BindingTestResult != BindingTestResult.Success)
 			{
 				Status.MappingBehavior = MappingBehavior.Fail;
@@ -222,8 +218,8 @@ namespace STUN.Client
 			}
 
 			if (Status.OtherEndPoint is null
-				|| Equals(Status.OtherEndPoint.Address, RemoteEndPoint.Address)
-				|| Status.OtherEndPoint.Port == RemoteEndPoint.Port)
+				|| Equals(Status.OtherEndPoint.Address, _remoteEndPoint.Address)
+				|| Status.OtherEndPoint.Port == _remoteEndPoint.Port)
 			{
 				Status.FilteringBehavior = FilteringBehavior.UnsupportedServer;
 				return;
@@ -235,7 +231,7 @@ namespace STUN.Client
 				StunMessageType = StunMessageType.BindingRequest,
 				Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
 			};
-			var (response2, _, _) = await TestAsync(test2, RemoteEndPoint, Status.OtherEndPoint, token);
+			var (response2, _, _) = await TestAsync(test2, _remoteEndPoint, Status.OtherEndPoint, token);
 
 			if (response2 is not null)
 			{
@@ -249,7 +245,7 @@ namespace STUN.Client
 				StunMessageType = StunMessageType.BindingRequest,
 				Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
 			};
-			var (response3, remote3, _) = await TestAsync(test3, RemoteEndPoint, RemoteEndPoint, token);
+			var (response3, remote3, _) = await TestAsync(test3, _remoteEndPoint, _remoteEndPoint, token);
 
 			if (response3 is null || remote3 is null)
 			{
@@ -257,7 +253,7 @@ namespace STUN.Client
 				return;
 			}
 
-			if (Equals(remote3.Address, RemoteEndPoint.Address) && remote3.Port != RemoteEndPoint.Port)
+			if (Equals(remote3.Address, _remoteEndPoint.Address) && remote3.Port != _remoteEndPoint.Port)
 			{
 				Status.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
 			}
@@ -272,44 +268,34 @@ namespace STUN.Client
 			try
 			{
 				Status.Reset();
-				using var cts = new CancellationTokenSource(Timeout);
-				await Proxy.ConnectAsync(cts.Token);
+				using var cts = new CancellationTokenSource(ReceiveTimeout);
+				await _proxy.ConnectAsync(cts.Token);
 				await FilteringBehaviorTestBaseAsync(cts.Token);
 			}
 			finally
 			{
-				await Proxy.DisconnectAsync();
+				await _proxy.CloseAsync();
 			}
 		}
 
-		private async Task<(StunMessage5389?, IPEndPoint?, IPAddress?)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken token)
+		private async Task<(StunMessage5389?, IPEndPoint?, IPAddress?)> TestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken cancellationToken)
 		{
 			try
 			{
-				using var memoryOwner = MemoryPool<byte>.Shared.Rent(ushort.MaxValue);
-				var sendBuffer = memoryOwner.Memory;
-				var length = sendMessage.WriteTo(sendBuffer.Span);
-				//var t = DateTime.Now;
+				using var memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
+				var buffer = memoryOwner.Memory;
+				var length = sendMessage.WriteTo(buffer.Span);
 
-				// Simple retransmissions
-				//https://tools.ietf.org/html/rfc3489#section-9.3
-				//while (t + TimeSpan.FromSeconds(3) > DateTime.Now)
+				await _proxy.SendToAsync(buffer[..length], SocketFlags.None, remote, cancellationToken);
+
+				using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+				cts.CancelAfter(ReceiveTimeout);
+				var r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
+
+				var message = new StunMessage5389();
+				if (message.TryParse(buffer.Span[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 				{
-					try
-					{
-						var (receive1, ipe, local) = await Proxy.ReceiveAsync(sendBuffer[..length], remote, receive, token);
-
-						var message = new StunMessage5389();
-						if (message.TryParse(receive1) &&
-							message.IsSameTransaction(sendMessage))
-						{
-							return (message, ipe, local);
-						}
-					}
-					catch (Exception ex)
-					{
-						Debug.WriteLine(ex);
-					}
+					return (message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);
 				}
 			}
 			catch (Exception ex)
@@ -322,7 +308,7 @@ namespace STUN.Client
 
 		public void Dispose()
 		{
-			Proxy.Dispose();
+			_proxy.Dispose();
 		}
 	}
 }

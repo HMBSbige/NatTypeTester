@@ -17,7 +17,10 @@ if (args.Length > 0 && StunServer.TryParse(args[0], out var stun))
 
 if (args.Length > 1)
 {
-	IPEndPoint.TryParse(args[2], out local);
+	if (IPEndPoint.TryParse(args[2], out var ipEndPoint))
+	{
+		local = ipEndPoint;
+	}
 }
 
 var dnsClient = new DefaultDnsClient();
