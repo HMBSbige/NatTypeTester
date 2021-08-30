@@ -87,6 +87,17 @@ namespace STUN.Client
 			var response2 = await Test2Async(changedAddress, cancellationToken);
 			var mappedAddress2 = response2?.Message.GetMappedAddressAttribute();
 
+			if (response2 is not null)
+			{
+				// 有些单 IP 服务器并不能测 NAT 类型
+				if (Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port)
+				{
+					State.NatType = NatType.UnsupportedServer;
+					State.PublicEndPoint = mappedAddress2;
+					return;
+				}
+			}
+
 			// is Public IP == link's IP?
 			if (Equals(mappedAddress1.Address, response1.LocalAddress) && mappedAddress1.Port == LocalEndPoint.Port)
 			{
@@ -107,9 +118,7 @@ namespace STUN.Client
 			// NAT
 			if (response2 is not null)
 			{
-				// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
-				var type = Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port ? NatType.UnsupportedServer : NatType.FullCone;
-				State.NatType = type;
+				State.NatType = NatType.FullCone;
 				State.PublicEndPoint = mappedAddress2;
 				return;
 			}
