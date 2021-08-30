@@ -3,6 +3,7 @@ using STUN;
 using STUN.Client;
 using System;
 using System.Net;
+using System.Threading;
 
 //stun.qq.com:3478 0.0.0.0:0
 var server = @"stun.syncthing.net";
@@ -25,8 +26,12 @@ if (args.Length > 1)
 
 var dnsClient = new DefaultDnsClient();
 var ip = await dnsClient.QueryAsync(server);
-using var client = new StunClient5389UDP(ip, port, local);
-await client.QueryAsync();
+using var client = new StunClient5389UDP(new IPEndPoint(ip, port), local);
+
+using var cts = new CancellationTokenSource();
+cts.CancelAfter(TimeSpan.FromSeconds(5));
+await client.QueryAsync(cts.Token);
+
 var res = client.State;
 
 Console.WriteLine($@"Other address is {res.OtherEndPoint}");

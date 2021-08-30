@@ -30,19 +30,19 @@ namespace STUN.Client
 
 		public ClassicStunResult State { get; } = new();
 
-		public StunClient3489(IPAddress server, ushort port, IPEndPoint local, IUdpProxy? proxy = null)
+		public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null)
 		{
 			Requires.NotNull(server, nameof(server));
-			Requires.Argument(port > 0, nameof(port), @"Port value must be > 0!");
+			Requires.NotNull(local, nameof(local));
 
 			_proxy = proxy ?? new NoneUdpProxy(local);
 
-			_remoteEndPoint = new IPEndPoint(server, port);
+			_remoteEndPoint = server;
 
 			State.LocalEndPoint = local;
 		}
 
-		public virtual async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
+		public async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
 		{
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			cts.CancelAfter(ReceiveTimeout);
@@ -50,7 +50,7 @@ namespace STUN.Client
 			await _proxy.ConnectAsync(cts.Token);
 		}
 
-		public virtual async ValueTask CloseProxyAsync(CancellationToken cancellationToken = default)
+		public async ValueTask CloseProxyAsync(CancellationToken cancellationToken = default)
 		{
 			await _proxy.CloseAsync(cancellationToken);
 		}

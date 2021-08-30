@@ -67,7 +67,7 @@ namespace NatTypeTester.ViewModels
 			using var proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result3489.LocalEndPoint, socks5Option);
 
 			var ip = await DnsClient.QueryAsync(server.Hostname, token);
-			using var client = new StunClient3489(ip, server.Port, Result3489.LocalEndPoint, proxy);
+			using var client = new StunClient3489(new IPEndPoint(ip, server.Port), Result3489.LocalEndPoint, proxy);
 
 			Result3489 = client.State;
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
