@@ -28,7 +28,7 @@ namespace STUN.Client
 
 		private readonly IUdpProxy _proxy;
 
-		public StunResult5389 Status { get; } = new();
+		public StunResult5389 State { get; } = new();
 
 		public StunClient5389UDP(IPAddress server, ushort port, IPEndPoint local, IUdpProxy? proxy = null)
 		{
@@ -39,7 +39,7 @@ namespace STUN.Client
 
 			_remoteEndPoint = new IPEndPoint(server, port);
 
-			Status.LocalEndPoint = local;
+			State.LocalEndPoint = local;
 		}
 
 		public virtual async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
@@ -57,19 +57,19 @@ namespace STUN.Client
 
 		public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 		{
-			Status.Reset();
+			State.Reset();
 
 			await FilteringBehaviorTestBaseAsync(cancellationToken);
-			if (Status.BindingTestResult != BindingTestResult.Success
-				|| Status.FilteringBehavior == FilteringBehavior.UnsupportedServer
+			if (State.BindingTestResult != BindingTestResult.Success
+				|| State.FilteringBehavior == FilteringBehavior.UnsupportedServer
 			)
 			{
 				return;
 			}
 
-			if (Equals(Status.PublicEndPoint, Status.LocalEndPoint))
+			if (Equals(State.PublicEndPoint, State.LocalEndPoint))
 			{
-				Status.MappingBehavior = MappingBehavior.Direct;
+				State.MappingBehavior = MappingBehavior.Direct;
 				return;
 			}
 
@@ -88,7 +88,7 @@ namespace STUN.Client
 		{
 			try
 			{
-				Status.Reset();
+				State.Reset();
 				using var cts = new CancellationTokenSource(ReceiveTimeout);
 				await _proxy.ConnectAsync(cts.Token);
 				await BindingTestInternalAsync(cts.Token);
@@ -101,7 +101,7 @@ namespace STUN.Client
 
 		private async Task BindingTestInternalAsync(CancellationToken token)
 		{
-			Status.Clone(await BindingTestBaseAsync(_remoteEndPoint, token));
+			State.Clone(await BindingTestBaseAsync(_remoteEndPoint, token));
 		}
 
 		private async Task<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken token)
@@ -137,28 +137,28 @@ namespace STUN.Client
 		{
 			try
 			{
-				Status.Reset();
+				State.Reset();
 				using var cts = new CancellationTokenSource(ReceiveTimeout);
 				await _proxy.ConnectAsync(cts.Token);
 
 				// test I
 				await BindingTestInternalAsync(cts.Token);
-				if (Status.BindingTestResult != BindingTestResult.Success)
+				if (State.BindingTestResult != BindingTestResult.Success)
 				{
 					return;
 				}
 
-				if (Status.OtherEndPoint is null
-					|| Equals(Status.OtherEndPoint.Address, _remoteEndPoint.Address)
-					|| Status.OtherEndPoint.Port == _remoteEndPoint.Port)
+				if (State.OtherEndPoint is null
+					|| Equals(State.OtherEndPoint.Address, _remoteEndPoint.Address)
+					|| State.OtherEndPoint.Port == _remoteEndPoint.Port)
 				{
-					Status.MappingBehavior = MappingBehavior.UnsupportedServer;
+					State.MappingBehavior = MappingBehavior.UnsupportedServer;
 					return;
 				}
 
-				if (Equals(Status.PublicEndPoint, Status.LocalEndPoint))
+				if (Equals(State.PublicEndPoint, State.LocalEndPoint))
 				{
-					Status.MappingBehavior = MappingBehavior.Direct;
+					State.MappingBehavior = MappingBehavior.Direct;
 					return;
 				}
 
@@ -180,16 +180,16 @@ namespace STUN.Client
 
 		private async Task<(bool, StunResult5389)> MappingBehaviorTestBase2Async(CancellationToken token)
 		{
-			var result2 = await BindingTestBaseAsync(new IPEndPoint(Status.OtherEndPoint!.Address, _remoteEndPoint.Port), token);
+			var result2 = await BindingTestBaseAsync(new IPEndPoint(State.OtherEndPoint!.Address, _remoteEndPoint.Port), token);
 			if (result2.BindingTestResult != BindingTestResult.Success)
 			{
-				Status.MappingBehavior = MappingBehavior.Fail;
+				State.MappingBehavior = MappingBehavior.Fail;
 				return (false, result2);
 			}
 
-			if (Equals(result2.PublicEndPoint, Status.PublicEndPoint))
+			if (Equals(result2.PublicEndPoint, State.PublicEndPoint))
 			{
-				Status.MappingBehavior = MappingBehavior.EndpointIndependent;
+				State.MappingBehavior = MappingBehavior.EndpointIndependent;
 				return (false, result2);
 			}
 
@@ -198,30 +198,30 @@ namespace STUN.Client
 
 		private async Task MappingBehaviorTestBase3Async(StunResult5389 result2, CancellationToken token)
 		{
-			var result3 = await BindingTestBaseAsync(Status.OtherEndPoint!, token);
+			var result3 = await BindingTestBaseAsync(State.OtherEndPoint!, token);
 			if (result3.BindingTestResult != BindingTestResult.Success)
 			{
-				Status.MappingBehavior = MappingBehavior.Fail;
+				State.MappingBehavior = MappingBehavior.Fail;
 				return;
 			}
 
-			Status.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
+			State.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
 		}
 
 		private async Task FilteringBehaviorTestBaseAsync(CancellationToken token)
 		{
 			// test I
 			await BindingTestInternalAsync(token);
-			if (Status.BindingTestResult != BindingTestResult.Success)
+			if (State.BindingTestResult != BindingTestResult.Success)
 			{
 				return;
 			}
 
-			if (Status.OtherEndPoint is null
-				|| Equals(Status.OtherEndPoint.Address, _remoteEndPoint.Address)
-				|| Status.OtherEndPoint.Port == _remoteEndPoint.Port)
+			if (State.OtherEndPoint is null
+				|| Equals(State.OtherEndPoint.Address, _remoteEndPoint.Address)
+				|| State.OtherEndPoint.Port == _remoteEndPoint.Port)
 			{
-				Status.FilteringBehavior = FilteringBehavior.UnsupportedServer;
+				State.FilteringBehavior = FilteringBehavior.UnsupportedServer;
 				return;
 			}
 
@@ -231,11 +231,11 @@ namespace STUN.Client
 				StunMessageType = StunMessageType.BindingRequest,
 				Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
 			};
-			var (response2, _, _) = await TestAsync(test2, _remoteEndPoint, Status.OtherEndPoint, token);
+			var (response2, _, _) = await TestAsync(test2, _remoteEndPoint, State.OtherEndPoint, token);
 
 			if (response2 is not null)
 			{
-				Status.FilteringBehavior = FilteringBehavior.EndpointIndependent;
+				State.FilteringBehavior = FilteringBehavior.EndpointIndependent;
 				return;
 			}
 
@@ -249,17 +249,17 @@ namespace STUN.Client
 
 			if (response3 is null || remote3 is null)
 			{
-				Status.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
+				State.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
 				return;
 			}
 
 			if (Equals(remote3.Address, _remoteEndPoint.Address) && remote3.Port != _remoteEndPoint.Port)
 			{
-				Status.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
+				State.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
 			}
 			else
 			{
-				Status.FilteringBehavior = FilteringBehavior.UnsupportedServer;
+				State.FilteringBehavior = FilteringBehavior.UnsupportedServer;
 			}
 		}
 
@@ -267,7 +267,7 @@ namespace STUN.Client
 		{
 			try
 			{
-				Status.Reset();
+				State.Reset();
 				using var cts = new CancellationTokenSource(ReceiveTimeout);
 				await _proxy.ConnectAsync(cts.Token);
 				await FilteringBehaviorTestBaseAsync(cts.Token);

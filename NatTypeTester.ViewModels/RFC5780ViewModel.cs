@@ -66,7 +66,7 @@ namespace NatTypeTester.ViewModels
 			var ip = await DnsClient.QueryAsync(server.Hostname, token);
 			using var client = new StunClient5389UDP(ip, server.Port, Result5389.LocalEndPoint, proxy);
 
-			Result5389 = client.Status;
+			Result5389 = client.State;
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
 					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe(_ => this.RaisePropertyChanged(nameof(Result5389))))
@@ -84,7 +84,7 @@ namespace NatTypeTester.ViewModels
 			}
 
 			Result5389 = new StunResult5389();
-			Result5389.Clone(client.Status);
+			Result5389.Clone(client.State);
 
 			this.RaisePropertyChanged(nameof(Result5389));
 		}

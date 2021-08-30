@@ -27,7 +27,7 @@ var dnsClient = new DefaultDnsClient();
 var ip = await dnsClient.QueryAsync(server);
 using var client = new StunClient5389UDP(ip, port, local);
 await client.QueryAsync();
-var res = client.Status;
+var res = client.State;
 
 Console.WriteLine($@"Other address is {res.OtherEndPoint}");
 Console.WriteLine($@"Binding test: {res.BindingTestResult}");

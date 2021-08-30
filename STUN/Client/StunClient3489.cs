@@ -28,7 +28,7 @@ namespace STUN.Client
 
 		private readonly IUdpProxy _proxy;
 
-		public ClassicStunResult Status { get; } = new();
+		public ClassicStunResult State { get; } = new();
 
 		public StunClient3489(IPAddress server, ushort port, IPEndPoint local, IUdpProxy? proxy = null)
 		{
@@ -39,7 +39,7 @@ namespace STUN.Client
 
 			_remoteEndPoint = new IPEndPoint(server, port);
 
-			Status.LocalEndPoint = local;
+			State.LocalEndPoint = local;
 		}
 
 		public virtual async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
@@ -57,29 +57,29 @@ namespace STUN.Client
 
 		public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 		{
-			Status.Reset();
+			State.Reset();
 
 			// test I
 			var response1 = await Test1Async(cancellationToken);
 			if (response1 is null)
 			{
-				Status.NatType = NatType.UdpBlocked;
+				State.NatType = NatType.UdpBlocked;
 				return;
 			}
 
-			Status.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
+			State.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
 
 			var mappedAddress1 = response1.Message.GetMappedAddressAttribute();
 			var changedAddress = response1.Message.GetChangedAddressAttribute();
 
-			Status.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
+			State.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
 
 			// 某些单 IP 服务器的迷惑操作
 			if (mappedAddress1 is null || changedAddress is null
 				|| Equals(changedAddress.Address, response1.Remote.Address)
 				|| changedAddress.Port == response1.Remote.Port)
 			{
-				Status.NatType = NatType.UnsupportedServer;
+				State.NatType = NatType.UnsupportedServer;
 				return;
 			}
 
@@ -93,13 +93,13 @@ namespace STUN.Client
 				// No NAT
 				if (response2 is null)
 				{
-					Status.NatType = NatType.SymmetricUdpFirewall;
-					Status.PublicEndPoint = mappedAddress1;
+					State.NatType = NatType.SymmetricUdpFirewall;
+					State.PublicEndPoint = mappedAddress1;
 				}
 				else
 				{
-					Status.NatType = NatType.OpenInternet;
-					Status.PublicEndPoint = mappedAddress2;
+					State.NatType = NatType.OpenInternet;
+					State.PublicEndPoint = mappedAddress2;
 				}
 				return;
 			}
@@ -109,8 +109,8 @@ namespace STUN.Client
 			{
 				// 有些单 IP 服务器并不能测 NAT 类型，比如 Google 的
 				var type = Equals(response1.Remote.Address, response2.Remote.Address) || response1.Remote.Port == response2.Remote.Port ? NatType.UnsupportedServer : NatType.FullCone;
-				Status.NatType = type;
-				Status.PublicEndPoint = mappedAddress2;
+				State.NatType = type;
+				State.PublicEndPoint = mappedAddress2;
 				return;
 			}
 
@@ -120,14 +120,14 @@ namespace STUN.Client
 
 			if (mappedAddress12 is null)
 			{
-				Status.NatType = NatType.Unknown;
+				State.NatType = NatType.Unknown;
 				return;
 			}
 
 			if (!Equals(mappedAddress12, mappedAddress1))
 			{
-				Status.NatType = NatType.Symmetric;
-				Status.PublicEndPoint = mappedAddress12;
+				State.NatType = NatType.Symmetric;
+				State.PublicEndPoint = mappedAddress12;
 				return;
 			}
 
@@ -140,14 +140,14 @@ namespace STUN.Client
 					&& Equals(response3.Remote.Address, response1.Remote.Address)
 					&& response3.Remote.Port != response1.Remote.Port)
 				{
-					Status.NatType = NatType.RestrictedCone;
-					Status.PublicEndPoint = mappedAddress3;
+					State.NatType = NatType.RestrictedCone;
+					State.PublicEndPoint = mappedAddress3;
 					return;
 				}
 			}
 
-			Status.NatType = NatType.PortRestrictedCone;
-			Status.PublicEndPoint = mappedAddress12;
+			State.NatType = NatType.PortRestrictedCone;
+			State.PublicEndPoint = mappedAddress12;
 		}
 
 		private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken cancellationToken)

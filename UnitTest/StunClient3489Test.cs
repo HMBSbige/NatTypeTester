@@ -41,9 +41,9 @@ namespace UnitTest
 
 			mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
 
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.UdpBlocked, client.Status.NatType);
+			Assert.AreEqual(NatType.UdpBlocked, client.State.NatType);
 		}
 
 		[TestMethod]
@@ -101,10 +101,10 @@ namespace UnitTest
 
 			async Task TestAsync()
 			{
-				Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+				Assert.AreEqual(NatType.Unknown, client.State.NatType);
 				await client.QueryAsync();
-				Assert.AreEqual(NatType.UnsupportedServer, client.Status.NatType);
-				client.Status.Reset();
+				Assert.AreEqual(NatType.UnsupportedServer, client.State.NatType);
+				client.State.Reset();
 			}
 		}
 
@@ -142,17 +142,17 @@ namespace UnitTest
 			mock.Setup(x => x.LocalEndPoint).Returns(MappedAddress1);
 			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test2Response);
 
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.OpenInternet, client.Status.NatType);
-			client.Status.Reset();
+			Assert.AreEqual(NatType.OpenInternet, client.State.NatType);
+			client.State.Reset();
 
 			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
 
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.SymmetricUdpFirewall, client.Status.NatType);
-			client.Status.Reset();
+			Assert.AreEqual(NatType.SymmetricUdpFirewall, client.State.NatType);
+			client.State.Reset();
 		}
 
 		[TestMethod]
@@ -222,10 +222,10 @@ namespace UnitTest
 			mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
 			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fullConeResponse);
 
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.FullCone, client.Status.NatType);
-			client.Status.Reset();
+			Assert.AreEqual(NatType.FullCone, client.State.NatType);
+			client.State.Reset();
 
 			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse1);
 			await TestUnsupportedServerAsync();
@@ -238,10 +238,10 @@ namespace UnitTest
 
 			async Task TestUnsupportedServerAsync()
 			{
-				Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+				Assert.AreEqual(NatType.Unknown, client.State.NatType);
 				await client.QueryAsync();
-				Assert.AreEqual(NatType.UnsupportedServer, client.Status.NatType);
-				client.Status.Reset();
+				Assert.AreEqual(NatType.UnsupportedServer, client.State.NatType);
+				client.State.Reset();
 			}
 		}
 
@@ -280,16 +280,16 @@ namespace UnitTest
 			mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
 			mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
 
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
-			client.Status.Reset();
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
+			client.State.Reset();
 
 			mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test12Response);
 
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.Symmetric, client.Status.NatType);
+			Assert.AreEqual(NatType.Symmetric, client.State.NatType);
 		}
 
 		[TestMethod]
@@ -340,21 +340,21 @@ namespace UnitTest
 			mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
 
 			mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3Response);
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.RestrictedCone, client.Status.NatType);
-			client.Status.Reset();
+			Assert.AreEqual(NatType.RestrictedCone, client.State.NatType);
+			client.State.Reset();
 
 			mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3ErrorResponse);
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.PortRestrictedCone, client.Status.NatType);
-			client.Status.Reset();
+			Assert.AreEqual(NatType.PortRestrictedCone, client.State.NatType);
+			client.State.Reset();
 
 			mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync((StunResponse?)null);
-			Assert.AreEqual(NatType.Unknown, client.Status.NatType);
+			Assert.AreEqual(NatType.Unknown, client.State.NatType);
 			await client.QueryAsync();
-			Assert.AreEqual(NatType.PortRestrictedCone, client.Status.NatType);
+			Assert.AreEqual(NatType.PortRestrictedCone, client.State.NatType);
 		}
 
 		[TestMethod]
