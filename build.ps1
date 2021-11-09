@@ -6,12 +6,12 @@ dotnet --info
 
 $proj = 'NatTypeTester'
 $exe = "$proj.exe"
-$net_tfm = 'net5.0-windows10.0.20348.0'
+$net_tfm = 'net6.0-windows10.0.22000.0'
 $configuration = 'Release'
 $output_dir = "$PSScriptRoot\$proj\bin\$configuration"
 $proj_path = "$PSScriptRoot\$proj\$proj.csproj"
 
-$dllpatcher_tfm = 'net5.0'
+$dllpatcher_tfm = 'net6.0'
 $dllpatcher_dir = "$PSScriptRoot\Build\DotNetDllPathPatcher"
 $dllpatcher_exe = "$dllpatcher_dir\bin\$configuration\$dllpatcher_tfm\DotNetDllPathPatcher.exe"
 
@@ -61,6 +61,7 @@ if($rid -eq 'all')
 {
     Build-SelfContained win-x86
     Build-SelfContained win-x64
+    Build-SelfContained win-arm64
 }
 elseif($rid -ne 'generic')
 {

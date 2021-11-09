@@ -2,7 +2,7 @@ name: CI
 on: [push, pull_request]
 env:
   ProjectName: NatTypeTester
-  NET_TFM: net5.0-windows10.0.20348.0
+  NET_TFM: net6.0-windows10.0.22000.0
   Configuration: Release
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Install dotnet-format
         run: dotnet tool update -g dotnet-format
@@ -41,7 +41,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Test
         shell: pwsh
@@ -54,7 +54,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        Rid: [generic, win-x64, win-x86]
+        Rid: [generic, win-x64, win-x86, win-arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -64,7 +64,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Build ${{ matrix.Rid }}
         shell: pwsh
@@ -93,7 +93,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Build
         shell: pwsh
@@ -119,7 +119,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
       - name: Build
         shell: pwsh

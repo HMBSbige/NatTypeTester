@@ -3,7 +3,6 @@ using Socks5.Clients;
 using Socks5.Enums;
 using Socks5.Models;
 using Socks5.Utils;
-using STUN.Utils;
 using System;
 using System.Buffers;
 using System.IO;
