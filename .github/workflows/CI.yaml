@@ -15,9 +15,6 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
-      - name: Install dotnet-format
-        run: dotnet tool update -g dotnet-format
-
       - name: Checkout code
         uses: actions/checkout@v2
 
