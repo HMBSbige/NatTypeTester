@@ -21,11 +21,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build
-        run: dotnet build
-
       - name: Run dotnet format check
-        run: dotnet format -wsa -v diag --check --no-restore
+        run: dotnet format -v diag --verify-no-changes
 
   test:
     name: Test
