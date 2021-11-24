@@ -68,8 +68,8 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 
 		Result5389 = client.State;
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-			       .ObserveOn(RxApp.MainThreadScheduler)
-			       .Subscribe(_ => this.RaisePropertyChanged(nameof(Result5389))))
+				   .ObserveOn(RxApp.MainThreadScheduler)
+				   .Subscribe(_ => this.RaisePropertyChanged(nameof(Result5389))))
 		{
 			await client.ConnectProxyAsync(token);
 			try

@@ -76,8 +76,8 @@ public class StunClient3489 : IStunClient
 
 		// 某些单 IP 服务器的迷惑操作
 		if (mappedAddress1 is null || changedAddress is null
-		                           || Equals(changedAddress.Address, response1.Remote.Address)
-		                           || changedAddress.Port == response1.Remote.Port)
+								   || Equals(changedAddress.Address, response1.Remote.Address)
+								   || changedAddress.Port == response1.Remote.Port)
 		{
 			State.NatType = NatType.UnsupportedServer;
 			return;
@@ -146,8 +146,8 @@ public class StunClient3489 : IStunClient
 		{
 			var mappedAddress3 = response3.Message.GetMappedAddressAttribute();
 			if (mappedAddress3 is not null
-			    && Equals(response3.Remote.Address, response1.Remote.Address)
-			    && response3.Remote.Port != response1.Remote.Port)
+				&& Equals(response3.Remote.Address, response1.Remote.Address)
+				&& response3.Remote.Port != response1.Remote.Port)
 			{
 				State.NatType = NatType.RestrictedCone;
 				State.PublicEndPoint = mappedAddress3;

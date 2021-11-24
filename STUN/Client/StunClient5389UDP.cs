@@ -63,7 +63,7 @@ public class StunClient5389UDP : IStunClient
 
 		await FilteringBehaviorTestBaseAsync(cancellationToken);
 		if (State.BindingTestResult is not BindingTestResult.Success
-		    || State.FilteringBehavior == FilteringBehavior.UnsupportedServer
+			|| State.FilteringBehavior == FilteringBehavior.UnsupportedServer
 		   )
 		{
 			return;
@@ -267,8 +267,8 @@ public class StunClient5389UDP : IStunClient
 	private bool HasValidOtherAddress([NotNullWhen(true)] IPEndPoint? other)
 	{
 		return other is not null
-		       && !Equals(other.Address, _remoteEndPoint.Address)
-		       && other.Port != _remoteEndPoint.Port;
+			   && !Equals(other.Address, _remoteEndPoint.Address)
+			   && other.Port != _remoteEndPoint.Port;
 	}
 
 	private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken cancellationToken)
