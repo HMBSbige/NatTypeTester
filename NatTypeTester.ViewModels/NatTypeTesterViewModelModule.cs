@@ -1,10 +1,9 @@
 using JetBrains.Annotations;
 using Volo.Abp.Modularity;
 
-namespace NatTypeTester.ViewModels
+namespace NatTypeTester.ViewModels;
+
+[UsedImplicitly]
+public class NatTypeTesterViewModelModule : AbpModule
 {
-	[UsedImplicitly]
-	public class NatTypeTesterViewModelModule : AbpModule
-	{
-	}
 }

@@ -1,11 +1,10 @@
 using System;
 
-namespace STUN.Messages.StunAttributeValues
-{
-	public interface IStunAttributeValue
-	{
-		int WriteTo(Span<byte> buffer);
+namespace STUN.Messages.StunAttributeValues;
 
-		bool TryParse(ReadOnlySpan<byte> buffer);
-	}
+public interface IStunAttributeValue
+{
+	int WriteTo(Span<byte> buffer);
+
+	bool TryParse(ReadOnlySpan<byte> buffer);
 }

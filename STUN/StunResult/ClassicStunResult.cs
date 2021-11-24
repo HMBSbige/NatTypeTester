@@ -1,22 +1,21 @@
 using STUN.Enums;
 
-namespace STUN.StunResult
+namespace STUN.StunResult;
+
+public class ClassicStunResult : StunResult
 {
-	public class ClassicStunResult : StunResult
+	public NatType NatType { get; set; } = NatType.Unknown;
+
+	public void Clone(ClassicStunResult result)
 	{
-		public NatType NatType { get; set; } = NatType.Unknown;
+		PublicEndPoint = result.PublicEndPoint;
+		LocalEndPoint = result.LocalEndPoint;
+		NatType = result.NatType;
+	}
 
-		public void Clone(ClassicStunResult result)
-		{
-			PublicEndPoint = result.PublicEndPoint;
-			LocalEndPoint = result.LocalEndPoint;
-			NatType = result.NatType;
-		}
-
-		public override void Reset()
-		{
-			base.Reset();
-			NatType = NatType.Unknown;
-		}
+	public override void Reset()
+	{
+		base.Reset();
+		NatType = NatType.Unknown;
 	}
 }

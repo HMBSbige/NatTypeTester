@@ -8,34 +8,34 @@ using System.Linq;
 using System.Reactive.Disposables;
 using Volo.Abp.DependencyInjection;
 
-namespace NatTypeTester
+namespace NatTypeTester;
+
+public partial class MainWindow : ISingletonDependency
 {
-	public partial class MainWindow : ISingletonDependency
+	public MainWindow(MainWindowViewModel viewModel, IServiceProvider serviceProvider)
 	{
-		public MainWindow(MainWindowViewModel viewModel, IServiceProvider serviceProvider)
+		InitializeComponent();
+		ViewModel = viewModel;
+
+		this.WhenActivated(d =>
 		{
-			InitializeComponent();
-			ViewModel = viewModel;
+			#region Server
 
-			this.WhenActivated(d =>
-			{
-				#region Server
+			this.Bind(ViewModel,
+				vm => vm.Config.StunServer,
+				v => v.ServersComboBox.Text
+			).DisposeWith(d);
 
-				this.Bind(ViewModel,
-						vm => vm.Config.StunServer,
-						v => v.ServersComboBox.Text
-				).DisposeWith(d);
+			this.OneWayBind(ViewModel,
+				vm => vm.StunServers,
+				v => v.ServersComboBox.ItemsSource
+			).DisposeWith(d);
 
-				this.OneWayBind(ViewModel,
-						vm => vm.StunServers,
-						v => v.ServersComboBox.ItemsSource
-				).DisposeWith(d);
+			#endregion
 
-				#endregion
+			this.Bind(ViewModel, vm => vm.Router, v => v.RoutedViewHost.Router).DisposeWith(d);
 
-				this.Bind(ViewModel, vm => vm.Router, v => v.RoutedViewHost.Router).DisposeWith(d);
-
-				NavigationView.Events().SelectionChanged
+			NavigationView.Events().SelectionChanged
 				.Subscribe(parameter =>
 				{
 					if (parameter.args.IsSettingsSelected)
@@ -63,10 +63,9 @@ namespace NatTypeTester
 						}
 					}
 				}).DisposeWith(d);
-				NavigationView.SelectedItem = NavigationView.MenuItems.OfType<NavigationViewItem>().First();
+			NavigationView.SelectedItem = NavigationView.MenuItems.OfType<NavigationViewItem>().First();
 
-				ViewModel.LoadStunServer();
-			});
-		}
+			ViewModel.LoadStunServer();
+		});
 	}
 }
