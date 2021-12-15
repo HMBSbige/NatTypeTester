@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Splat.Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Windows;
 using Volo.Abp;
 

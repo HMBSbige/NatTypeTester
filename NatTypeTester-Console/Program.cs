@@ -1,9 +1,7 @@
 using Dns.Net.Clients;
 using STUN;
 using STUN.Client;
-using System;
 using System.Net;
-using System.Threading;
 
 //stun.qq.com:3478 0.0.0.0:0
 var server = @"stun.syncthing.net";

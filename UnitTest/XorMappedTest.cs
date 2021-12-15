@@ -1,8 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using STUN.Enums;
 using STUN.Messages.StunAttributeValues;
-using System;
-using System.Linq;
 using System.Net;
 
 namespace UnitTest;

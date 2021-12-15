@@ -1,7 +1,6 @@
 using Microsoft;
 using STUN.Enums;
 using STUN.Messages.StunAttributeValues;
-using System;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 

@@ -3,14 +3,10 @@ using Socks5.Clients;
 using Socks5.Enums;
 using Socks5.Models;
 using Socks5.Utils;
-using System;
 using System.Buffers;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace STUN.Proxy;
 

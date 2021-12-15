@@ -3,8 +3,6 @@ using ModernWpf.Controls;
 using NatTypeTester.ViewModels;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System;
-using System.Linq;
 using System.Reactive.Disposables;
 using Volo.Abp.DependencyInjection;
 

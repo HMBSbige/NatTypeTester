@@ -1,5 +1,4 @@
 using ModernWpf.Controls;
-using System;
 
 namespace NatTypeTester.Dialogs;
 

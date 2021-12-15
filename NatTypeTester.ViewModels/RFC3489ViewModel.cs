@@ -8,13 +8,10 @@ using STUN;
 using STUN.Client;
 using STUN.Proxy;
 using STUN.StunResult;
-using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NatTypeTester.ViewModels;
 

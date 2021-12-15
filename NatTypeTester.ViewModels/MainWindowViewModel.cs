@@ -4,12 +4,7 @@ using Microsoft.VisualStudio.Threading;
 using NatTypeTester.Models;
 using ReactiveUI;
 using STUN;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.ViewModels;

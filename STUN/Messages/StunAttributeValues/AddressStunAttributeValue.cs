@@ -1,6 +1,5 @@
 using Microsoft;
 using STUN.Enums;
-using System;
 using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;

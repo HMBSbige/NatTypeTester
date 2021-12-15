@@ -7,8 +7,6 @@ using STUN.Enums;
 using STUN.Messages;
 using STUN.StunResult;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace UnitTest;
 

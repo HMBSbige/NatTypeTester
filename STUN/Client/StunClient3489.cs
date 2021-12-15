@@ -4,13 +4,10 @@ using STUN.Messages;
 using STUN.Proxy;
 using STUN.StunResult;
 using STUN.Utils;
-using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace STUN.Client;
 
