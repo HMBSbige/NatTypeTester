@@ -1,5 +1,10 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
 env:
   ProjectName: NatTypeTester
   NET_TFM: net6.0-windows10.0.22000.0
