@@ -11,10 +11,6 @@ $configuration = 'Release'
 $output_dir = "$PSScriptRoot\$proj\bin\$configuration"
 $proj_path = "$PSScriptRoot\$proj\$proj.csproj"
 
-$dllpatcher_tfm = 'net6.0'
-$dllpatcher_dir = "$PSScriptRoot\Build\DotNetDllPathPatcher"
-$dllpatcher_exe = "$dllpatcher_dir\bin\$configuration\$dllpatcher_tfm\DotNetDllPathPatcher.exe"
-
 function Build-Generic
 {
     Write-Host 'Building generic'
@@ -27,7 +23,7 @@ function Build-Generic
     dotnet publish -c $configuration -f $net_tfm $proj_path -o $publishDir
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
-    & "$dllpatcher_exe" "$publishDir\$exe" bin
+    & "$PSScriptRoot\Build\DotNetDllPathPatcher.ps1" "$publishDir\$exe" bin
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 }
 
@@ -45,12 +41,9 @@ function Build-SelfContained
     dotnet publish -c $configuration -f $net_tfm -r $rid --self-contained true $proj_path
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
-    & "$dllpatcher_exe" "$publishDir\$exe" bin
+    & "$PSScriptRoot\Build\DotNetDllPathPatcher.ps1" "$publishDir\$exe" bin
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 }
-
-dotnet build -c $configuration -f $dllpatcher_tfm $dllpatcher_dir\DotNetDllPathPatcher.csproj
-if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
 if($rid -eq 'all' -or $rid -eq 'generic')
 {
