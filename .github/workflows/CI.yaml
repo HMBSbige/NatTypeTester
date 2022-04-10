@@ -73,7 +73,7 @@ jobs:
 
       - name: Upload ${{ matrix.Rid }}
         continue-on-error: true
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ProjectName }}-${{ matrix.Rid }}
           path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\${{ matrix.Rid }}\publish\
