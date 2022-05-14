@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - 'renovate/**'
     tags:
       - "*"
   pull_request:
