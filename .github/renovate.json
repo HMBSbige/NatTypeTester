@@ -9,7 +9,8 @@
 		"config:base",
 		":automergeBranch",
 		":automergeDigest",
-		":automergeMinor"
+		":automergeMinor",
+		":disableRateLimiting"
 	],
 	"labels": [
 		"Automatic"
