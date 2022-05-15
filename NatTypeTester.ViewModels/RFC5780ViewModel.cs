@@ -33,7 +33,7 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 
 	public RFC5780ViewModel()
 	{
-		Result5389 = new StunResult5389 { LocalEndPoint = new IPEndPoint(IPAddress.Any, 0) };
+		Result5389 = new StunResult5389();
 		DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeAsync);
 	}
 
