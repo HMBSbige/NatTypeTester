@@ -24,7 +24,7 @@ public class ErrorCodeStunAttributeValue : IStunAttributeValue
 		buffer[2] = Class;
 		buffer[3] = Number;
 
-		var length = Encoding.UTF8.GetBytes(ReasonPhrase, buffer[4..]);
+		int length = Encoding.UTF8.GetBytes(ReasonPhrase, buffer[4..]);
 
 		return 4 + Math.Min(length, MaxReasonPhraseBytesLength);
 	}
@@ -36,8 +36,8 @@ public class ErrorCodeStunAttributeValue : IStunAttributeValue
 			return false;
 		}
 
-		var @class = (byte)(buffer[2] & 0b111);
-		var number = Math.Min(buffer[3], (ushort)99);
+		byte @class = (byte)(buffer[2] & 0b111);
+		ushort number = Math.Min(buffer[3], (ushort)99);
 
 		ErrorCode = (ushort)(@class * 100 + number);
 

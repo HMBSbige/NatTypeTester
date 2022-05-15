@@ -26,14 +26,14 @@ public abstract class AddressStunAttributeValue : IStunAttributeValue
 		buffer[0] = 0;
 		buffer[1] = (byte)Family;
 		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Port);
-		Requires.Range(Address.TryWriteBytes(buffer[4..], out var bytesWritten), nameof(buffer));
+		Requires.Range(Address.TryWriteBytes(buffer[4..], out int bytesWritten), nameof(buffer));
 
 		return 4 + bytesWritten;
 	}
 
 	public virtual bool TryParse(ReadOnlySpan<byte> buffer)
 	{
-		var length = 4;
+		int length = 4;
 
 		if (buffer.Length < length)
 		{

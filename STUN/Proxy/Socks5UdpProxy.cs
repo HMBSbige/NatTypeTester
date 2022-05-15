@@ -62,7 +62,7 @@ public class Socks5UdpProxy : IUdpProxy
 	{
 		Verify.Operation(_socks5Client?.Status is Status.Established && _socks5Client.UdpClient is not null, @"Socks5 is not established.");
 
-		var t = ArrayPool<byte>.Shared.Rent(buffer.Length);
+		byte[] t = ArrayPool<byte>.Shared.Rent(buffer.Length);
 		try
 		{
 			if (_udpServerBound.Type is AddressType.Domain)
@@ -70,9 +70,9 @@ public class Socks5UdpProxy : IUdpProxy
 				ThrowErrorAddressType();
 			}
 
-			var remote = new IPEndPoint(_udpServerBound.Address!, _udpServerBound.Port);
-			var r = await _socks5Client.UdpClient.ReceiveMessageFromAsync(t, socketFlags, remote, cancellationToken);
-			var u = Unpack.Udp(t.AsMemory(0, r.ReceivedBytes));
+			IPEndPoint remote = new(_udpServerBound.Address!, _udpServerBound.Port);
+			SocketReceiveMessageFromResult r = await _socks5Client.UdpClient.ReceiveMessageFromAsync(t, socketFlags, remote, cancellationToken);
+			Socks5UdpReceivePacket u = Unpack.Udp(t.AsMemory(0, r.ReceivedBytes));
 
 			u.Data.CopyTo(buffer);
 

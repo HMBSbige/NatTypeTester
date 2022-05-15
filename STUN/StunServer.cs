@@ -25,7 +25,7 @@ public class StunServer
 
 	public static bool TryParse(string s, [NotNullWhen(true)] out StunServer? result)
 	{
-		if (!HostnameEndpoint.TryParse(s, out var host, DefaultPort))
+		if (!HostnameEndpoint.TryParse(s, out HostnameEndpoint? host, DefaultPort))
 		{
 			result = null;
 			return false;
@@ -41,7 +41,7 @@ public class StunServer
 		{
 			return Hostname;
 		}
-		if (IPAddress.TryParse(Hostname, out var ip) && ip.AddressFamily is AddressFamily.InterNetworkV6)
+		if (IPAddress.TryParse(Hostname, out IPAddress? ip) && ip.AddressFamily is AddressFamily.InterNetworkV6)
 		{
 			return $@"[{ip}]:{Port}";
 		}

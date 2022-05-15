@@ -41,7 +41,7 @@ public class StunClient3489 : IStunClient
 
 	public async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
 	{
-		using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		cts.CancelAfter(ReceiveTimeout);
 
 		await _proxy.ConnectAsync(cts.Token);
@@ -57,7 +57,7 @@ public class StunClient3489 : IStunClient
 		State.Reset();
 
 		// test I
-		var response1 = await Test1Async(cancellationToken);
+		StunResponse? response1 = await Test1Async(cancellationToken);
 		if (response1 is null)
 		{
 			State.NatType = NatType.UdpBlocked;
@@ -66,8 +66,8 @@ public class StunClient3489 : IStunClient
 
 		State.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
 
-		var mappedAddress1 = response1.Message.GetMappedAddressAttribute();
-		var changedAddress = response1.Message.GetChangedAddressAttribute();
+		IPEndPoint? mappedAddress1 = response1.Message.GetMappedAddressAttribute();
+		IPEndPoint? changedAddress = response1.Message.GetChangedAddressAttribute();
 
 		State.PublicEndPoint = mappedAddress1; // 显示 test I 得到的映射地址
 
@@ -81,8 +81,8 @@ public class StunClient3489 : IStunClient
 		}
 
 		// test II
-		var response2 = await Test2Async(changedAddress, cancellationToken);
-		var mappedAddress2 = response2?.Message.GetMappedAddressAttribute();
+		StunResponse? response2 = await Test2Async(changedAddress, cancellationToken);
+		IPEndPoint? mappedAddress2 = response2?.Message.GetMappedAddressAttribute();
 
 		if (response2 is not null)
 		{
@@ -121,8 +121,8 @@ public class StunClient3489 : IStunClient
 		}
 
 		// Test I(#2)
-		var response12 = await Test1_2Async(changedAddress, cancellationToken);
-		var mappedAddress12 = response12?.Message.GetMappedAddressAttribute();
+		StunResponse? response12 = await Test1_2Async(changedAddress, cancellationToken);
+		IPEndPoint? mappedAddress12 = response12?.Message.GetMappedAddressAttribute();
 
 		if (mappedAddress12 is null)
 		{
@@ -138,10 +138,10 @@ public class StunClient3489 : IStunClient
 		}
 
 		// Test III
-		var response3 = await Test3Async(cancellationToken);
+		StunResponse? response3 = await Test3Async(cancellationToken);
 		if (response3 is not null)
 		{
-			var mappedAddress3 = response3.Message.GetMappedAddressAttribute();
+			IPEndPoint? mappedAddress3 = response3.Message.GetMappedAddressAttribute();
 			if (mappedAddress3 is not null
 				&& Equals(response3.Remote.Address, response1.Remote.Address)
 				&& response3.Remote.Port != response1.Remote.Port)
@@ -160,17 +160,17 @@ public class StunClient3489 : IStunClient
 	{
 		try
 		{
-			using var memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
-			var buffer = memoryOwner.Memory;
-			var length = sendMessage.WriteTo(buffer.Span);
+			using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
+			Memory<byte> buffer = memoryOwner.Memory;
+			int length = sendMessage.WriteTo(buffer.Span);
 
 			await _proxy.SendToAsync(buffer[..length], SocketFlags.None, remote, cancellationToken);
 
-			using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			cts.CancelAfter(ReceiveTimeout);
-			var r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
+			SocketReceiveMessageFromResult r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
 
-			var message = new StunMessage5389();
+			StunMessage5389 message = new();
 			if (message.TryParse(buffer.Span[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
 				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);
@@ -185,7 +185,7 @@ public class StunClient3489 : IStunClient
 
 	public virtual async ValueTask<StunResponse?> Test1Async(CancellationToken cancellationToken)
 	{
-		var message = new StunMessage5389
+		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			MagicCookie = 0
@@ -195,7 +195,7 @@ public class StunClient3489 : IStunClient
 
 	public virtual async ValueTask<StunResponse?> Test2Async(IPEndPoint other, CancellationToken cancellationToken)
 	{
-		var message = new StunMessage5389
+		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			MagicCookie = 0,
@@ -206,7 +206,7 @@ public class StunClient3489 : IStunClient
 
 	public virtual async ValueTask<StunResponse?> Test1_2Async(IPEndPoint other, CancellationToken cancellationToken)
 	{
-		var message = new StunMessage5389
+		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			MagicCookie = 0
@@ -216,7 +216,7 @@ public class StunClient3489 : IStunClient
 
 	public virtual async ValueTask<StunResponse?> Test3Async(CancellationToken cancellationToken)
 	{
-		var message = new StunMessage5389
+		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			MagicCookie = 0,

@@ -42,7 +42,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	public void LoadStunServer()
 	{
-		foreach (var server in _defaultServers)
+		foreach (string? server in _defaultServers)
 		{
 			List.Add(server);
 		}
@@ -58,9 +58,9 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 				return;
 			}
 
-			foreach (var line in File.ReadLines(path))
+			foreach (string? line in File.ReadLines(path))
 			{
-				if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out var stun))
+				if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out StunServer? stun))
 				{
 					List.Add(stun.ToString());
 				}

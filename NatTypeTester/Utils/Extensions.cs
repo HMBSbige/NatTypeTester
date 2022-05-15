@@ -6,7 +6,7 @@ public static class Extensions
 {
 	public static async Task HandleExceptionWithContentDialogAsync(this Exception ex)
 	{
-		using var dialog = new DisposableContentDialog
+		using DisposableContentDialog dialog = new()
 		{
 			Title = nameof(NatTypeTester),
 			Content = ex.Message,

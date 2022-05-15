@@ -39,14 +39,14 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 
 	private async Task DiscoveryNatTypeAsync(CancellationToken token)
 	{
-		Verify.Operation(StunServer.TryParse(Config.StunServer, out var server), @"Wrong STUN Server!");
+		Verify.Operation(StunServer.TryParse(Config.StunServer, out StunServer? server), @"Wrong STUN Server!");
 
-		if (!HostnameEndpoint.TryParse(Config.ProxyServer, out var proxyIpe))
+		if (!HostnameEndpoint.TryParse(Config.ProxyServer, out HostnameEndpoint? proxyIpe))
 		{
 			throw new NotSupportedException(@"Unknown proxy address");
 		}
 
-		var socks5Option = new Socks5CreateOption
+		Socks5CreateOption socks5Option = new()
 		{
 			Address = await DnsClient.QueryAsync(proxyIpe.Hostname, token),
 			Port = proxyIpe.Port,
@@ -58,15 +58,15 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 		};
 
 		Result5389.LocalEndPoint ??= DefaultLocalEndpoint;
-		using var proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
+		using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
 
-		var ip = await DnsClient.QueryAsync(server.Hostname, token);
-		using var client = new StunClient5389UDP(new IPEndPoint(ip, server.Port), Result5389.LocalEndPoint, proxy);
+		IPAddress ip = await DnsClient.QueryAsync(server.Hostname, token);
+		using StunClient5389UDP client = new(new IPEndPoint(ip, server.Port), Result5389.LocalEndPoint, proxy);
 
 		Result5389 = client.State;
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-				   .ObserveOn(RxApp.MainThreadScheduler)
-				   .Subscribe(_ => this.RaisePropertyChanged(nameof(Result5389))))
+				.ObserveOn(RxApp.MainThreadScheduler)
+				.Subscribe(_ => this.RaisePropertyChanged(nameof(Result5389))))
 		{
 			await client.ConnectProxyAsync(token);
 			try

@@ -34,7 +34,7 @@ public partial class App
 
 	protected override async void OnExit(ExitEventArgs e)
 	{
-		_application.Shutdown();
+		await _application.ShutdownAsync();
 		await _host.StopAsync();
 		_host.Dispose();
 	}

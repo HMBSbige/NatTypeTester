@@ -34,8 +34,8 @@ public class StunMessage5389
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		var messageLength = Attributes.Aggregate<StunAttribute, ushort>(0, (current, attribute) => (ushort)(current + attribute.RealLength));
-		var length = 20 + messageLength;
+		ushort messageLength = Attributes.Aggregate<StunAttribute, ushort>(0, (current, attribute) => (ushort)(current + attribute.RealLength));
+		int length = 20 + messageLength;
 		Requires.Range(buffer.Length >= length, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)StunMessageType);
@@ -44,9 +44,9 @@ public class StunMessage5389
 		TransactionId.CopyTo(buffer[8..]);
 
 		buffer = buffer[20..];
-		foreach (var attribute in Attributes)
+		foreach (StunAttribute? attribute in Attributes)
 		{
-			var outLength = attribute.WriteTo(buffer);
+			int outLength = attribute.WriteTo(buffer);
 			buffer = buffer[outLength..];
 		}
 
@@ -64,7 +64,7 @@ public class StunMessage5389
 
 		tempSpan[0] = (byte)(buffer[0] & 0b0011_1111);
 		tempSpan[1] = buffer[1];
-		var type = (StunMessageType)BinaryPrimitives.ReadUInt16BigEndian(tempSpan);
+		StunMessageType type = (StunMessageType)BinaryPrimitives.ReadUInt16BigEndian(tempSpan);
 
 		if (!Enum.IsDefined(typeof(StunMessageType), type))
 		{
@@ -73,7 +73,7 @@ public class StunMessage5389
 
 		StunMessageType = type;
 
-		var length = BinaryPrimitives.ReadUInt16BigEndian(buffer[2..]);
+		ushort length = BinaryPrimitives.ReadUInt16BigEndian(buffer[2..]);
 
 		MagicCookie = BinaryPrimitives.ReadUInt32BigEndian(buffer[4..]);
 
@@ -84,15 +84,15 @@ public class StunMessage5389
 			return false; // Check length
 		}
 
-		var list = new List<StunAttribute>();
+		List<StunAttribute> list = new();
 
-		var attributeBuffer = buffer[20..];
-		var magicCookieAndTransactionId = buffer.Slice(4, 16);
+		ReadOnlySpan<byte> attributeBuffer = buffer[20..];
+		ReadOnlySpan<byte> magicCookieAndTransactionId = buffer.Slice(4, 16);
 
 		while (attributeBuffer.Length > 0)
 		{
-			var attribute = new StunAttribute();
-			var offset = attribute.TryParse(attributeBuffer, magicCookieAndTransactionId);
+			StunAttribute attribute = new();
+			int offset = attribute.TryParse(attributeBuffer, magicCookieAndTransactionId);
 			if (offset > 0)
 			{
 				list.Add(attribute);

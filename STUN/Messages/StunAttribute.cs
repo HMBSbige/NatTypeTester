@@ -34,15 +34,15 @@ public class StunAttribute
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		var length = 4 + Length;
-		var n = (4 - length % 4) % 4; // 填充的字节数
-		var totalLength = length + n;
+		int length = 4 + Length;
+		int n = (4 - length % 4) % 4; // 填充的字节数
+		int totalLength = length + n;
 
 		Requires.Range(buffer.Length >= totalLength, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)Type);
 		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Length);
-		var valueLength = Value.WriteTo(buffer[4..]);
+		int valueLength = Value.WriteTo(buffer[4..]);
 
 		Assumes.True(valueLength == Length);
 
@@ -70,7 +70,7 @@ public class StunAttribute
 			return 0;
 		}
 
-		var value = buffer.Slice(4, Length);
+		ReadOnlySpan<byte> value = buffer.Slice(4, Length);
 
 		IStunAttributeValue t = Type switch
 		{

@@ -13,10 +13,10 @@ public class UnknownStunAttributeValue : IStunAttributeValue
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		var size = Types.Count << 1;
+		int size = Types.Count << 1;
 		Requires.Range(buffer.Length >= size, nameof(buffer));
 
-		foreach (var attributeType in Types)
+		foreach (AttributeType attributeType in Types)
 		{
 			BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)attributeType);
 			buffer = buffer[sizeof(ushort)..];
@@ -35,7 +35,7 @@ public class UnknownStunAttributeValue : IStunAttributeValue
 		Types.Clear();
 		while (!buffer.IsEmpty)
 		{
-			var type = BinaryPrimitives.ReadUInt16BigEndian(buffer);
+			ushort type = BinaryPrimitives.ReadUInt16BigEndian(buffer);
 			Types.Add((AttributeType)type);
 			buffer = buffer[sizeof(ushort)..];
 		}

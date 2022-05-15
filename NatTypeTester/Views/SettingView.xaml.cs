@@ -29,7 +29,7 @@ public partial class SettingView : ITransientDependency
 				type => (int)type,
 				index =>
 				{
-					var type = (ProxyType)index;
+					ProxyType type = (ProxyType)index;
 					ProxyConfigGrid.IsEnabled = type is not ProxyType.Plain;
 					return type;
 				}).DisposeWith(d);

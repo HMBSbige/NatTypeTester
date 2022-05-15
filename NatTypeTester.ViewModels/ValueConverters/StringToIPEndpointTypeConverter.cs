@@ -28,7 +28,7 @@ public class StringToIPEndpointTypeConverter : IBindingTypeConverter, ISingleton
 	{
 		if (toType == typeof(IPEndPoint) && from is string str)
 		{
-			if (IPEndPoint.TryParse(str, out var ipe))
+			if (IPEndPoint.TryParse(str, out IPEndPoint? ipe))
 			{
 				result = ipe;
 				return true;

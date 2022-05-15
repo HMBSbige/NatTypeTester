@@ -26,7 +26,7 @@ public class XorMappedAddressStunAttributeValue : AddressStunAttributeValue
 		buffer[0] = 0;
 		buffer[1] = (byte)Family;
 		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Xor(Port));
-		Requires.Range(Xor(Address).TryWriteBytes(buffer[4..], out var bytesWritten), nameof(buffer));
+		Requires.Range(Xor(Address).TryWriteBytes(buffer[4..], out int bytesWritten), nameof(buffer));
 
 		return 4 + bytesWritten;
 	}
@@ -59,9 +59,9 @@ public class XorMappedAddressStunAttributeValue : AddressStunAttributeValue
 	private IPAddress Xor(IPAddress address)
 	{
 		Span<byte> b = stackalloc byte[16];
-		Assumes.True(address.TryWriteBytes(b, out var bytesWritten));
+		Assumes.True(address.TryWriteBytes(b, out int bytesWritten));
 
-		for (var i = 0; i < bytesWritten; ++i)
+		for (int i = 0; i < bytesWritten; ++i)
 		{
 			b[i] ^= _magicCookieAndTransactionId[i];
 		}

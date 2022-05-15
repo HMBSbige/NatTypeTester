@@ -43,7 +43,7 @@ public class StunClient5389UDP : IStunClient
 
 	public async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
 	{
-		using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		cts.CancelAfter(ReceiveTimeout);
 
 		await _proxy.ConnectAsync(cts.Token);
@@ -73,7 +73,7 @@ public class StunClient5389UDP : IStunClient
 		}
 
 		// MappingBehaviorTest test II
-		var result2 = await MappingBehaviorTestBase2Async(cancellationToken);
+		StunResult5389 result2 = await MappingBehaviorTestBase2Async(cancellationToken);
 		if (State.MappingBehavior is not MappingBehavior.Unknown)
 		{
 			return;
@@ -90,14 +90,14 @@ public class StunClient5389UDP : IStunClient
 
 	public virtual async ValueTask<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken cancellationToken = default)
 	{
-		var result = new StunResult5389();
-		var test = new StunMessage5389
+		StunResult5389 result = new();
+		StunMessage5389 test = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest
 		};
-		var response1 = await RequestAsync(test, remote, remote, cancellationToken);
-		var mappedAddress1 = response1?.Message.GetXorMappedAddressAttribute();
-		var otherAddress = response1?.Message.GetOtherAddressAttribute();
+		StunResponse? response1 = await RequestAsync(test, remote, remote, cancellationToken);
+		IPEndPoint? mappedAddress1 = response1?.Message.GetXorMappedAddressAttribute();
+		IPEndPoint? otherAddress = response1?.Message.GetOtherAddressAttribute();
 
 		if (response1 is null)
 		{
@@ -112,7 +112,7 @@ public class StunClient5389UDP : IStunClient
 			result.BindingTestResult = BindingTestResult.Success;
 		}
 
-		var local = response1 is null ? null : new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
+		IPEndPoint? local = response1 is null ? null : new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
 
 		result.LocalEndPoint = local;
 		result.PublicEndPoint = mappedAddress1;
@@ -126,7 +126,7 @@ public class StunClient5389UDP : IStunClient
 		State.Reset();
 
 		// test I
-		var bindingResult = await BindingTestAsync(cancellationToken);
+		StunResult5389 bindingResult = await BindingTestAsync(cancellationToken);
 		State.Clone(bindingResult);
 		if (State.BindingTestResult is not BindingTestResult.Success)
 		{
@@ -146,7 +146,7 @@ public class StunClient5389UDP : IStunClient
 		}
 
 		// test II
-		var result2 = await MappingBehaviorTestBase2Async(cancellationToken);
+		StunResult5389 result2 = await MappingBehaviorTestBase2Async(cancellationToken);
 		if (State.MappingBehavior is not MappingBehavior.Unknown)
 		{
 			return;
@@ -160,7 +160,7 @@ public class StunClient5389UDP : IStunClient
 	{
 		Verify.Operation(State.OtherEndPoint is not null, @"OTHER-ADDRESS is not returned");
 
-		var result2 = await BindingTestBaseAsync(new IPEndPoint(State.OtherEndPoint.Address, _remoteEndPoint.Port), cancellationToken);
+		StunResult5389 result2 = await BindingTestBaseAsync(new IPEndPoint(State.OtherEndPoint.Address, _remoteEndPoint.Port), cancellationToken);
 
 		if (result2.BindingTestResult is not BindingTestResult.Success)
 		{
@@ -178,7 +178,7 @@ public class StunClient5389UDP : IStunClient
 	{
 		Verify.Operation(State.OtherEndPoint is not null, @"OTHER-ADDRESS is not returned");
 
-		var result3 = await BindingTestBaseAsync(State.OtherEndPoint, cancellationToken);
+		StunResult5389 result3 = await BindingTestBaseAsync(State.OtherEndPoint, cancellationToken);
 		if (result3.BindingTestResult is not BindingTestResult.Success)
 		{
 			State.MappingBehavior = MappingBehavior.Fail;
@@ -197,7 +197,7 @@ public class StunClient5389UDP : IStunClient
 	private async ValueTask FilteringBehaviorTestBaseAsync(CancellationToken cancellationToken)
 	{
 		// test I
-		var bindingResult = await BindingTestAsync(cancellationToken);
+		StunResult5389 bindingResult = await BindingTestAsync(cancellationToken);
 		State.Clone(bindingResult);
 		if (State.BindingTestResult is not BindingTestResult.Success)
 		{
@@ -211,7 +211,7 @@ public class StunClient5389UDP : IStunClient
 		}
 
 		// test II
-		var response2 = await FilteringBehaviorTest2Async(cancellationToken);
+		StunResponse? response2 = await FilteringBehaviorTest2Async(cancellationToken);
 		if (response2 is not null)
 		{
 			State.FilteringBehavior = Equals(response2.Remote, State.OtherEndPoint) ? FilteringBehavior.EndpointIndependent : FilteringBehavior.UnsupportedServer;
@@ -219,7 +219,7 @@ public class StunClient5389UDP : IStunClient
 		}
 
 		// test III
-		var response3 = await FilteringBehaviorTest3Async(cancellationToken);
+		StunResponse? response3 = await FilteringBehaviorTest3Async(cancellationToken);
 		if (response3 is null)
 		{
 			State.FilteringBehavior = FilteringBehavior.AddressAndPortDependent;
@@ -240,7 +240,7 @@ public class StunClient5389UDP : IStunClient
 	{
 		Assumes.NotNull(State.OtherEndPoint);
 
-		var message = new StunMessage5389
+		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
@@ -252,7 +252,7 @@ public class StunClient5389UDP : IStunClient
 	{
 		Assumes.NotNull(State.OtherEndPoint);
 
-		var message = new StunMessage5389
+		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
@@ -272,17 +272,17 @@ public class StunClient5389UDP : IStunClient
 	{
 		try
 		{
-			using var memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
-			var buffer = memoryOwner.Memory;
-			var length = sendMessage.WriteTo(buffer.Span);
+			using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
+			Memory<byte> buffer = memoryOwner.Memory;
+			int length = sendMessage.WriteTo(buffer.Span);
 
 			await _proxy.SendToAsync(buffer[..length], SocketFlags.None, remote, cancellationToken);
 
-			using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			cts.CancelAfter(ReceiveTimeout);
-			var r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
+			SocketReceiveMessageFromResult r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
 
-			var message = new StunMessage5389();
+			StunMessage5389 message = new();
 			if (message.TryParse(buffer.Span[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
 				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);

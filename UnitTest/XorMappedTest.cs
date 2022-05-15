@@ -39,7 +39,7 @@ public class XorMappedTest
 	[TestMethod]
 	public void TestXorMapped()
 	{
-		var t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId)
+		XorMappedAddressStunAttributeValue t = new(MagicCookieAndTransactionId)
 		{
 			Port = Port,
 			Family = IpFamily.IPv4,
@@ -47,7 +47,7 @@ public class XorMappedTest
 		};
 		Span<byte> temp = stackalloc byte[ushort.MaxValue];
 
-		var length4 = t.WriteTo(temp);
+		int length4 = t.WriteTo(temp);
 		Assert.AreNotEqual(0, length4);
 		Assert.IsTrue(temp[..length4].SequenceEqual(_ipv4Response));
 
@@ -63,7 +63,7 @@ public class XorMappedTest
 		Assert.AreEqual(t.Family, IpFamily.IPv6);
 		Assert.AreEqual(t.Address, IPv6);
 
-		var length6 = t.WriteTo(temp);
+		int length6 = t.WriteTo(temp);
 		Assert.AreNotEqual(0, length6);
 		Assert.IsTrue(temp[..length6].SequenceEqual(_ipv6Response));
 	}

@@ -19,7 +19,7 @@ public static class AttributeExtensions
 
 	public static StunAttribute BuildMapping(IpFamily family, IPAddress ip, ushort port)
 	{
-		var length = family switch
+		int length = family switch
 		{
 			IpFamily.IPv4 => 4,
 			IpFamily.IPv6 => 16,
@@ -40,7 +40,7 @@ public static class AttributeExtensions
 
 	public static StunAttribute BuildChangeAddress(IpFamily family, IPAddress ip, ushort port)
 	{
-		var length = family switch
+		int length = family switch
 		{
 			IpFamily.IPv4 => 4,
 			IpFamily.IPv6 => 16,
@@ -61,33 +61,33 @@ public static class AttributeExtensions
 
 	public static IPEndPoint? GetMappedAddressAttribute(this StunMessage5389 response)
 	{
-		var mappedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
+		StunAttribute? mappedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
 
 		if (mappedAddressAttribute is null)
 		{
 			return null;
 		}
 
-		var mapped = (MappedAddressStunAttributeValue)mappedAddressAttribute.Value;
+		MappedAddressStunAttributeValue mapped = (MappedAddressStunAttributeValue)mappedAddressAttribute.Value;
 		return new IPEndPoint(mapped.Address!, mapped.Port);
 	}
 
 	public static IPEndPoint? GetChangedAddressAttribute(this StunMessage5389 response)
 	{
-		var changedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
+		StunAttribute? changedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
 
 		if (changedAddressAttribute is null)
 		{
 			return null;
 		}
 
-		var address = (ChangedAddressStunAttributeValue)changedAddressAttribute.Value;
+		ChangedAddressStunAttributeValue address = (ChangedAddressStunAttributeValue)changedAddressAttribute.Value;
 		return new IPEndPoint(address.Address!, address.Port);
 	}
 
 	public static IPEndPoint? GetXorMappedAddressAttribute(this StunMessage5389 response)
 	{
-		var mappedAddressAttribute =
+		StunAttribute? mappedAddressAttribute =
 			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.XorMappedAddress) ??
 			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
 
@@ -96,13 +96,13 @@ public static class AttributeExtensions
 			return null;
 		}
 
-		var mapped = (AddressStunAttributeValue)mappedAddressAttribute.Value;
+		AddressStunAttributeValue mapped = (AddressStunAttributeValue)mappedAddressAttribute.Value;
 		return new IPEndPoint(mapped.Address!, mapped.Port);
 	}
 
 	public static IPEndPoint? GetOtherAddressAttribute(this StunMessage5389 response)
 	{
-		var addressAttribute =
+		StunAttribute? addressAttribute =
 			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.OtherAddress) ??
 			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
 
@@ -111,7 +111,7 @@ public static class AttributeExtensions
 			return null;
 		}
 
-		var address = (AddressStunAttributeValue)addressAttribute.Value;
+		AddressStunAttributeValue address = (AddressStunAttributeValue)addressAttribute.Value;
 		return new IPEndPoint(address.Address!, address.Port);
 	}
 }

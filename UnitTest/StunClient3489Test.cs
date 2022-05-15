@@ -34,8 +34,8 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task UdpBlockedTestAsync()
 	{
-		var mock = new Mock<StunClient3489>(Any, Any, default);
-		var client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default);
+		StunClient3489? client = mock.Object;
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
@@ -46,15 +46,15 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task UnsupportedServerTestAsync()
 	{
-		var mock = new Mock<StunClient3489>(Any, Any, default);
-		var client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default);
+		StunClient3489? client = mock.Object;
 
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
-		var unknownResponse = new StunResponse(DefaultStunMessage, Any, LocalAddress1.Address);
+		StunResponse unknownResponse = new(DefaultStunMessage, Any, LocalAddress1.Address);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(unknownResponse);
 		await TestAsync();
 
-		var r1 = new StunResponse(new StunMessage5389
+		StunResponse r1 = new(new StunMessage5389
 		{
 			Attributes = new[]
 			{
@@ -64,7 +64,7 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 		await TestAsync();
 
-		var r2 = new StunResponse(new StunMessage5389
+		StunResponse r2 = new(new StunMessage5389
 		{
 			Attributes = new[]
 			{
@@ -74,7 +74,7 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 		await TestAsync();
 
-		var r3 = new StunResponse(new StunMessage5389
+		StunResponse r3 = new(new StunMessage5389
 		{
 			Attributes = new[]
 			{
@@ -85,7 +85,7 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 		await TestAsync();
 
-		var r4 = new StunResponse(new StunMessage5389
+		StunResponse r4 = new(new StunMessage5389
 		{
 			Attributes = new[]
 			{
@@ -106,10 +106,10 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task NoNatTestAsync()
 	{
-		var mock = new Mock<StunClient3489>(Any, Any, default);
-		var client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default);
+		StunClient3489? client = mock.Object;
 
-		var openInternetTest1Response = new StunResponse(
+		StunResponse openInternetTest1Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -121,7 +121,7 @@ public class StunClient3489Test
 			ServerAddress,
 			MappedAddress1.Address
 		);
-		var test2Response = new StunResponse(
+		StunResponse test2Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -150,10 +150,10 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task FullConeTestAsync()
 	{
-		var mock = new Mock<StunClient3489>(Any, Any, default);
-		var client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default);
+		StunClient3489? client = mock.Object;
 
-		var test1Response = new StunResponse(
+		StunResponse test1Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -165,7 +165,7 @@ public class StunClient3489Test
 			ServerAddress,
 			LocalAddress1.Address
 		);
-		var fullConeResponse = new StunResponse(
+		StunResponse fullConeResponse = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -176,7 +176,7 @@ public class StunClient3489Test
 			ChangedAddress1,
 			LocalAddress1.Address
 		);
-		var unsupportedResponse1 = new StunResponse(
+		StunResponse unsupportedResponse1 = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -187,7 +187,7 @@ public class StunClient3489Test
 			ServerAddress,
 			LocalAddress1.Address
 		);
-		var unsupportedResponse2 = new StunResponse(
+		StunResponse unsupportedResponse2 = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -198,7 +198,7 @@ public class StunClient3489Test
 			new IPEndPoint(ServerAddress.Address, ChangedAddress1.Port),
 			LocalAddress1.Address
 		);
-		var unsupportedResponse3 = new StunResponse(
+		StunResponse unsupportedResponse3 = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -237,10 +237,10 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task SymmetricTestAsync()
 	{
-		var mock = new Mock<StunClient3489>(Any, Any, default);
-		var client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default);
+		StunClient3489? client = mock.Object;
 
-		var test1Response = new StunResponse(
+		StunResponse test1Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -252,7 +252,7 @@ public class StunClient3489Test
 			ServerAddress,
 			LocalAddress1.Address
 		);
-		var test12Response = new StunResponse(
+		StunResponse test12Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -282,10 +282,10 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task RestrictedConeTestAsync()
 	{
-		var mock = new Mock<StunClient3489>(Any, Any, default);
-		var client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default);
+		StunClient3489? client = mock.Object;
 
-		var test1Response = new StunResponse(
+		StunResponse test1Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -297,7 +297,7 @@ public class StunClient3489Test
 			ServerAddress,
 			LocalAddress1.Address
 		);
-		var test3Response = new StunResponse(
+		StunResponse test3Response = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -309,7 +309,7 @@ public class StunClient3489Test
 			ChangedAddress2,
 			LocalAddress1.Address
 		);
-		var test3ErrorResponse = new StunResponse(
+		StunResponse test3ErrorResponse = new(
 			new StunMessage5389
 			{
 				Attributes = new[]
@@ -343,19 +343,19 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task Test1Async()
 	{
-		var ip = await _dnsClient.QueryAsync(Server);
-		using var client = new StunClient3489(new IPEndPoint(ip, Port), Any);
+		IPAddress ip = await _dnsClient.QueryAsync(Server);
+		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
 
 		// test I
-		var response1 = await client.Test1Async(default);
+		StunResponse? response1 = await client.Test1Async(default);
 
 		Assert.IsNotNull(response1);
 		Assert.AreEqual(ip, response1.Remote.Address);
 		Assert.AreEqual(Port, response1.Remote.Port);
 		Assert.AreNotEqual(Any, client.LocalEndPoint);
 
-		var mappedAddress = response1.Message.GetMappedAddressAttribute();
-		var changedAddress = response1.Message.GetChangedAddressAttribute();
+		IPEndPoint? mappedAddress = response1.Message.GetMappedAddressAttribute();
+		IPEndPoint? changedAddress = response1.Message.GetChangedAddressAttribute();
 
 		Assert.IsNotNull(mappedAddress);
 		Assert.IsNotNull(changedAddress);
@@ -364,7 +364,7 @@ public class StunClient3489Test
 		Assert.AreNotEqual(Port, changedAddress.Port);
 
 		// Test I(#2)
-		var response12 = await client.Test1_2Async(changedAddress, default);
+		StunResponse? response12 = await client.Test1_2Async(changedAddress, default);
 
 		Assert.IsNotNull(response12);
 		Assert.AreEqual(changedAddress.Address, response12.Remote.Address);
@@ -372,13 +372,13 @@ public class StunClient3489Test
 	}
 
 #if FullCone
-		[TestMethod]
+	[TestMethod]
 #endif
 	public async Task Test2Async()
 	{
-		var ip = await _dnsClient.QueryAsync(Server);
-		using var client = new StunClient3489(new IPEndPoint(ip, Port), Any);
-		var response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, default);
+		IPAddress ip = await _dnsClient.QueryAsync(Server);
+		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
+		StunResponse? response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, default);
 
 		Assert.IsNotNull(response2);
 
@@ -387,13 +387,13 @@ public class StunClient3489Test
 	}
 
 #if FullCone
-		[TestMethod]
+	[TestMethod]
 #endif
 	public async Task Test3Async()
 	{
-		var ip = await _dnsClient.QueryAsync(Server);
-		using var client = new StunClient3489(new IPEndPoint(ip, Port), Any);
-		var response = await client.Test3Async(default);
+		IPAddress ip = await _dnsClient.QueryAsync(Server);
+		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
+		StunResponse? response = await client.Test3Async(default);
 
 		Assert.IsNotNull(response);
 

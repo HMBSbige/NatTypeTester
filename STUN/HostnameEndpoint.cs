@@ -23,8 +23,8 @@ public class HostnameEndpoint
 			return false;
 		}
 
-		var hostLength = s.Length;
-		var pos = s.LastIndexOf(':');
+		int hostLength = s.Length;
+		int pos = s.LastIndexOf(':');
 
 		if (pos > 0)
 		{
@@ -38,8 +38,8 @@ public class HostnameEndpoint
 			}
 		}
 
-		var host = s[..hostLength];
-		var type = Uri.CheckHostName(host);
+		string host = s[..hostLength];
+		UriHostNameType type = Uri.CheckHostName(host);
 		switch (type)
 		{
 			case UriHostNameType.Dns:
@@ -65,7 +65,7 @@ public class HostnameEndpoint
 
 	public override string ToString()
 	{
-		if (IPAddress.TryParse(Hostname, out var ip) && ip.AddressFamily is AddressFamily.InterNetworkV6)
+		if (IPAddress.TryParse(Hostname, out IPAddress? ip) && ip.AddressFamily is AddressFamily.InterNetworkV6)
 		{
 			return $@"[{ip}]:{Port}";
 		}

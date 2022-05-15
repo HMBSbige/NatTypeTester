@@ -1,14 +1,15 @@
 using Dns.Net.Clients;
 using STUN;
 using STUN.Client;
+using STUN.StunResult;
 using System.Net;
 
 //stun.qq.com:3478 0.0.0.0:0
-var server = @"stun.syncthing.net";
+string server = @"stun.syncthing.net";
 ushort port = 3478;
-var local = new IPEndPoint(IPAddress.Any, 0);
+IPEndPoint local = new(IPAddress.Any, 0);
 
-if (args.Length > 0 && StunServer.TryParse(args[0], out var stun))
+if (args.Length > 0 && StunServer.TryParse(args[0], out StunServer? stun))
 {
 	server = stun.Hostname;
 	port = stun.Port;
@@ -16,21 +17,21 @@ if (args.Length > 0 && StunServer.TryParse(args[0], out var stun))
 
 if (args.Length > 1)
 {
-	if (IPEndPoint.TryParse(args[2], out var ipEndPoint))
+	if (IPEndPoint.TryParse(args[2], out IPEndPoint? ipEndPoint))
 	{
 		local = ipEndPoint;
 	}
 }
 
-var dnsClient = new DefaultDnsClient();
-var ip = await dnsClient.QueryAsync(server);
-using var client = new StunClient5389UDP(new IPEndPoint(ip, port), local);
+DefaultDnsClient dnsClient = new();
+IPAddress ip = await dnsClient.QueryAsync(server);
+using StunClient5389UDP client = new(new IPEndPoint(ip, port), local);
 
-using var cts = new CancellationTokenSource();
+using CancellationTokenSource cts = new();
 cts.CancelAfter(TimeSpan.FromSeconds(5));
 await client.QueryAsync(cts.Token);
 
-var res = client.State;
+StunResult5389 res = client.State;
 
 Console.WriteLine($@"Other address is {res.OtherEndPoint}");
 Console.WriteLine($@"Binding test: {res.BindingTestResult}");
