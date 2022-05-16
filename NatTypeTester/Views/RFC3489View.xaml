@@ -22,10 +22,14 @@
                  Margin="10,5" IsReadOnly="True"
                  VerticalContentAlignment="Center" VerticalAlignment="Center"
                  ui:ControlHelper.Header="NAT type" />
-        <TextBox x:Name="LocalEndTextBox" Grid.Row="1"
-                 Margin="10,5"
-                 VerticalContentAlignment="Center" VerticalAlignment="Center"
-                 ui:ControlHelper.Header="Local end" />
+        <ComboBox x:Name="LocalEndComboBox" Grid.Row="1"
+                  Margin="10,5"
+                  IsEditable="True" HorizontalAlignment="Stretch"
+                  VerticalContentAlignment="Center" VerticalAlignment="Center"
+                  ui:ControlHelper.Header="Local end">
+            <ComboBoxItem>0.0.0.0:0</ComboBoxItem>
+            <ComboBoxItem>[::]:0</ComboBoxItem>
+        </ComboBox>
         <TextBox x:Name="PublicEndTextBox" Grid.Row="2"
                  Margin="10,5" IsReadOnly="True"
                  VerticalContentAlignment="Center" VerticalAlignment="Center"

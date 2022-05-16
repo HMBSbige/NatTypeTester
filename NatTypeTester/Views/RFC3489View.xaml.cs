@@ -23,7 +23,9 @@ public partial class RFC3489View : ITransientDependency
 		{
 			this.OneWayBind(ViewModel, vm => vm.Result3489.NatType, v => v.NatTypeTextBox.Text).DisposeWith(d);
 
-			this.Bind(ViewModel, vm => vm.Result3489.LocalEndPoint, v => v.LocalEndTextBox.Text).DisposeWith(d);
+			this.Bind(ViewModel, vm => vm.Result3489.LocalEndPoint, v => v.LocalEndComboBox.Text).DisposeWith(d);
+
+			LocalEndComboBox.Events().LostKeyboardFocus.Subscribe(_ => LocalEndComboBox.Text = ViewModel.Result3489.LocalEndPoint?.ToString() ?? string.Empty).DisposeWith(d);
 
 			this.OneWayBind(ViewModel, vm => vm.Result3489.PublicEndPoint, v => v.PublicEndTextBox.Text).DisposeWith(d);
 

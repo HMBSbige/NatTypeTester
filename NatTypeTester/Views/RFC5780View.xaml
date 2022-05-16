@@ -34,11 +34,14 @@
             Margin="10,5" IsReadOnly="True"
             VerticalContentAlignment="Center" VerticalAlignment="Center"
             ui:ControlHelper.Header="Filtering behavior" />
-        <TextBox
-            x:Name="LocalAddressTextBox" Grid.Row="3"
-            Margin="10,5" IsReadOnly="False"
-            VerticalContentAlignment="Center" VerticalAlignment="Center"
-            ui:ControlHelper.Header="Local end" />
+        <ComboBox x:Name="LocalAddressComboBox" Grid.Row="3"
+                  Margin="10,5"
+                  IsEditable="True" HorizontalAlignment="Stretch"
+                  VerticalContentAlignment="Center" VerticalAlignment="Center"
+                  ui:ControlHelper.Header="Local end">
+            <ComboBoxItem>0.0.0.0:0</ComboBoxItem>
+            <ComboBoxItem>[::]:0</ComboBoxItem>
+        </ComboBox>
         <TextBox
             x:Name="MappingAddressTextBox" Grid.Row="4"
             Margin="10,5" IsReadOnly="True"

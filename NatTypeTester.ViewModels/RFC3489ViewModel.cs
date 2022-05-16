@@ -1,4 +1,5 @@
 using Dns.Net.Abstractions;
+using Dns.Net.Clients;
 using JetBrains.Annotations;
 using Microsoft;
 using NatTypeTester.Models;
@@ -24,19 +25,16 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 	private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 
 	private IDnsClient DnsClient => LazyServiceProvider.LazyGetRequiredService<IDnsClient>();
+	private IDnsClient AAAADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAAAAClient>();
+	private IDnsClient ADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAClient>();
 
 	public ClassicStunResult Result3489 { get; set; }
 
 	public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
 
-	private static readonly IPEndPoint DefaultLocalEndpoint = new(IPAddress.Any, 0);
-
 	public RFC3489ViewModel()
 	{
-		Result3489 = new ClassicStunResult
-		{
-			LocalEndPoint = DefaultLocalEndpoint
-		};
+		Result3489 = new ClassicStunResult();
 		TestClassicNatType = ReactiveCommand.CreateFromTask(TestClassicNatTypeAsync);
 	}
 
@@ -60,22 +58,37 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 			}
 		};
 
-		Result3489.LocalEndPoint ??= DefaultLocalEndpoint;
+		IPAddress? serverIp;
+		if (Result3489.LocalEndPoint is null)
+		{
+			serverIp = await DnsClient.QueryAsync(server.Hostname, token);
+			Result3489.LocalEndPoint = serverIp.AddressFamily is AddressFamily.InterNetworkV6 ? new IPEndPoint(IPAddress.IPv6Any, IPEndPoint.MinPort) : new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
+		}
+		else
+		{
+			if (Result3489.LocalEndPoint.AddressFamily is AddressFamily.InterNetworkV6)
+			{
+				serverIp = await AAAADnsClient.QueryAsync(server.Hostname, token);
+			}
+			else
+			{
+				serverIp = await ADnsClient.QueryAsync(server.Hostname, token);
+			}
+		}
+
 		using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result3489.LocalEndPoint, socks5Option);
 
-		IPAddress ip = await DnsClient.QueryAsync(server.Hostname, token);
-		using StunClient3489 client = new(new IPEndPoint(ip, server.Port), Result3489.LocalEndPoint, proxy);
+		using StunClient3489 client = new(new IPEndPoint(serverIp, server.Port), Result3489.LocalEndPoint, proxy);
 
 		Result3489 = client.State;
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-				   .ObserveOn(RxApp.MainThreadScheduler)
-				   .Subscribe(_ => this.RaisePropertyChanged(nameof(Result3489))))
+				.ObserveOn(RxApp.MainThreadScheduler)
+				.Subscribe(_ => this.RaisePropertyChanged(nameof(Result3489))))
 		{
 			await client.ConnectProxyAsync(token);
 			try
 			{
 				await client.QueryAsync(token);
-				Result3489.LocalEndPoint = new IPEndPoint(client.LocalEndPoint.AddressFamily is AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, client.LocalEndPoint.Port);
 			}
 			finally
 			{

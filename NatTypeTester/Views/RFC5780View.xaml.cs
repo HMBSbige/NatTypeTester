@@ -27,7 +27,9 @@ public partial class RFC5780View : ITransientDependency
 
 			this.OneWayBind(ViewModel, vm => vm.Result5389.FilteringBehavior, v => v.FilteringBehaviorTextBox.Text).DisposeWith(d);
 
-			this.Bind(ViewModel, vm => vm.Result5389.LocalEndPoint, v => v.LocalAddressTextBox.Text).DisposeWith(d);
+			this.Bind(ViewModel, vm => vm.Result5389.LocalEndPoint, v => v.LocalAddressComboBox.Text).DisposeWith(d);
+
+			LocalAddressComboBox.Events().LostKeyboardFocus.Subscribe(_ => LocalAddressComboBox.Text = ViewModel.Result5389.LocalEndPoint?.ToString() ?? string.Empty).DisposeWith(d);
 
 			this.OneWayBind(ViewModel, vm => vm.Result5389.PublicEndPoint, v => v.MappingAddressTextBox.Text).DisposeWith(d);
 

@@ -44,7 +44,7 @@ public class StringToIPEndpointTypeConverter : IBindingTypeConverter, ISingleton
 		}
 		else
 		{
-			result = @"AUTO";
+			result = string.Empty;
 		}
 
 		return true;

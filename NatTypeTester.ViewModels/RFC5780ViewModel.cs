@@ -1,4 +1,5 @@
 using Dns.Net.Abstractions;
+using Dns.Net.Clients;
 using JetBrains.Annotations;
 using Microsoft;
 using NatTypeTester.Models;
@@ -24,12 +25,12 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 	private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 
 	private IDnsClient DnsClient => LazyServiceProvider.LazyGetRequiredService<IDnsClient>();
+	private IDnsClient AAAADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAAAAClient>();
+	private IDnsClient ADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAClient>();
 
 	public StunResult5389 Result5389 { get; set; }
 
 	public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
-
-	private static readonly IPEndPoint DefaultLocalEndpoint = new(IPAddress.Any, 0);
 
 	public RFC5780ViewModel()
 	{
@@ -57,11 +58,27 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			}
 		};
 
-		Result5389.LocalEndPoint ??= DefaultLocalEndpoint;
+		IPAddress? serverIp;
+		if (Result5389.LocalEndPoint is null)
+		{
+			serverIp = await DnsClient.QueryAsync(server.Hostname, token);
+			Result5389.LocalEndPoint = serverIp.AddressFamily is AddressFamily.InterNetworkV6 ? new IPEndPoint(IPAddress.IPv6Any, IPEndPoint.MinPort) : new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
+		}
+		else
+		{
+			if (Result5389.LocalEndPoint.AddressFamily is AddressFamily.InterNetworkV6)
+			{
+				serverIp = await AAAADnsClient.QueryAsync(server.Hostname, token);
+			}
+			else
+			{
+				serverIp = await ADnsClient.QueryAsync(server.Hostname, token);
+			}
+		}
+
 		using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
 
-		IPAddress ip = await DnsClient.QueryAsync(server.Hostname, token);
-		using StunClient5389UDP client = new(new IPEndPoint(ip, server.Port), Result5389.LocalEndPoint, proxy);
+		using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, proxy);
 
 		Result5389 = client.State;
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
@@ -72,7 +89,6 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			try
 			{
 				await client.QueryAsync(token);
-				Result5389.LocalEndPoint = new IPEndPoint(client.LocalEndPoint.AddressFamily is AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, client.LocalEndPoint.Port);
 			}
 			finally
 			{
