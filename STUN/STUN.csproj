@@ -11,7 +11,7 @@
     <PackageProjectUrl>https://github.com/HMBSbige/NatTypeTester</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HMBSbige/NatTypeTester</RepositoryUrl>
     <PackageTags>stun;nat;rfc3489;rfc5389</PackageTags>
-    <Version>6.0.0</Version>
+    <Version>6.1.0</Version>
     <PackageId>Stun.Net</PackageId>
   </PropertyGroup>
 
