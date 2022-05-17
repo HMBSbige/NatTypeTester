@@ -12,6 +12,14 @@
 		":automergeMinor",
 		":disableRateLimiting"
 	],
+	"packageRules": [
+		{
+			"matchPackagePrefixes": [
+				"Volo.Abp"
+			],
+			"groupName": "abp"
+		}
+	],
 	"labels": [
 		"Automatic"
 	]
