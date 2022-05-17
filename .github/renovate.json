@@ -17,7 +17,13 @@
 			"matchPackagePrefixes": [
 				"Volo.Abp"
 			],
-			"groupName": "abp"
+			"groupName": "ABP"
+		},
+		{
+			"matchPackagePrefixes": [
+				"ReactiveUI"
+			],
+			"groupName": "ReactiveUI"
 		}
 	],
 	"labels": [
