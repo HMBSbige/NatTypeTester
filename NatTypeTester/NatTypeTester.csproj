@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="ModernWpfUI" Version="0.9.4" />
+    <PackageReference Include="ModernWpfUI" Version="0.9.5" />
     <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" Version="1.1.4" PrivateAssets="all" />
     <PackageReference Include="ReactiveUI.WPF" Version="18.0.10" />
     <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.2.8" />
