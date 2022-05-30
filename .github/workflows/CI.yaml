@@ -1,22 +1,13 @@
 name: CI
-on:
-  push:
-    branches:
-      - master
-      - 'renovate/**'
-    tags:
-      - "*"
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 env:
-  ProjectName: NatTypeTester
+  ProjectName: ${{ github.event.repository.name }}
   NET_TFM: net6.0-windows
   Configuration: Release
 
 jobs:
   check_format:
-    name: Check format
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
@@ -30,11 +21,13 @@ jobs:
         run: dotnet format -v diag --verify-no-changes
 
   test:
-    name: Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
 
     steps:
       - name: Checkout code
@@ -45,49 +38,15 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
-      - name: Test
-        shell: pwsh
-        run: dotnet test -c Release UnitTest
+      - name: Run tests
+        working-directory: UnitTest
+        run: dotnet test -c Release
 
   build:
     name: Build
     needs: [test, check_format]
     if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: windows-latest
-    strategy:
-      matrix:
-        Rid: [generic, win-x64, win-x86, win-arm64]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.0.x
-
-      - name: Build ${{ matrix.Rid }}
-        shell: pwsh
-        run: .\build.ps1 ${{ matrix.Rid }}
-
-      - name: Upload ${{ matrix.Rid }}
-        continue-on-error: true
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.ProjectName }}-${{ matrix.Rid }}
-          path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\${{ matrix.Rid }}\publish\
-
-  nuget:
-    name: Nuget
-    needs: [test, check_format]
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        PackageName: [STUN]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -99,13 +58,42 @@ jobs:
 
       - name: Build
         shell: pwsh
-        run: dotnet build -c Release ${{ matrix.PackageName }}\${{ matrix.PackageName }}.csproj
+        run: .\build.ps1
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.ProjectName }}
+          path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\generic\publish\
+
+  nuget:
+    name: Nuget
+    needs: [test, check_format]
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        PackageName:
+          - STUN
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build
+        working-directory: ${{ matrix.PackageName }}
+        run: dotnet build -c Release
 
       - name: Push nuget packages
-        shell: pwsh
+        working-directory: ${{ matrix.PackageName }}/bin/Release
         run: |
-          dotnet nuget push ${{ matrix.PackageName }}\bin\Release\*.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
-          dotnet nuget push ${{ matrix.PackageName }}\bin\Release\*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
+          dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+          dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
   release:
     name: Release
@@ -115,8 +103,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          submodules: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
@@ -131,11 +117,11 @@ jobs:
         id: tag
         uses: dawidd6/action-get-tag@v1
 
-      - name: Package generic
+      - name: Package
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
-          $zip_path = "C:\builtfiles\$env:ProjectName-generic-${{ steps.tag.outputs.tag }}.7z"
+          $zip_path = "C:\builtfiles\$env:ProjectName-${{ steps.tag.outputs.tag }}.7z"
           7z a -mx9 "$zip_path" ".\$env:ProjectName\bin\$env:Configuration\$env:NET_TFM\generic\publish\"
           7z rn "$zip_path" publish $env:ProjectName
           echo "GENERIC_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -156,4 +142,4 @@ jobs:
             ## Hash
             | Filename | SHA-256 |
             | :- | :- |
-            | <sub>${{ env.ProjectName }}-generic-${{ steps.tag.outputs.tag }}.7z</sub> | <sub>${{ env.GENERIC_SHA256 }}</sub> |
+            | <sub>${{ env.ProjectName }}-${{ steps.tag.outputs.tag }}.7z</sub> | <sub>${{ env.GENERIC_SHA256 }}</sub> |

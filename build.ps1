@@ -1,7 +1,5 @@
-param([string]$rid = 'all')
 $ErrorActionPreference = 'Stop'
 
-Write-Host 'dotnet SDK info'
 dotnet --info
 
 $proj = 'NatTypeTester'
@@ -10,12 +8,12 @@ $net_tfm = 'net6.0-windows'
 $configuration = 'Release'
 $output_dir = "$PSScriptRoot\$proj\bin\$configuration"
 $proj_path = "$PSScriptRoot\$proj\$proj.csproj"
+$generic_outdir = "$output_dir\$net_tfm\generic"
 
-function Build-Generic
-{
+function Build-Generic {
     Write-Host 'Building generic'
 
-    $outdir = "$output_dir\$net_tfm\generic"
+    $outdir = $generic_outdir
     $publishDir = "$outdir\publish"
 
     Remove-Item $publishDir -Recurse -Force -Confirm:$false -ErrorAction Ignore
@@ -25,12 +23,14 @@ function Build-Generic
 
     & "$PSScriptRoot\Build\DotNetDllPathPatcher.ps1" "$publishDir\$exe" bin
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+    Remove-Item "$publishDir\$exe"
 }
 
-function Build-SelfContained
-{
-    param([string]$rid)
+function Build {
+    param([string]$arch)
 
+    $rid = "win-$arch"
     Write-Host "Building $rid"
 
     $outdir = "$output_dir\$net_tfm\$rid"
@@ -38,25 +38,17 @@ function Build-SelfContained
 
     Remove-Item $publishDir -Recurse -Force -Confirm:$false -ErrorAction Ignore
 
-    dotnet publish -c $configuration -f $net_tfm -r $rid --self-contained true $proj_path
+    dotnet publish -c $configuration -f $net_tfm -r $rid --no-self-contained true $proj_path
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
     & "$PSScriptRoot\Build\DotNetDllPathPatcher.ps1" "$publishDir\$exe" bin
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+    Move-Item "$publishDir\$exe" "$generic_outdir\publish\$proj-$arch.exe"
 }
 
-if($rid -eq 'all' -or $rid -eq 'generic')
-{
-    Build-Generic
-}
-
-if($rid -eq 'all')
-{
-    Build-SelfContained win-x86
-    Build-SelfContained win-x64
-    Build-SelfContained win-arm64
-}
-elseif($rid -ne 'generic')
-{
-    Build-SelfContained $rid
-}
+Build-Generic
+Build x64
+Build x86
+Build arm64
+Build arm
