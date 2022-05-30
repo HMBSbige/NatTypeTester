@@ -43,9 +43,7 @@ jobs:
         run: dotnet test -c Release
 
   build:
-    name: Build
     needs: [test, check_format]
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -67,7 +65,6 @@ jobs:
           path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\generic\publish\
 
   nuget:
-    name: Nuget
     needs: [test, check_format]
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
@@ -96,22 +93,14 @@ jobs:
           dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
   release:
-    name: Release
     needs: nuget
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+      - uses: actions/download-artifact@v3
         with:
-          dotnet-version: 6.0.x
-
-      - name: Build
-        shell: pwsh
-        run: .\build.ps1
+          name: ${{ env.ProjectName }}
+          path: ${{ env.ProjectName }}
 
       - name: Get tag
         id: tag
@@ -120,10 +109,9 @@ jobs:
       - name: Package
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
-          $zip_path = "C:\builtfiles\$env:ProjectName-${{ steps.tag.outputs.tag }}.7z"
-          7z a -mx9 "$zip_path" ".\$env:ProjectName\bin\$env:Configuration\$env:NET_TFM\generic\publish\"
-          7z rn "$zip_path" publish $env:ProjectName
+          New-Item -ItemType Directory -Path builtfiles -Force > $null
+          $zip_path = "builtfiles/$env:ProjectName-${{ steps.tag.outputs.tag }}.7z"
+          7z a -mx9 "$zip_path" ${{ env.ProjectName }}
           echo "GENERIC_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Changelog
@@ -136,7 +124,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: true
           draft: false
-          artifacts: C:\builtfiles\*
+          artifacts: builtfiles/*
           body: |
             ${{ steps.changelog.outputs.commitLog }}
             ## Hash
