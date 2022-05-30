@@ -93,7 +93,7 @@ jobs:
           dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
   release:
-    needs: nuget
+    needs: [build, nuget]
     runs-on: ubuntu-latest
 
     steps:
