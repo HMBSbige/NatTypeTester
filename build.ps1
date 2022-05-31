@@ -51,4 +51,3 @@ Build-Generic
 Build x64
 Build x86
 Build arm64
-Build arm
