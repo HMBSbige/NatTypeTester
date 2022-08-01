@@ -13,7 +13,6 @@ namespace STUN.Client;
 
 /// <summary>
 /// https://tools.ietf.org/html/rfc3489#section-10.1
-/// https://upload.wikimedia.org/wikipedia/commons/6/63/STUN_Algorithm3.svg
 /// </summary>
 public class StunClient3489 : IStunClient
 {
