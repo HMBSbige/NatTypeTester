@@ -60,7 +60,7 @@ public class StunClient5389UDP : IStunClient
 
 		await FilteringBehaviorTestBaseAsync(cancellationToken);
 		if (State.BindingTestResult is not BindingTestResult.Success
-			|| State.FilteringBehavior == FilteringBehavior.UnsupportedServer
+			|| State.FilteringBehavior is FilteringBehavior.UnsupportedServer
 		   )
 		{
 			return;

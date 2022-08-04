@@ -39,6 +39,20 @@ Checking for UDP Connectivity with the STUN Server
 
 ![](pic/RFC5780_4.2.png)
 
+### Mapping Behavior
+Determining NAT Mapping Behavior
+
+![](pic/RFC5780_4.3.png)
+
+### Filtering Behavior
+Determining NAT Filtering Behavior
+
+![](pic/RFC5780_4.4.png)
+
+### Combining Tests
+
+![](pic/RFC5780_4.5.png)
+
 ## STUN Server
 ### Docker
 ```
