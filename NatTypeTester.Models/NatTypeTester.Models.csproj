@@ -4,7 +4,7 @@
 
   <ItemGroup>
     <PackageReference Include="ReactiveUI" Version="18.3.1" />
-    <PackageReference Include="Volo.Abp.Core" Version="5.3.3" />
+    <PackageReference Include="Volo.Abp.Core" Version="5.3.4" />
   </ItemGroup>
 
   <ItemGroup>
