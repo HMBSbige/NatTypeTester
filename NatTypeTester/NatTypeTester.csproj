@@ -19,7 +19,7 @@
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
     <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" Version="1.2.3" PrivateAssets="all" />
     <PackageReference Include="ReactiveUI.WPF" Version="18.4.20" />
-    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.6.1" />
+    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="14.6.8" />
     <PackageReference Include="Volo.Abp.Autofac" Version="7.0.1" />
   </ItemGroup>
 
