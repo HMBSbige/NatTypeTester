@@ -64,10 +64,3 @@ Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)
 ![](pic/RFC5780_4.5.png)
 
 </details>
-
-## STUN Server
-### Docker
-```
-docker pull hmbsbige/stunserver
-docker run -d --restart=always --net=host --name=stunserver hmbsbige/stunserver --mode full --primaryinterface $IP1 --altinterface $IP2
-```
