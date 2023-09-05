@@ -21,10 +21,10 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	private readonly IEnumerable<string> _defaultServers = new HashSet<string>
 	{
-		@"stun.syncthing.net",
 		@"stunserver.stunprotocol.org",
-		@"stun.miwifi.com",
-		@"stun.qq.com"
+		@"stun.syncthing.net",
+		@"stun.qq.com",
+		@"stun.miwifi.com"
 	};
 
 	private SourceList<string> List { get; } = new();

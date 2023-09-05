@@ -6,12 +6,10 @@ public static class Extensions
 {
 	public static async Task HandleExceptionWithContentDialogAsync(this Exception ex)
 	{
-		using DisposableContentDialog dialog = new()
-		{
-			Title = nameof(NatTypeTester),
-			Content = ex.Message,
-			PrimaryButtonText = @"OK"
-		};
+		using DisposableContentDialog dialog = new();
+		dialog.Title = nameof(NatTypeTester);
+		dialog.Content = ex.Message;
+		dialog.PrimaryButtonText = @"OK";
 		await dialog.ShowAsync();
 	}
 }
