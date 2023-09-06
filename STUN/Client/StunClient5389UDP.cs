@@ -283,7 +283,7 @@ public class StunClient5389UDP : IStunClient
 			SocketReceiveMessageFromResult r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, receive, cts.Token);
 
 			StunMessage5389 message = new();
-			if (message.TryParse(buffer.Span[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
+			if (message.TryParse(buffer[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
 				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);
 			}

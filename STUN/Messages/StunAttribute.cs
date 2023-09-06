@@ -58,7 +58,7 @@ public class StunAttribute
 	{
 		if (buffer.Length < 4)
 		{
-			return 0;
+			return default;
 		}
 
 		Type = (AttributeType)BinaryPrimitives.ReadUInt16BigEndian(buffer);
@@ -67,7 +67,7 @@ public class StunAttribute
 
 		if (buffer.Length < 4 + Length)
 		{
-			return 0;
+			return default;
 		}
 
 		ReadOnlySpan<byte> value = buffer.Slice(4, Length);

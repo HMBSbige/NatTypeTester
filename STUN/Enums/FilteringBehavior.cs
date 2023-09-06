@@ -7,5 +7,9 @@ public enum FilteringBehavior
 	EndpointIndependent,
 	AddressDependent,
 	AddressAndPortDependent,
-	Fail
+
+	/// <summary>
+	/// Filtering test applies only to UDP.
+	/// </summary>
+	None
 }

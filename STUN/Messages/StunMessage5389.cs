@@ -1,5 +1,6 @@
 using Microsoft;
 using STUN.Enums;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -12,6 +13,12 @@ namespace STUN.Messages;
 public class StunMessage5389
 {
 	#region Header
+
+	private const int SizeOfMessageType = sizeof(StunMessageType);
+	private const int SizeOfLength = sizeof(ushort);
+	private const int SizeOfMagicCookie = sizeof(uint);
+	private const int SizeOfTransactionId = 12;
+	private const int HeaderLength = SizeOfMessageType + SizeOfLength + SizeOfMagicCookie + SizeOfTransactionId;
 
 	public StunMessageType StunMessageType { get; set; }
 
@@ -28,23 +35,23 @@ public class StunMessage5389
 		Attributes = Array.Empty<StunAttribute>();
 		StunMessageType = StunMessageType.BindingRequest;
 		MagicCookie = 0x2112A442;
-		TransactionId = new byte[12];
+		TransactionId = new byte[SizeOfTransactionId];
 		RandomNumberGenerator.Fill(TransactionId);
 	}
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		ushort messageLength = Attributes.Aggregate<StunAttribute, ushort>(0, (current, attribute) => (ushort)(current + attribute.RealLength));
-		int length = 20 + messageLength;
+		ushort messageLength = (ushort)Attributes.Sum(x => x.RealLength);
+		int length = HeaderLength + messageLength;
 		Requires.Range(buffer.Length >= length, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)StunMessageType);
-		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], messageLength);
-		BinaryPrimitives.WriteUInt32BigEndian(buffer[4..], MagicCookie);
-		TransactionId.CopyTo(buffer[8..]);
+		BinaryPrimitives.WriteUInt16BigEndian(buffer[SizeOfMessageType..], messageLength);
+		BinaryPrimitives.WriteUInt32BigEndian(buffer[(SizeOfMessageType + SizeOfLength)..], MagicCookie);
+		TransactionId.CopyTo(buffer[(SizeOfMessageType + SizeOfLength + SizeOfMagicCookie)..]);
 
-		buffer = buffer[20..];
-		foreach (StunAttribute? attribute in Attributes)
+		buffer = buffer[HeaderLength..];
+		foreach (StunAttribute attribute in Attributes)
 		{
 			int outLength = attribute.WriteTo(buffer);
 			buffer = buffer[outLength..];
@@ -53,60 +60,91 @@ public class StunMessage5389
 		return length;
 	}
 
-	public bool TryParse(ReadOnlySpan<byte> buffer)
+	public bool TryParse(ReadOnlyMemory<byte> buffer)
 	{
-		if (buffer.Length < 20)
+		ReadOnlySequence<byte> sequence = new(buffer);
+		return TryParse(ref sequence);
+	}
+
+	public bool TryParse(ref ReadOnlySequence<byte> sequence)
+	{
+		if (sequence.Length < HeaderLength)
 		{
 			return false; // Check length
 		}
 
-		Span<byte> tempSpan = stackalloc byte[2];
+		SequenceReader<byte> reader = new(sequence);
 
-		tempSpan[0] = (byte)(buffer[0] & 0b0011_1111);
-		tempSpan[1] = buffer[1];
-		StunMessageType type = (StunMessageType)BinaryPrimitives.ReadUInt16BigEndian(tempSpan);
+		if (!reader.TryReadBigEndian(out short typeValue))
+		{
+			throw Assumes.NotReachable();
+		}
 
-		if (!Enum.IsDefined(typeof(StunMessageType), type))
+		StunMessageType type = (StunMessageType)(ushort)(typeValue & 0b0011_1111_1111_1111);
+
+		if (!Enum.IsDefined(type))
 		{
 			return false;
 		}
 
 		StunMessageType = type;
 
-		ushort length = BinaryPrimitives.ReadUInt16BigEndian(buffer[2..]);
+		if (!reader.TryReadBigEndian(out short lengthValue))
+		{
+			throw Assumes.NotReachable();
+		}
 
-		MagicCookie = BinaryPrimitives.ReadUInt32BigEndian(buffer[4..]);
+		ushort length = (ushort)lengthValue;
 
-		buffer.Slice(8, 12).CopyTo(TransactionId);
-
-		if (buffer.Length != length + 20)
+		if (sequence.Length - HeaderLength < length)
 		{
 			return false; // Check length
 		}
 
-		List<StunAttribute> list = new();
-
-		ReadOnlySpan<byte> attributeBuffer = buffer[20..];
-		ReadOnlySpan<byte> magicCookieAndTransactionId = buffer.Slice(4, 16);
-
-		while (attributeBuffer.Length > 0)
+		if (!reader.TryReadBigEndian(out int magicCookie))
 		{
-			StunAttribute attribute = new();
-			int offset = attribute.TryParse(attributeBuffer, magicCookieAndTransactionId);
-			if (offset > 0)
+			throw Assumes.NotReachable();
+		}
+
+		MagicCookie = (uint)magicCookie;
+
+		reader.UnreadSequence.Slice(0, SizeOfTransactionId).CopyTo(TransactionId);
+		reader.Advance(SizeOfTransactionId);
+
+		byte[] tempBuffer = ArrayPool<byte>.Shared.Rent(length + SizeOfMagicCookie + SizeOfTransactionId);
+		try
+		{
+			reader.UnreadSequence.Slice(0, length).CopyTo(tempBuffer);
+			reader.Advance(length);
+			sequence.Slice(SizeOfMessageType + SizeOfLength, SizeOfMagicCookie + SizeOfTransactionId).CopyTo(tempBuffer.AsSpan(length));
+
+			List<StunAttribute> list = new();
+
+			Span<byte> attributeBuffer = tempBuffer.AsSpan(0, length);
+			ReadOnlySpan<byte> magicCookieAndTransactionId = tempBuffer.AsSpan(length, SizeOfMagicCookie + SizeOfTransactionId);
+
+			while (attributeBuffer.Length > default(int))
 			{
+				StunAttribute attribute = new();
+				int offset = attribute.TryParse(attributeBuffer, magicCookieAndTransactionId);
+				if (offset <= default(int))
+				{
+					Debug.WriteLine($@"[Warning] Ignore wrong attribute: {Convert.ToHexString(attributeBuffer)}");
+					break;
+				}
+
 				list.Add(attribute);
 				attributeBuffer = attributeBuffer[offset..];
 			}
-			else
-			{
-				Debug.WriteLine($@"[Warning] Ignore wrong attribute: {Convert.ToHexString(attributeBuffer)}");
-				break;
-			}
+
+			Attributes = list;
+		}
+		finally
+		{
+			ArrayPool<byte>.Shared.Return(tempBuffer);
 		}
 
-		Attributes = list;
-
+		sequence = reader.UnreadSequence;
 		return true;
 	}
 
