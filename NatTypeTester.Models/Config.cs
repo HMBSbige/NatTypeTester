@@ -8,7 +8,7 @@ namespace NatTypeTester.Models;
 [UsedImplicitly]
 public record Config : ReactiveRecord, ISingletonDependency
 {
-	private string _stunServer = @"stunserver.stunprotocol.org";
+	private string _stunServer = @"stun.hot-chilli.net";
 	public string StunServer
 	{
 		get => _stunServer;
