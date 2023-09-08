@@ -14,7 +14,7 @@ namespace STUN.Client;
 /// <summary>
 /// https://tools.ietf.org/html/rfc3489#section-10.1
 /// </summary>
-public class StunClient3489 : IStunClient
+public class StunClient3489 : IUdpStunClient
 {
 	public virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
 
@@ -24,7 +24,7 @@ public class StunClient3489 : IStunClient
 
 	private readonly IUdpProxy _proxy;
 
-	public ClassicStunResult State { get; } = new();
+	public ClassicStunResult State { get; private set; } = new();
 
 	public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null)
 	{
@@ -53,7 +53,7 @@ public class StunClient3489 : IStunClient
 
 	public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 	{
-		State.Reset();
+		State = new ClassicStunResult();
 
 		// test I
 		StunResponse? response1 = await Test1Async(cancellationToken);
@@ -63,7 +63,7 @@ public class StunClient3489 : IStunClient
 			return;
 		}
 
-		State.LocalEndPoint = new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
+		State.LocalEndPoint = response1.Local;
 
 		IPEndPoint? mappedAddress1 = response1.Message.GetMappedAddressAttribute();
 		IPEndPoint? changedAddress = response1.Message.GetChangedAddressAttribute();
@@ -95,7 +95,7 @@ public class StunClient3489 : IStunClient
 		}
 
 		// is Public IP == link's IP?
-		if (Equals(mappedAddress1.Address, response1.LocalAddress) && mappedAddress1.Port == LocalEndPoint.Port)
+		if (Equals(mappedAddress1, response1.Local))
 		{
 			// No NAT
 			if (response2 is null)
@@ -172,10 +172,10 @@ public class StunClient3489 : IStunClient
 			StunMessage5389 message = new();
 			if (message.TryParse(buffer[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
-				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);
+				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, ((IPEndPoint)_proxy.Client.LocalEndPoint!).Port));
 			}
 		}
-		catch (Exception ex)
+		catch (OperationCanceledException ex)
 		{
 			Debug.WriteLine(ex);
 		}
@@ -227,5 +227,7 @@ public class StunClient3489 : IStunClient
 	public void Dispose()
 	{
 		_proxy.Dispose();
+
+		GC.SuppressFinalize(this);
 	}
 }

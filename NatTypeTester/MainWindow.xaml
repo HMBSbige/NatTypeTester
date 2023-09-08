@@ -8,8 +8,8 @@
     xmlns:ui="http://schemas.modernwpf.com/2019"
     Title="NatTypeTester"
     WindowStartupLocation="CenterScreen"
-    Height="480" Width="500"
-    MinHeight="480" MinWidth="500"
+    Height="525" Width="500"
+    MinHeight="525" MinWidth="500"
     ui:WindowHelper.UseModernWindowStyle="True">
 
     <Grid>

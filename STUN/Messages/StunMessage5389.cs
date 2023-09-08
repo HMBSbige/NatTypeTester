@@ -18,7 +18,7 @@ public class StunMessage5389
 	private const int SizeOfLength = sizeof(ushort);
 	private const int SizeOfMagicCookie = sizeof(uint);
 	private const int SizeOfTransactionId = 12;
-	private const int HeaderLength = SizeOfMessageType + SizeOfLength + SizeOfMagicCookie + SizeOfTransactionId;
+	public const int HeaderLength = SizeOfMessageType + SizeOfLength + SizeOfMagicCookie + SizeOfTransactionId;
 
 	public StunMessageType StunMessageType { get; set; }
 
@@ -29,6 +29,9 @@ public class StunMessage5389
 	#endregion
 
 	public IEnumerable<StunAttribute> Attributes { get; set; }
+
+	public ushort MessageLength => (ushort)Attributes.Sum(x => x.RealLength);
+	public int Length => HeaderLength + MessageLength;
 
 	public StunMessage5389()
 	{
@@ -41,8 +44,8 @@ public class StunMessage5389
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		ushort messageLength = (ushort)Attributes.Sum(x => x.RealLength);
-		int length = HeaderLength + messageLength;
+		ushort messageLength = MessageLength;
+		int length = Length;
 		Requires.Range(buffer.Length >= length, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)StunMessageType);

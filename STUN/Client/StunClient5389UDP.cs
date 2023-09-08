@@ -17,19 +17,17 @@ namespace STUN.Client;
 /// https://tools.ietf.org/html/rfc5389#section-7.2.1
 /// https://tools.ietf.org/html/rfc5780#section-4.2
 /// </summary>
-public class StunClient5389UDP : IStunClient
+public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 {
-	public virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
-
 	public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
 	private readonly IPEndPoint _remoteEndPoint;
 
 	private readonly IUdpProxy _proxy;
 
-	public StunResult5389 State { get; } = new();
+	public StunResult5389 State { get; private set; } = new();
 
-	public StunClient5389UDP(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null)
+	public StunClient5389UDP(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = default)
 	{
 		Requires.NotNull(server, nameof(server));
 		Requires.NotNull(local, nameof(local));
@@ -56,7 +54,7 @@ public class StunClient5389UDP : IStunClient
 
 	public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 	{
-		State.Reset();
+		State = new StunResult5389();
 
 		await FilteringBehaviorTestBaseAsync(cancellationToken);
 		if (State.BindingTestResult is not BindingTestResult.Success
@@ -112,7 +110,7 @@ public class StunClient5389UDP : IStunClient
 			result.BindingTestResult = BindingTestResult.Success;
 		}
 
-		IPEndPoint? local = response1 is null ? null : new IPEndPoint(response1.LocalAddress, LocalEndPoint.Port);
+		IPEndPoint? local = response1?.Local;
 
 		result.LocalEndPoint = local;
 		result.PublicEndPoint = mappedAddress1;
@@ -123,11 +121,11 @@ public class StunClient5389UDP : IStunClient
 
 	public async ValueTask MappingBehaviorTestAsync(CancellationToken cancellationToken = default)
 	{
-		State.Reset();
+		State = new StunResult5389();
 
 		// test I
 		StunResult5389 bindingResult = await BindingTestAsync(cancellationToken);
-		State.Clone(bindingResult);
+		State = bindingResult with { };
 		if (State.BindingTestResult is not BindingTestResult.Success)
 		{
 			return;
@@ -190,7 +188,7 @@ public class StunClient5389UDP : IStunClient
 
 	public async ValueTask FilteringBehaviorTestAsync(CancellationToken cancellationToken = default)
 	{
-		State.Reset();
+		State = new StunResult5389();
 		await FilteringBehaviorTestBaseAsync(cancellationToken);
 	}
 
@@ -198,7 +196,7 @@ public class StunClient5389UDP : IStunClient
 	{
 		// test I
 		StunResult5389 bindingResult = await BindingTestAsync(cancellationToken);
-		State.Clone(bindingResult);
+		State = bindingResult with { };
 		if (State.BindingTestResult is not BindingTestResult.Success)
 		{
 			return;
@@ -248,7 +246,7 @@ public class StunClient5389UDP : IStunClient
 		return await RequestAsync(message, _remoteEndPoint, State.OtherEndPoint, cancellationToken);
 	}
 
-	public virtual async ValueTask<StunResponse?> FilteringBehaviorTest3Async(CancellationToken cancellationToken = default)
+	protected virtual async ValueTask<StunResponse?> FilteringBehaviorTest3Async(CancellationToken cancellationToken = default)
 	{
 		Assumes.NotNull(State.OtherEndPoint);
 
@@ -263,9 +261,7 @@ public class StunClient5389UDP : IStunClient
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private bool HasValidOtherAddress([NotNullWhen(true)] IPEndPoint? other)
 	{
-		return other is not null
-			   && !Equals(other.Address, _remoteEndPoint.Address)
-			   && other.Port != _remoteEndPoint.Port;
+		return other is not null && !Equals(other.Address, _remoteEndPoint.Address) && other.Port != _remoteEndPoint.Port;
 	}
 
 	private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, IPEndPoint receive, CancellationToken cancellationToken)
@@ -285,10 +281,10 @@ public class StunClient5389UDP : IStunClient
 			StunMessage5389 message = new();
 			if (message.TryParse(buffer[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
-				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, r.PacketInformation.Address);
+				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, ((IPEndPoint)_proxy.Client.LocalEndPoint!).Port));
 			}
 		}
-		catch (Exception ex)
+		catch (OperationCanceledException ex)
 		{
 			Debug.WriteLine(ex);
 		}
@@ -298,5 +294,7 @@ public class StunClient5389UDP : IStunClient
 	public void Dispose()
 	{
 		_proxy.Dispose();
+
+		GC.SuppressFinalize(this);
 	}
 }

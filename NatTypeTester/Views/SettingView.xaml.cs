@@ -23,16 +23,9 @@ public partial class SettingView : ITransientDependency
 
 			this.Bind(ViewModel, vm => vm.Config.ProxyPassword, v => v.ProxyPasswordTextBox.Text).DisposeWith(d);
 
-			this.Bind(ViewModel,
-				vm => vm.Config.ProxyType,
-				v => v.ProxyRadioButtons.SelectedIndex,
-				type => (int)type,
-				index =>
-				{
-					ProxyType type = (ProxyType)index;
-					ProxyConfigGrid.IsEnabled = type is not ProxyType.Plain;
-					return type;
-				}).DisposeWith(d);
+			this.Bind(ViewModel, vm => vm.Config.ProxyType, v => v.ProxyRadioButtons.SelectedIndex, type => (int)type, index => (ProxyType)index).DisposeWith(d);
+
+			this.OneWayBind(ViewModel, vm => vm.Config.ProxyType, v => v.ProxyConfigGrid.IsEnabled, type => type is not ProxyType.Plain).DisposeWith(d);
 		});
 	}
 }

@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Margin="10,0" Grid.Column="0">
+        <Grid Margin="10,0" Grid.Row="0">
             <ui:RadioButtons Header="Proxy" x:Name="ProxyRadioButtons">
                 <RadioButton Content="Don't use Proxy" />
                 <RadioButton Content="SOCKS5" />

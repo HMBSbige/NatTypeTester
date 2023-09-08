@@ -3,8 +3,10 @@ using NatTypeTester.Utils;
 using NatTypeTester.ViewModels;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using STUN.Enums;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Input;
 using Volo.Abp.DependencyInjection;
 
@@ -21,6 +23,10 @@ public partial class RFC5780View : ITransientDependency
 
 		this.WhenActivated(d =>
 		{
+			this.Bind(ViewModel, vm => vm.TransportType, v => v.TransportTypeRadioButtons.SelectedIndex, type => (int)type, index => (TransportType)index).DisposeWith(d);
+			ViewModel.WhenAnyValue(vm => vm.TransportType).Subscribe(_ => ViewModel.ResetResult()).DisposeWith(d);
+			this.OneWayBind(ViewModel, vm => vm.TransportType, v => v.FilteringBehaviorTextBox.Visibility, type => type is TransportType.Udp ? Visibility.Visible : Visibility.Collapsed).DisposeWith(d);
+
 			this.OneWayBind(ViewModel, vm => vm.Result5389.BindingTestResult, v => v.BindingTestTextBox.Text).DisposeWith(d);
 
 			this.OneWayBind(ViewModel, vm => vm.Result5389.MappingBehavior, v => v.MappingBehaviorTextBox.Text).DisposeWith(d);
@@ -36,11 +42,13 @@ public partial class RFC5780View : ITransientDependency
 			this.BindCommand(ViewModel, vm => vm.DiscoveryNatType, v => v.DiscoveryButton).DisposeWith(d);
 
 			this.Events().KeyDown
-				.Where(x => x.Key == Key.Enter && DiscoveryButton.Command.CanExecute(default))
+				.Where(x => x.Key is Key.Enter && DiscoveryButton.Command.CanExecute(default))
 				.Subscribe(_ => DiscoveryButton.Command.Execute(default))
 				.DisposeWith(d);
 
 			ViewModel.DiscoveryNatType.ThrownExceptions.Subscribe(ex => _ = ex.HandleExceptionWithContentDialogAsync()).DisposeWith(d);
+
+			ViewModel.DiscoveryNatType.IsExecuting.Subscribe(b => TransportTypeRadioButtons.IsEnabled = !b).DisposeWith(d);
 		});
 	}
 }

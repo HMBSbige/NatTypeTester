@@ -28,13 +28,18 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 	private IDnsClient AAAADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAAAAClient>();
 	private IDnsClient ADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAClient>();
 
-	public ClassicStunResult Result3489 { get; set; }
+	private ClassicStunResult _result3489;
+	public ClassicStunResult Result3489
+	{
+		get => _result3489;
+		set => this.RaiseAndSetIfChanged(ref _result3489, value);
+	}
 
 	public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
 
 	public RFC3489ViewModel()
 	{
-		Result3489 = new ClassicStunResult();
+		_result3489 = new ClassicStunResult();
 		TestClassicNatType = ReactiveCommand.CreateFromTask(TestClassicNatTypeAsync);
 	}
 
@@ -80,25 +85,27 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 
 		using StunClient3489 client = new(new IPEndPoint(serverIp, server.Port), Result3489.LocalEndPoint, proxy);
 
-		Result3489 = client.State;
-		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-				.ObserveOn(RxApp.MainThreadScheduler)
-				.Subscribe(_ => this.RaisePropertyChanged(nameof(Result3489))))
+		try
 		{
-			await client.ConnectProxyAsync(token);
-			try
+			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+					.ObserveOn(RxApp.MainThreadScheduler)
+					// ReSharper disable once AccessToDisposedClosure
+					.Subscribe(_ => Result3489 = client.State with { }))
 			{
-				await client.QueryAsync(token);
-			}
-			finally
-			{
-				await client.CloseProxyAsync(token);
+				await client.ConnectProxyAsync(token);
+				try
+				{
+					await client.QueryAsync(token);
+				}
+				finally
+				{
+					await client.CloseProxyAsync(token);
+				}
 			}
 		}
-
-		Result3489 = new ClassicStunResult();
-		Result3489.Clone(client.State);
-
-		this.RaisePropertyChanged(nameof(Result3489));
+		finally
+		{
+			Result3489 = client.State with { };
+		}
 	}
 }

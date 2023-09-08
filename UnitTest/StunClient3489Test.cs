@@ -50,7 +50,7 @@ public class StunClient3489Test
 		StunClient3489? client = mock.Object;
 
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
-		StunResponse unknownResponse = new(DefaultStunMessage, Any, LocalAddress1.Address);
+		StunResponse unknownResponse = new(DefaultStunMessage, Any, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(unknownResponse);
 		await TestAsync();
 
@@ -60,7 +60,7 @@ public class StunClient3489Test
 			{
 				BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
 			}
-		}, ServerAddress, LocalAddress1.Address);
+		}, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 		await TestAsync();
 
@@ -70,7 +70,7 @@ public class StunClient3489Test
 			{
 				BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
 			}
-		}, ServerAddress, LocalAddress1.Address);
+		}, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 		await TestAsync();
 
@@ -81,7 +81,7 @@ public class StunClient3489Test
 				BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
 				BuildChangeAddress(IpFamily.IPv4, ServerAddress.Address, (ushort)ChangedAddress1.Port)
 			}
-		}, ServerAddress, LocalAddress1.Address);
+		}, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 		await TestAsync();
 
@@ -92,7 +92,7 @@ public class StunClient3489Test
 				BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
 				BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ServerAddress.Port)
 			}
-		}, ServerAddress, LocalAddress1.Address);
+		}, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r4);
 		await TestAsync();
 
@@ -119,7 +119,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			MappedAddress1.Address
+			MappedAddress1
 		);
 		StunResponse test2Response = new(
 			new StunMessage5389
@@ -130,7 +130,7 @@ public class StunClient3489Test
 				}
 			},
 			ChangedAddress1,
-			MappedAddress1.Address
+			MappedAddress1
 		);
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(openInternetTest1Response);
@@ -163,7 +163,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse fullConeResponse = new(
 			new StunMessage5389
@@ -174,7 +174,7 @@ public class StunClient3489Test
 				}
 			},
 			ChangedAddress1,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse unsupportedResponse1 = new(
 			new StunMessage5389
@@ -185,7 +185,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse unsupportedResponse2 = new(
 			new StunMessage5389
@@ -196,7 +196,7 @@ public class StunClient3489Test
 				}
 			},
 			new IPEndPoint(ServerAddress.Address, ChangedAddress1.Port),
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse unsupportedResponse3 = new(
 			new StunMessage5389
@@ -207,7 +207,7 @@ public class StunClient3489Test
 				}
 			},
 			new IPEndPoint(ChangedAddress1.Address, ServerAddress.Port),
-			LocalAddress1.Address
+			LocalAddress1
 		);
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
@@ -250,7 +250,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse test12Response = new(
 			new StunMessage5389
@@ -262,7 +262,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
@@ -295,7 +295,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse test3Response = new(
 			new StunMessage5389
@@ -307,7 +307,7 @@ public class StunClient3489Test
 				}
 			},
 			ChangedAddress2,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		StunResponse test3ErrorResponse = new(
 			new StunMessage5389
@@ -319,7 +319,7 @@ public class StunClient3489Test
 				}
 			},
 			ServerAddress,
-			LocalAddress1.Address
+			LocalAddress1
 		);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);

@@ -27,4 +27,25 @@ public static class ProxyFactory
 			}
 		}
 	}
+
+	public static ITcpProxy CreateProxy(ProxyType type, Socks5CreateOption option)
+	{
+		switch (type)
+		{
+			case ProxyType.Plain:
+			{
+				return new DirectTcpProxy();
+			}
+			case ProxyType.Socks5:
+			{
+				Requires.NotNull(option, nameof(option));
+				Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
+				return new Socks5TcpProxy(option);
+			}
+			default:
+			{
+				throw Assumes.NotReachable();
+			}
+		}
+	}
 }
