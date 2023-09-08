@@ -17,7 +17,7 @@ public class StunClient5389TCP : IStunClient5389
 	public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
 	private readonly IPEndPoint _remoteEndPoint;
-	private readonly IPEndPoint _initLocalEndPoint;
+	private IPEndPoint _lastLocalEndPoint;
 
 	private readonly ITcpProxy _proxy;
 
@@ -32,7 +32,7 @@ public class StunClient5389TCP : IStunClient5389
 
 		_remoteEndPoint = server;
 
-		_initLocalEndPoint = local;
+		_lastLocalEndPoint = local;
 		State.LocalEndPoint = local;
 	}
 
@@ -155,11 +155,9 @@ public class StunClient5389TCP : IStunClient5389
 		{
 			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			cts.CancelAfter(ConnectTimeout);
-			IDuplexPipe pipe = await _proxy.ConnectAsync(_initLocalEndPoint, remote, cts.Token);
+			IDuplexPipe pipe = await _proxy.ConnectAsync(_lastLocalEndPoint, remote, cts.Token);
 			try
 			{
-				_initLocalEndPoint.Port = default;
-
 				using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(sendMessage.Length);
 				Memory<byte> buffer = memoryOwner.Memory;
 				int length = sendMessage.WriteTo(buffer.Span);
@@ -174,6 +172,7 @@ public class StunClient5389TCP : IStunClient5389
 					IPEndPoint? local = _proxy.CurrentLocalEndPoint;
 					if (local is not null)
 					{
+						_lastLocalEndPoint = local;
 						return new StunResponse(message, remote, local);
 					}
 				}

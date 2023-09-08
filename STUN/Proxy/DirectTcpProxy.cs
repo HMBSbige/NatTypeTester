@@ -37,11 +37,7 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 	{
 		Verify.NotDisposed(this);
 
-		if (_tcpClient is not null)
-		{
-			CloseClient();
-			_tcpClient = default;
-		}
+		CloseClient();
 
 		return default;
 	}
@@ -53,8 +49,15 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 			return;
 		}
 
-		_tcpClient.Client.Close(0);
-		_tcpClient.Dispose();
+		try
+		{
+			_tcpClient.Client.Close(0);
+		}
+		finally
+		{
+			_tcpClient.Dispose();
+			_tcpClient = default;
+		}
 	}
 
 	public bool IsDisposed { get; private set; }

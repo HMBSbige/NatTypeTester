@@ -70,9 +70,15 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 			return;
 		}
 
-		GetTcpClient()?.Client.Close(0);
-		_socks5Client.Dispose();
-		_socks5Client = default;
+		try
+		{
+			GetTcpClient()?.Client.Close(0);
+		}
+		finally
+		{
+			_socks5Client.Dispose();
+			_socks5Client = default;
+		}
 	}
 
 	public bool IsDisposed { get; private set; }

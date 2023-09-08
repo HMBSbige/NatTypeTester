@@ -1,6 +1,7 @@
 using Dns.Net.Abstractions;
 using Dns.Net.Clients;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using STUN;
 using STUN.Client;
 using STUN.Enums;
 using STUN.StunResult;
@@ -48,5 +49,38 @@ public class StunClient5389TCPTest
 		Assert.IsNull(response.PublicEndPoint);
 		Assert.IsNull(response.LocalEndPoint);
 		Assert.IsNull(response.OtherEndPoint);
+	}
+
+	[TestMethod]
+	public async Task TestServerAsync()
+	{
+		const string url = @"https://raw.githubusercontent.com/pradt2/always-online-stun/master/valid_hosts_tcp.txt";
+		HttpClient httpClient = new();
+		string listRaw = await httpClient.GetStringAsync(url);
+		string[] list = listRaw.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+		foreach (string host in list)
+		{
+			if (!HostnameEndpoint.TryParse(host, out HostnameEndpoint? hostEndpoint, 3478))
+			{
+				continue;
+			}
+
+			IPAddress ip = await _dnsClient.QueryAsync(hostEndpoint.Hostname);
+			using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, hostEndpoint.Port), Any);
+			try
+			{
+				await client.QueryAsync();
+			}
+			catch
+			{
+				// ignored
+			}
+
+			if (client.State.MappingBehavior is MappingBehavior.AddressAndPortDependent or MappingBehavior.AddressDependent or MappingBehavior.EndpointIndependent or MappingBehavior.Direct)
+			{
+				Console.WriteLine(host);
+			}
+		}
 	}
 }
