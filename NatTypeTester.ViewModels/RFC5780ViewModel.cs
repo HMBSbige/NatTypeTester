@@ -30,12 +30,14 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 	private IDnsClient ADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAClient>();
 
 	private StunResult5389 _result5389;
-
 	public StunResult5389 Result5389
 	{
 		get => _result5389;
 		set => this.RaiseAndSetIfChanged(ref _result5389, value);
 	}
+
+	private StunResult5389 _udpResult;
+	private StunResult5389 _tcpResult;
 
 	private TransportType _transportType;
 	public TransportType TransportType
@@ -48,7 +50,9 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 
 	public RFC5780ViewModel()
 	{
-		_result5389 = new StunResult5389();
+		_udpResult = new StunResult5389();
+		_tcpResult = new StunResult5389();
+		_result5389 = _udpResult;
 		DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeAsync);
 	}
 
@@ -90,43 +94,58 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			}
 		}
 
-		using IStunClient5389 client = TransportType is TransportType.Udp ?
-				new StunClient5389UDP(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option))
-				: new StunClient5389TCP(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, ProxyFactory.CreateProxy(Config.ProxyType, socks5Option));
-
-		try
+		if (TransportType is TransportType.Udp)
 		{
-			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					.ObserveOn(RxApp.MainThreadScheduler)
-					// ReSharper disable once AccessToDisposedClosure
-					.Subscribe(_ => Result5389 = client.State with { }))
+			using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
+			using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, proxy);
+
+			try
 			{
-				if (client is IUdpStunClient udpClient)
+				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+						.ObserveOn(RxApp.MainThreadScheduler)
+						// ReSharper disable once AccessToDisposedClosure
+						.Subscribe(_ => Result5389 = _udpResult = client.State with { }))
 				{
-					await udpClient.ConnectProxyAsync(token);
+					await client.ConnectProxyAsync(token);
 					try
 					{
 						await client.QueryAsync(token);
 					}
 					finally
 					{
-						await udpClient.CloseProxyAsync(token);
+						await client.CloseProxyAsync(token);
 					}
 				}
-				else
+			}
+			finally
+			{
+				Result5389 = _udpResult = client.State with { };
+			}
+		}
+		else
+		{
+			using ITcpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, socks5Option);
+			using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, proxy);
+
+			try
+			{
+				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+						.ObserveOn(RxApp.MainThreadScheduler)
+						// ReSharper disable once AccessToDisposedClosure
+						.Subscribe(_ => Result5389 = _tcpResult = client.State with { }))
 				{
 					await client.QueryAsync(token);
 				}
 			}
-		}
-		finally
-		{
-			Result5389 = client.State with { };
+			finally
+			{
+				Result5389 = _tcpResult = client.State with { };
+			}
 		}
 	}
 
 	public void ResetResult()
 	{
-		Result5389 = new StunResult5389();
+		Result5389 = TransportType is TransportType.Udp ? _udpResult : _tcpResult;
 	}
 }

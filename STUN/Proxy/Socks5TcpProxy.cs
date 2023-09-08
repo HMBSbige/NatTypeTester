@@ -79,8 +79,6 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 	public void Dispose()
 	{
-		Verify.NotDisposed(this);
-
 		IsDisposed = true;
 
 		CloseClient();

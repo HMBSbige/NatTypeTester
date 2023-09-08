@@ -61,8 +61,6 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 
 	public void Dispose()
 	{
-		Verify.NotDisposed(this);
-
 		IsDisposed = true;
 
 		CloseClient();
