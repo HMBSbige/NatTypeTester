@@ -13,13 +13,13 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 		get
 		{
 			Verify.NotDisposed(this);
-			return _tcpClient?.Client.LocalEndPoint as IPEndPoint;
+			return TcpClient?.Client.LocalEndPoint as IPEndPoint;
 		}
 	}
 
-	private TcpClient? _tcpClient;
+	protected TcpClient? TcpClient;
 
-	public async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
+	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		Verify.NotDisposed(this);
 		Requires.NotNull(local, nameof(local));
@@ -27,10 +27,10 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 
 		await CloseAsync(cancellationToken);
 
-		_tcpClient = new TcpClient(local) { NoDelay = true };
-		await _tcpClient.ConnectAsync(dst, cancellationToken);
+		TcpClient = new TcpClient(local) { NoDelay = true };
+		await TcpClient.ConnectAsync(dst, cancellationToken);
 
-		return _tcpClient.Client.AsDuplexPipe();
+		return TcpClient.Client.AsDuplexPipe();
 	}
 
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
@@ -42,21 +42,21 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 		return default;
 	}
 
-	private void CloseClient()
+	protected virtual void CloseClient()
 	{
-		if (_tcpClient is null)
+		if (TcpClient is null)
 		{
 			return;
 		}
 
 		try
 		{
-			_tcpClient.Client.Close(0);
+			TcpClient.Client.Close(0);
 		}
 		finally
 		{
-			_tcpClient.Dispose();
-			_tcpClient = default;
+			TcpClient.Dispose();
+			TcpClient = default;
 		}
 	}
 

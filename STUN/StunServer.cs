@@ -9,7 +9,8 @@ public class StunServer
 	public string Hostname { get; }
 	public ushort Port { get; }
 
-	private const ushort DefaultPort = 3478;
+	public const ushort DefaultPort = 3478;
+	public const ushort DefaultTlsPort = 5349;
 
 	public StunServer()
 	{
@@ -23,9 +24,9 @@ public class StunServer
 		Port = port;
 	}
 
-	public static bool TryParse(string s, [NotNullWhen(true)] out StunServer? result)
+	public static bool TryParse(string s, [NotNullWhen(true)] out StunServer? result, ushort defaultPort = DefaultPort)
 	{
-		if (!HostnameEndpoint.TryParse(s, out HostnameEndpoint? host, DefaultPort))
+		if (!HostnameEndpoint.TryParse(s, out HostnameEndpoint? host, defaultPort))
 		{
 			result = null;
 			return false;

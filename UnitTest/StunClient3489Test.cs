@@ -34,8 +34,8 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task UdpBlockedTestAsync()
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default);
-		StunClient3489? client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default!);
+		StunClient3489 client = mock.Object;
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
@@ -46,7 +46,7 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task UnsupportedServerTestAsync()
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default);
+		Mock<StunClient3489> mock = new(Any, Any, default!);
 		StunClient3489? client = mock.Object;
 
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
@@ -106,8 +106,8 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task NoNatTestAsync()
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default);
-		StunClient3489? client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default!);
+		StunClient3489 client = mock.Object;
 
 		StunResponse openInternetTest1Response = new(
 			new StunMessage5389
@@ -150,7 +150,7 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task FullConeTestAsync()
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default);
+		Mock<StunClient3489> mock = new(Any, Any, default!);
 		StunClient3489? client = mock.Object;
 
 		StunResponse test1Response = new(
@@ -237,8 +237,8 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task SymmetricTestAsync()
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default);
-		StunClient3489? client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default!);
+		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
 			new StunMessage5389
@@ -282,8 +282,8 @@ public class StunClient3489Test
 	[TestMethod]
 	public async Task RestrictedConeTestAsync()
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default);
-		StunClient3489? client = mock.Object;
+		Mock<StunClient3489> mock = new(Any, Any, default!);
+		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
 			new StunMessage5389

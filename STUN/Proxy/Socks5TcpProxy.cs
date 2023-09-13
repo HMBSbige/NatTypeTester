@@ -19,19 +19,19 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 		}
 	}
 
-	private readonly Socks5CreateOption _socks5Options;
+	protected readonly Socks5CreateOption Socks5Options;
 
-	private Socks5Client? _socks5Client;
+	protected Socks5Client? Socks5Client;
 
 	public Socks5TcpProxy(Socks5CreateOption socks5Options)
 	{
 		Requires.NotNull(socks5Options, nameof(socks5Options));
 		Requires.Argument(socks5Options.Address is not null, nameof(socks5Options), @"SOCKS5 address is null");
 
-		_socks5Options = socks5Options;
+		Socks5Options = socks5Options;
 	}
 
-	public async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
+	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		Verify.NotDisposed(this);
 		Requires.NotNull(local, nameof(local));
@@ -39,13 +39,13 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 		await CloseAsync(cancellationToken);
 
-		_socks5Client = new Socks5Client(_socks5Options);
+		Socks5Client = new Socks5Client(Socks5Options);
 
 		GetTcpClient()?.Client.Bind(local);
 
-		await _socks5Client.ConnectAsync(dst.Address, (ushort)dst.Port, cancellationToken);
+		await Socks5Client.ConnectAsync(dst.Address, (ushort)dst.Port, cancellationToken);
 
-		return _socks5Client.GetPipe();
+		return Socks5Client.GetPipe();
 	}
 
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
@@ -57,15 +57,15 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 		return default;
 	}
 
-	private TcpClient? GetTcpClient()
+	protected TcpClient? GetTcpClient()
 	{
 		// TODO
-		return _socks5Client?.GetType().GetField(@"_tcpClient", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_socks5Client) as TcpClient;
+		return Socks5Client?.GetType().GetField(@"_tcpClient", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(Socks5Client) as TcpClient;
 	}
 
-	private void CloseClient()
+	protected virtual void CloseClient()
 	{
-		if (_socks5Client is null)
+		if (Socks5Client is null)
 		{
 			return;
 		}
@@ -76,8 +76,8 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 		}
 		finally
 		{
-			_socks5Client.Dispose();
-			_socks5Client = default;
+			Socks5Client.Dispose();
+			Socks5Client = default;
 		}
 	}
 

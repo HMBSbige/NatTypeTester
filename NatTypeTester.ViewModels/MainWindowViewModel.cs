@@ -21,8 +21,9 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	private readonly IEnumerable<string> _defaultServers = new HashSet<string>
 	{
-		@"stun.hot-chilli.net",
 		@"stunserver.stunprotocol.org",
+		@"stun.fitauto.ru",
+		@"stun.hot-chilli.net",
 		@"stun.syncthing.net",
 		@"stun.qq.com",
 		@"stun.miwifi.com"

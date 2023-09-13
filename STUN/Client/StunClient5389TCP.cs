@@ -111,6 +111,11 @@ public class StunClient5389TCP : IStunClient5389
 		}
 	}
 
+	public ValueTask FilteringBehaviorTestAsync(CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException(@"Filtering test applies only to UDP.");
+	}
+
 	public async ValueTask<StunResult5389> BindingTestAsync(CancellationToken cancellationToken = default)
 	{
 		return await BindingTestBaseAsync(_remoteEndPoint, cancellationToken);
