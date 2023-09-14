@@ -4,7 +4,6 @@ using NatTypeTester.ViewModels;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester;
