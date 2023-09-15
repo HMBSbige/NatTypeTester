@@ -87,25 +87,26 @@ public class StunClient5389TCPTest
 
 		foreach (string host in list)
 		{
-			if (!HostnameEndpoint.TryParse(host, out HostnameEndpoint? hostEndpoint, 3478))
-			{
-				continue;
-			}
-
-			IPAddress ip = await _dnsClient.QueryAsync(hostEndpoint.Hostname);
-			using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, hostEndpoint.Port), Any);
 			try
 			{
+				if (!HostnameEndpoint.TryParse(host, out HostnameEndpoint? hostEndpoint, StunServer.DefaultPort))
+				{
+					continue;
+				}
+
+				IPAddress ip = await _dnsClient.QueryAsync(hostEndpoint.Hostname);
+				using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, hostEndpoint.Port), Any);
+
 				await client.QueryAsync();
+
+				if (client.State.MappingBehavior is MappingBehavior.AddressAndPortDependent or MappingBehavior.AddressDependent or MappingBehavior.EndpointIndependent or MappingBehavior.Direct)
+				{
+					Console.WriteLine(host);
+				}
 			}
 			catch
 			{
 				// ignored
-			}
-
-			if (client.State.MappingBehavior is MappingBehavior.AddressAndPortDependent or MappingBehavior.AddressDependent or MappingBehavior.EndpointIndependent or MappingBehavior.Direct)
-			{
-				Console.WriteLine(host);
 			}
 		}
 	}
@@ -121,26 +122,27 @@ public class StunClient5389TCPTest
 
 		foreach (string host in list)
 		{
-			if (!HostnameEndpoint.TryParse(host, out HostnameEndpoint? hostEndpoint, StunServer.DefaultTlsPort))
-			{
-				continue;
-			}
-
-			IPAddress ip = await _dnsClient.QueryAsync(hostEndpoint.Hostname);
-			ITcpProxy proxy = new TlsProxy(hostEndpoint.Hostname);
-			using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, StunServer.DefaultTlsPort), Any, proxy);
 			try
 			{
+				if (!HostnameEndpoint.TryParse(host, out HostnameEndpoint? hostEndpoint, StunServer.DefaultTlsPort))
+				{
+					continue;
+				}
+
+				IPAddress ip = await _dnsClient.QueryAsync(hostEndpoint.Hostname);
+				ITcpProxy proxy = new TlsProxy(hostEndpoint.Hostname);
+				using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, StunServer.DefaultTlsPort), Any, proxy);
+
 				await client.QueryAsync();
+
+				if (client.State.MappingBehavior is MappingBehavior.AddressAndPortDependent or MappingBehavior.AddressDependent or MappingBehavior.EndpointIndependent or MappingBehavior.Direct)
+				{
+					Console.WriteLine(host);
+				}
 			}
 			catch
 			{
-				continue;
-			}
-
-			if (client.State.MappingBehavior is MappingBehavior.AddressAndPortDependent or MappingBehavior.AddressDependent or MappingBehavior.EndpointIndependent or MappingBehavior.Direct)
-			{
-				Console.WriteLine(host);
+				// ignored
 			}
 		}
 	}

@@ -16,7 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Validation" Version="17.6.11" />
     <PackageReference Include="Socks5" Version="1.0.2" />
   </ItemGroup>
 

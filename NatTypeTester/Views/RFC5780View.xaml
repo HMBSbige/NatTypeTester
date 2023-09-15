@@ -24,6 +24,7 @@
             <ui:RadioButtons x:Name="TransportTypeRadioButtons" MaxColumns="4">
                 <RadioButton Content="UDP" />
                 <RadioButton Content="TCP" />
+                <RadioButton Content="TLS" />
             </ui:RadioButtons>
         </Grid>
         <TextBox

@@ -3,8 +3,6 @@ using Socks5.Clients;
 using Socks5.Models;
 using System.IO.Pipelines;
 using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
 
 namespace STUN.Proxy;
 
@@ -15,7 +13,7 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 		get
 		{
 			Verify.NotDisposed(this);
-			return GetTcpClient()?.Client.LocalEndPoint as IPEndPoint;
+			return Socks5Client?.TcpClient.Client.LocalEndPoint as IPEndPoint;
 		}
 	}
 
@@ -41,7 +39,7 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 		Socks5Client = new Socks5Client(Socks5Options);
 
-		GetTcpClient()?.Client.Bind(local);
+		Socks5Client.TcpClient.Client.Bind(local);
 
 		await Socks5Client.ConnectAsync(dst.Address, (ushort)dst.Port, cancellationToken);
 
@@ -57,12 +55,6 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 		return default;
 	}
 
-	protected TcpClient? GetTcpClient()
-	{
-		// TODO
-		return Socks5Client?.GetType().GetField(@"_tcpClient", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(Socks5Client) as TcpClient;
-	}
-
 	protected virtual void CloseClient()
 	{
 		if (Socks5Client is null)
@@ -72,7 +64,7 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 		try
 		{
-			GetTcpClient()?.Client.Close(0);
+			Socks5Client.TcpClient.Client.Close(0);
 		}
 		finally
 		{

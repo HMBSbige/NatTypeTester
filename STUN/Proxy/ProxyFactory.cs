@@ -28,23 +28,33 @@ public static class ProxyFactory
 		}
 	}
 
-	public static ITcpProxy CreateProxy(ProxyType type, Socks5CreateOption option)
+	public static ITcpProxy CreateProxy(TransportType transport, ProxyType type, Socks5CreateOption option, string targetHost)
 	{
-		switch (type)
+		switch (transport, type)
 		{
-			case ProxyType.Plain:
+			case (TransportType.Tcp, ProxyType.Plain):
 			{
 				return new DirectTcpProxy();
 			}
-			case ProxyType.Socks5:
+			case (TransportType.Tcp, ProxyType.Socks5):
 			{
 				Requires.NotNull(option, nameof(option));
 				Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
 				return new Socks5TcpProxy(option);
 			}
+			case (TransportType.Tls, ProxyType.Plain):
+			{
+				return new TlsProxy(targetHost);
+			}
+			case (TransportType.Tls, ProxyType.Socks5):
+			{
+				Requires.NotNull(option, nameof(option));
+				Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
+				return new TlsOverSocks5Proxy(option, targetHost);
+			}
 			default:
 			{
-				throw Assumes.NotReachable();
+				throw new NotSupportedException();
 			}
 		}
 	}
