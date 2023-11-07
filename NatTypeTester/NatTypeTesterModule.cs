@@ -1,6 +1,5 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NatTypeTester.Models;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
 using Splat;
@@ -12,7 +11,6 @@ namespace NatTypeTester;
 
 [DependsOn(
 	typeof(AbpAutofacModule),
-	typeof(NatTypeTesterModelsModule),
 	typeof(NatTypeTesterViewModelModule)
 )]
 [UsedImplicitly]
