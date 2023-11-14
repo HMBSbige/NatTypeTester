@@ -2,7 +2,7 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 env:
   ProjectName: ${{ github.event.repository.name }}
-  NET_TFM: net6.0-windows10.0.22621.0
+  NET_TFM: net8.0-windows10.0.22621.0
   Configuration: Release
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Run tests
         working-directory: UnitTest
@@ -52,7 +52,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Build
         shell: pwsh
@@ -80,7 +80,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Build
         working-directory: ${{ matrix.PackageName }}
