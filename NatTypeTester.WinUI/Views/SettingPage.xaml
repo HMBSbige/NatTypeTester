@@ -1,0 +1,45 @@
+<views:SettingReactivePage
+    x:Class="NatTypeTester.Views.SettingPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:NatTypeTester.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid RowDefinitions="Auto,Auto">
+        <Grid Margin="15" Grid.Row="0">
+            <RadioButtons Header="Proxy" x:Name="ProxyRadioButtons">
+                <RadioButton Content="Don't use Proxy" />
+                <RadioButton Content="SOCKS5" />
+            </RadioButtons>
+        </Grid>
+
+        <ContentControl x:Name="ProxyConfigGrid" Grid.Row="1" Margin="15,0" HorizontalContentAlignment="Stretch">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBox
+                    x:Name="ProxyServerTextBox" Grid.Row="0"
+                    Margin="0,5" IsReadOnly="False"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center"
+                    Header="Server" />
+                <TextBox
+                    x:Name="ProxyUsernameTextBox" Grid.Row="1"
+                    Margin="0,5" IsReadOnly="False"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center"
+                    Header="Username" />
+                <TextBox
+                    x:Name="ProxyPasswordTextBox" Grid.Row="2"
+                    Margin="0,5"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center"
+                    Header="Password" />
+            </Grid>
+        </ContentControl>
+
+    </Grid>
+
+</views:SettingReactivePage>

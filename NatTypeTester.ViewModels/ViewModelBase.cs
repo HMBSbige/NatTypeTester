@@ -5,5 +5,5 @@ namespace NatTypeTester.ViewModels;
 
 public abstract class ViewModelBase : ReactiveObject, ISingletonDependency
 {
-	public IAbpLazyServiceProvider LazyServiceProvider { get; set; } = null!;
+	public IAbpLazyServiceProvider LazyServiceProvider { get; init; } = null!;
 }

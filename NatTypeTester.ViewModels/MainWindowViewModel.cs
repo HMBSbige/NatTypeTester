@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Threading;
 using NatTypeTester.Models;
 using ReactiveUI;
 using STUN;
+using System.Collections.Frozen;
 using System.Reactive.Linq;
 using Volo.Abp.DependencyInjection;
 
@@ -19,15 +20,15 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	public Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
 
-	private readonly IEnumerable<string> _defaultServers = new HashSet<string>
+	private static readonly FrozenSet<string> DefaultServers = new[]
 	{
 		@"stunserver.stunprotocol.org",
-		@"stun.fitauto.ru",
 		@"stun.hot-chilli.net",
+		@"stun.fitauto.ru",
 		@"stun.syncthing.net",
 		@"stun.qq.com",
 		@"stun.miwifi.com"
-	};
+	}.ToFrozenSet();
 
 	private SourceList<string> List { get; } = new();
 	public readonly IObservableCollection<string> StunServers = new ObservableCollectionExtended<string>();
@@ -43,12 +44,12 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	public void LoadStunServer()
 	{
-		foreach (string? server in _defaultServers)
+		foreach (string? server in DefaultServers)
 		{
 			List.Add(server);
 		}
 
-		Config.StunServer = _defaultServers.First();
+		Config.StunServer = DefaultServers.First();
 
 		Task.Run(() =>
 		{
