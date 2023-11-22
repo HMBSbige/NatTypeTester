@@ -31,7 +31,7 @@ public partial class MainWindow : ISingletonDependency
 
 			#endregion
 
-			this.Bind(ViewModel, vm => vm.Router, v => v.RoutedViewHost.Router).DisposeWith(d);
+			this.OneWayBind(ViewModel, vm => vm.Router, v => v.RoutedViewHost.Router).DisposeWith(d);
 
 			NavigationView.Events().SelectionChanged
 				.Subscribe(parameter =>

@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid RowDefinitions="28,Auto,*" >
+    <Grid RowDefinitions="28,Auto,*">
 
         <!-- TitleBar -->
         <StackPanel
@@ -23,11 +23,13 @@
                 Text="NatTypeTester" />
         </StackPanel>
 
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="1"
+                    TabIndex="0"
+                    IsTabStop="True">
             <ComboBox x:Name="ServersComboBox"
+                      x:Uid="ServersComboBox"
                       Margin="10,10"
                       IsEditable="True"
-                      Header="STUN Server"
                       HorizontalAlignment="Stretch">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

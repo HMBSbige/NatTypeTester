@@ -7,45 +7,40 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Margin="10" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
-        <Grid Grid.Row="0" Margin="5,0,5,5">
-            <RadioButtons x:Name="TransportTypeRadioButtons" MaxColumns="4">
-                <RadioButton Content="UDP" />
-                <RadioButton Content="TCP" />
-                <RadioButton Content="TLS" />
-            </RadioButtons>
-        </Grid>
-        <TextBox
-            x:Name="BindingTestTextBox" Grid.Row="1"
-            Margin="5" IsReadOnly="True"
-            VerticalContentAlignment="Center" VerticalAlignment="Center"
-            Header="Binding test" />
-        <TextBox
-            x:Name="MappingBehaviorTextBox" Grid.Row="2"
-            Margin="5" IsReadOnly="True"
-            VerticalContentAlignment="Center" VerticalAlignment="Center"
-            Header="Mapping behavior" />
-        <TextBox
-            x:Name="FilteringBehaviorTextBox" Grid.Row="3"
-            Margin="5" IsReadOnly="True"
-            VerticalContentAlignment="Center" VerticalAlignment="Center"
-            Header="Filtering behavior" />
-        <ComboBox x:Name="LocalAddressComboBox" Grid.Row="4"
-                  Margin="5"
-                  IsEditable="True" HorizontalAlignment="Stretch"
-                  VerticalContentAlignment="Center" VerticalAlignment="Center"
-                  Header="Local end">
-            <ComboBoxItem>0.0.0.0:0</ComboBoxItem>
-            <ComboBoxItem>[::]:0</ComboBoxItem>
-        </ComboBox>
-        <TextBox
-            x:Name="MappingAddressTextBox" Grid.Row="5"
-            Margin="5"
-            IsReadOnly="True"
-            VerticalContentAlignment="Center" VerticalAlignment="Center"
-            Header="Public end" />
+    <Grid Margin="10" RowDefinitions="Auto,*">
 
-        <Button x:Name="DiscoveryButton" Grid.Row="6" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Test" />
+        <StackPanel Spacing="5">
+            <Grid>
+                <RadioButtons x:Name="TransportTypeRadioButtons" MaxColumns="4" Margin="0,0,0,5">
+                    <RadioButton Content="UDP" />
+                    <RadioButton Content="TCP" />
+                    <RadioButton Content="TLS" />
+                </RadioButtons>
+            </Grid>
+            <TextBox
+                x:Name="BindingTestTextBox"
+                x:Uid="BindingTestTextBox"
+                IsReadOnly="True" />
+            <TextBox
+                x:Name="MappingBehaviorTextBox"
+                x:Uid="MappingBehaviorTextBox"
+                IsReadOnly="True" />
+            <TextBox
+                x:Name="FilteringBehaviorTextBox"
+                x:Uid="FilteringBehaviorTextBox"
+                IsReadOnly="True" />
+            <TextBox x:Name="LocalAddressComboBox"
+                     x:Uid="LocalEndComboBox" />
+            <TextBox
+                x:Name="MappingAddressTextBox"
+                IsReadOnly="True"
+                x:Uid="PublicEndTextBox" />
+        </StackPanel>
+
+        <Button x:Name="DiscoveryButton"
+                x:Uid="TestButton"
+                Grid.Row="1"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" />
     </Grid>
 
 </views:RFC5780ReactivePage>

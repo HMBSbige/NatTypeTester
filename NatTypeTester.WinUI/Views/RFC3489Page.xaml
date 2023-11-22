@@ -7,27 +7,28 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Margin="10" RowDefinitions="Auto,Auto,Auto,*">
+    <Grid Margin="10" RowDefinitions="Auto,*">
 
-        <TextBox x:Name="NatTypeTextBox" Grid.Row="0"
-                 Margin="5" IsReadOnly="True"
-                 VerticalContentAlignment="Center" VerticalAlignment="Center"
-                 Header="NAT type" />
-        <ComboBox x:Name="LocalEndComboBox" Grid.Row="1"
-                  Margin="5"
-                  IsEditable="True" HorizontalAlignment="Stretch"
-                  VerticalContentAlignment="Center" VerticalAlignment="Center"
-                  Header="Local end">
-            <ComboBoxItem>0.0.0.0:0</ComboBoxItem>
-            <ComboBoxItem>[::]:0</ComboBoxItem>
-        </ComboBox>
-        <TextBox x:Name="PublicEndTextBox" Grid.Row="2"
-                 Margin="5"
-                 IsReadOnly="True"
-                 VerticalContentAlignment="Center" VerticalAlignment="Center"
-                 Header="Public end" />
+        <StackPanel Spacing="5">
+            <InfoBar
+                IsOpen="True"
+                IsClosable="False"
+                Severity="Warning"
+                x:Uid="RFC3489Warning" />
 
-        <Button x:Name="TestButton" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Content="Test" />
+            <TextBox x:Name="NatTypeTextBox"
+                     x:Uid="RFC3489NatTypeTextBox"
+                     IsReadOnly="True" />
+            <TextBox x:Name="LocalEndComboBox"
+                     x:Uid="LocalEndComboBox" />
+            <TextBox x:Name="PublicEndTextBox"
+                     x:Uid="PublicEndTextBox"
+                     IsReadOnly="True" />
+        </StackPanel>
 
+        <Button x:Name="TestButton"
+                x:Uid="TestButton"
+                Grid.Row="1"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" />
     </Grid>
 </views:RFC3489ReactivePage>

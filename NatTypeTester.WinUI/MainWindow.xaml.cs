@@ -9,7 +9,7 @@ public sealed partial class MainWindow : ISingletonDependency
 		Title = nameof(NatTypeTester);
 		ExtendsContentIntoTitleBar = true;
 
-		AppWindow.Resize(new SizeInt32(500, 590));
+		AppWindow.Resize(new SizeInt32(500, 560));
 		AppWindow.SetIcon(@"Assets\icon.ico");
 
 		// CenterScreen

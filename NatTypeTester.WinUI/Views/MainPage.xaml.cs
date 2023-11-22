@@ -53,6 +53,7 @@ internal sealed partial class MainPage
 			NavigationView.SelectedItem = NavigationView.MenuItems.OfType<NavigationViewItem>().First();
 
 			ViewModel.LoadStunServer();
+			ServersComboBox.SelectedIndex = 0;
 		});
 	}
 }

@@ -15,16 +15,7 @@ internal sealed partial class RFC3489Page : ITransientDependency
 
 			this.Bind(ViewModel, vm => vm.Result3489.LocalEndPoint, v => v.LocalEndComboBox.Text).DisposeWith(d);
 
-			LocalEndComboBox.Events().TextSubmitted.Subscribe(parameter =>
-			{
-				if (ViewModel.Result3489.LocalEndPoint is not null)
-				{
-					return;
-				}
-
-				LocalEndComboBox.Text = string.Empty;
-				parameter.args.Handled = true;
-			}).DisposeWith(d);
+			LocalEndComboBox.Events().LostFocus.Subscribe(_ => LocalEndComboBox.Text = ViewModel.Result3489.LocalEndPoint?.ToString()).DisposeWith(d);
 
 			this.OneWayBind(ViewModel, vm => vm.Result3489.PublicEndPoint, v => v.PublicEndTextBox.Text).DisposeWith(d);
 

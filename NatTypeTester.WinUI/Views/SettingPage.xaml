@@ -9,9 +9,9 @@
 
     <Grid RowDefinitions="Auto,Auto">
         <Grid Margin="15" Grid.Row="0">
-            <RadioButtons Header="Proxy" x:Name="ProxyRadioButtons">
-                <RadioButton Content="Don't use Proxy" />
-                <RadioButton Content="SOCKS5" />
+            <RadioButtons x:Name="ProxyRadioButtons" x:Uid="ProxyRadioButtons">
+                <RadioButton x:Uid="NoProxy" />
+                <RadioButton x:Uid="SOCKS5Proxy" />
             </RadioButtons>
         </Grid>
 
@@ -23,20 +23,20 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBox
-                    x:Name="ProxyServerTextBox" Grid.Row="0"
-                    Margin="0,5" IsReadOnly="False"
-                    VerticalContentAlignment="Center" VerticalAlignment="Center"
-                    Header="Server" />
+                    x:Name="ProxyServerTextBox"
+                    x:Uid="ProxyServerTextBox"
+                    Grid.Row="0"
+                    Margin="0,5" IsReadOnly="False" />
                 <TextBox
-                    x:Name="ProxyUsernameTextBox" Grid.Row="1"
-                    Margin="0,5" IsReadOnly="False"
-                    VerticalContentAlignment="Center" VerticalAlignment="Center"
-                    Header="Username" />
+                    x:Name="ProxyUsernameTextBox"
+                    x:Uid="ProxyUsernameTextBox"
+                    Grid.Row="1"
+                    Margin="0,5" IsReadOnly="False" />
                 <TextBox
-                    x:Name="ProxyPasswordTextBox" Grid.Row="2"
-                    Margin="0,5"
-                    VerticalContentAlignment="Center" VerticalAlignment="Center"
-                    Header="Password" />
+                    x:Name="ProxyPasswordTextBox"
+                    x:Uid="ProxyPasswordTextBox"
+                    Grid.Row="2"
+                    Margin="0,5" />
             </Grid>
         </ContentControl>
 

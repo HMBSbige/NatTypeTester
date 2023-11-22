@@ -20,6 +20,7 @@ global using Volo.Abp;
 global using Volo.Abp.Autofac;
 global using Volo.Abp.DependencyInjection;
 global using Volo.Abp.Modularity;
+global using Windows.ApplicationModel.Resources;
 global using Windows.Graphics;
 global using Windows.System;
 

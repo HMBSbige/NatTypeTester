@@ -21,9 +21,6 @@ Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)
 - [x] TCP
 - [x] TLS-over-TCP
 
-## Preview
-![](pic/1.png)
-
 ## RFC3489
 <details>
 

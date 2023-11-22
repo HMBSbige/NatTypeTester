@@ -23,16 +23,7 @@ internal sealed partial class RFC5780Page : ITransientDependency
 
 			this.Bind(ViewModel, vm => vm.Result5389.LocalEndPoint, v => v.LocalAddressComboBox.Text).DisposeWith(d);
 
-			LocalAddressComboBox.Events().TextSubmitted.Subscribe(parameter =>
-			{
-				if (ViewModel.Result5389.LocalEndPoint is not null)
-				{
-					return;
-				}
-
-				LocalAddressComboBox.Text = string.Empty;
-				parameter.args.Handled = true;
-			}).DisposeWith(d);
+			LocalAddressComboBox.Events().LostFocus.Subscribe(_ => LocalAddressComboBox.Text = ViewModel.Result5389.LocalEndPoint?.ToString()).DisposeWith(d);
 
 			this.OneWayBind(ViewModel, vm => vm.Result5389.PublicEndPoint, v => v.MappingAddressTextBox.Text).DisposeWith(d);
 
