@@ -127,29 +127,25 @@ jobs:
           name: ${{ env.ProjectName }}.WinUI.arm64
           path: ${{ env.ProjectName }}.WinUI.arm64
 
-      - name: Get tag
-        id: tag
-        uses: dawidd6/action-get-tag@v1
-
       - name: Package
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path builtfiles -Force > $null
-          $zip_path = "builtfiles/$env:ProjectName-${{ steps.tag.outputs.tag }}.7z"
+          $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}.7z"
           7z a -mx9 "$zip_path" ${{ env.ProjectName }}
           echo "GENERIC_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Package WinUI x64
         shell: pwsh
         run: |
-          $zip_path = "builtfiles/$env:ProjectName-${{ steps.tag.outputs.tag }}-x64.7z"
+          $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}-x64.7z"
           7z a -mx9 "$zip_path" ${{ env.ProjectName }}.WinUI.x64
           echo "X64_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Package WinUI arm64
         shell: pwsh
         run: |
-          $zip_path = "builtfiles/$env:ProjectName-${{ steps.tag.outputs.tag }}-arm64.7z"
+          $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}-arm64.7z"
           7z a -mx9 "$zip_path" ${{ env.ProjectName }}.WinUI.arm64
           echo "ARM64_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -164,6 +160,6 @@ jobs:
             ## Hash
             | Filename | SHA-256 |
             | :- | :- |
-            | <sub>${{ env.ProjectName }}-${{ steps.tag.outputs.tag }}.7z</sub> | <sub>${{ env.GENERIC_SHA256 }}</sub> |
-            | <sub>${{ env.ProjectName }}-${{ steps.tag.outputs.tag }}-x64.7z</sub> | <sub>${{ env.X64_SHA256 }}</sub> |
-            | <sub>${{ env.ProjectName }}-${{ steps.tag.outputs.tag }}-arm64.7z</sub> | <sub>${{ env.ARM64_SHA256 }}</sub> |
+            | <sub>${{ env.ProjectName }}-${{ github.ref_name }}.7z</sub> | <sub>${{ env.GENERIC_SHA256 }}</sub> |
+            | <sub>${{ env.ProjectName }}-${{ github.ref_name }}-x64.7z</sub> | <sub>${{ env.X64_SHA256 }}</sub> |
+            | <sub>${{ env.ProjectName }}-${{ github.ref_name }}-arm64.7z</sub> | <sub>${{ env.ARM64_SHA256 }}</sub> |
