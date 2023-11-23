@@ -11,6 +11,17 @@ internal sealed partial class MainPage
 
 		this.WhenActivated(d =>
 		{
+			#region DPI
+
+			double scale = XamlRoot.RasterizationScale;
+			if (scale is not 1.0)
+			{
+				AppWindow appWindow = Locator.Current.GetRequiredService<MainWindow>().AppWindow;
+				appWindow.Resize(new SizeInt32((int)(appWindow.Size.Width * scale), (int)(appWindow.Size.Height * scale)));
+			}
+
+			#endregion
+
 			this.Bind(ViewModel,
 				vm => vm.Config.StunServer,
 				v => v.ServersComboBox.Text

@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
     <Version>8.0.0</Version>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
