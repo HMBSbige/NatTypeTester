@@ -112,17 +112,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: ${{ env.ProjectName }}
           path: ${{ env.ProjectName }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: ${{ env.ProjectName }}.WinUI.x64
           path: ${{ env.ProjectName }}.WinUI.x64
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: ${{ env.ProjectName }}.WinUI.arm64
           path: ${{ env.ProjectName }}.WinUI.arm64
