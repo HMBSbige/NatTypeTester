@@ -3,7 +3,7 @@
   <Import Project="..\common.props" />
 
   <ItemGroup>
-    <PackageReference Include="ReactiveUI" Version="19.5.39" />
+    <PackageReference Include="ReactiveUI" Version="19.5.41" />
     <PackageReference Include="Volo.Abp.Core" Version="8.0.2" />
   </ItemGroup>
 
