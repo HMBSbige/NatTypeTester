@@ -44,7 +44,7 @@ jobs:
 
   build:
     needs: [test, check_format]
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
