@@ -163,11 +163,10 @@ public class StunClient5389TCP : IStunClient5389
 			IDuplexPipe pipe = await _proxy.ConnectAsync(_lastLocalEndPoint, remote, cts.Token);
 			try
 			{
-				using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(sendMessage.Length);
-				Memory<byte> buffer = memoryOwner.Memory;
-				int length = sendMessage.WriteTo(buffer.Span);
+				int length = sendMessage.WriteTo(pipe.Output.GetSpan(sendMessage.Length));
 
-				await pipe.Output.WriteAsync(buffer[..length], cancellationToken);
+				pipe.Output.Advance(length);
+				await pipe.Output.FlushAsync(cancellationToken);
 
 				StunMessage5389 message = new();
 				bool success = await ReadPipeAsync(message, pipe.Input);
