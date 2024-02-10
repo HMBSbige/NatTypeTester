@@ -5,6 +5,5 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Authors>HMBSbige</Authors>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 </Project>
