@@ -13,7 +13,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester.ViewModels", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester.Models", "NatTypeTester.Models\NatTypeTester.Models.csproj", "{FC61BC61-E24B-4E78-ABA4-C6CB6C05EFC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NatTypeTester.WinUI", "NatTypeTester.WinUI\NatTypeTester.WinUI.csproj", "{04F5A9FE-6272-41FE-9E91-C27A718BB97E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NatTypeTester.WinUI", "NatTypeTester.WinUI\NatTypeTester.WinUI.csproj", "{04F5A9FE-6272-41FE-9E91-C27A718BB97E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D4C320A3-E2E1-4AC5-B587-46BA65247A4D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		build.ps1 = build.ps1
+		build.WinUI.ps1 = build.WinUI.ps1
+		common.props = common.props
+		Build\DotNetDllPathPatcher.ps1 = Build\DotNetDllPathPatcher.ps1
+		LICENSE = LICENSE
+		NuGet.Config = NuGet.Config
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,7 +6,7 @@
     <NoWarn>CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Copyright>Copyright © 2018-2023 HMBSbige</Copyright>
+    <Copyright>Copyright © 2018-2024 HMBSbige</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/HMBSbige/NatTypeTester</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HMBSbige/NatTypeTester</RepositoryUrl>
