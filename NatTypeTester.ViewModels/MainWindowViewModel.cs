@@ -22,11 +22,9 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	private static readonly FrozenSet<string> DefaultServers = new[]
 	{
-		@"stunserver.stunprotocol.org",
+		@"stun.syncthing.net",
 		@"stun.hot-chilli.net",
 		@"stun.fitauto.ru",
-		@"stun.syncthing.net",
-		@"stun.qq.com",
 		@"stun.miwifi.com"
 	}.ToFrozenSet();
 
