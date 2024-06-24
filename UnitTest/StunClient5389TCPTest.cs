@@ -29,7 +29,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task BindingTestSuccessAsync()
 	{
-		IPAddress ip = await _dnsClient.QueryAsync(@"stunserver.stunprotocol.org");
+		IPAddress ip = await _dnsClient.QueryAsync(@"stun.hot-chilli.net");
 		using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, StunServer.DefaultPort), Any);
 
 		StunResult5389 response = await client.BindingTestAsync();
