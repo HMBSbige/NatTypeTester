@@ -47,7 +47,7 @@ public class StunClient3489Test
 	public async Task UnsupportedServerTestAsync()
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!);
-		StunClient3489? client = mock.Object;
+		StunClient3489 client = mock.Object;
 
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
 		StunResponse unknownResponse = new(DefaultStunMessage, Any, LocalAddress1);
@@ -151,7 +151,7 @@ public class StunClient3489Test
 	public async Task FullConeTestAsync()
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!);
-		StunClient3489? client = mock.Object;
+		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
 			new StunMessage5389

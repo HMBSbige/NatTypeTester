@@ -84,7 +84,7 @@ public class StunClien5389UDPTest
 	public async Task MappingBehaviorTestUnsupportedServerAsync()
 	{
 		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
-		StunClient5389UDP? client = mock.Object;
+		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
 		{
@@ -351,7 +351,7 @@ public class StunClien5389UDPTest
 	public async Task FilteringBehaviorTestUnsupportedServerAsync()
 	{
 		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
-		StunClient5389UDP? client = mock.Object;
+		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
 		{
