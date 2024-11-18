@@ -5,7 +5,7 @@
   <ItemGroup>
     <PackageReference Include="Dns.Net" Version="0.2.0" />
     <PackageReference Include="ReactiveUI" Version="20.1.63" />
-    <PackageReference Include="Volo.Abp.Core" Version="8.3.3" />
+    <PackageReference Include="Volo.Abp.Core" Version="8.3.4" />
   </ItemGroup>
 
   <ItemGroup>
