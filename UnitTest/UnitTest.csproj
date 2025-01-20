@@ -12,7 +12,7 @@
     <PackageReference Include="Moq" Version="4.20.71" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.7.1" />
     <PackageReference Include="MSTest.TestFramework" Version="3.7.1" />
-    <PackageReference Include="coverlet.collector" Version="6.0.3" PrivateAssets="all" /> 
+    <PackageReference Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" /> 
   </ItemGroup>
 
   <ItemGroup>
