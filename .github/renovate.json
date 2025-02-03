@@ -3,7 +3,6 @@
 	"assignees": [
 		"HMBSbige"
 	],
-	"commitMessagePrefix": "dep:",
 	"dependencyDashboard": false,
 	"extends": [
 		"config:base",
