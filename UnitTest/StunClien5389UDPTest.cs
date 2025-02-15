@@ -31,7 +31,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task BindingTestSuccessAsync()
 	{
-		IPAddress ip = await _dnsClient.QueryAsync(@"stun.syncthing.net");
+		IPAddress ip = await _dnsClient.QueryAsync(@"stun.hot-chilli.net");
 		using StunClient5389UDP client = new(new IPEndPoint(ip, StunServer.DefaultPort), Any);
 
 		StunResult5389 response = await client.BindingTestAsync();

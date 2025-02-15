@@ -22,10 +22,13 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	private static readonly FrozenSet<string> DefaultServers = new[]
 	{
-		@"stun.syncthing.net",
 		@"stun.hot-chilli.net",
 		@"stun.fitauto.ru",
-		@"stun.miwifi.com"
+		@"stun.internetcalls.com",
+		@"stun.miwifi.com",
+		@"stun.voip.aebc.com",
+		@"stun.voipbuster.com",
+		@"stun.voipstunt.com",
 	}.ToFrozenSet();
 
 	private SourceList<string> List { get; } = new();

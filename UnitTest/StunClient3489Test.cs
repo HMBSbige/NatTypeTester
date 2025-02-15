@@ -17,7 +17,7 @@ public class StunClient3489Test
 {
 	private readonly IDnsClient _dnsClient = new DefaultDnsClient();
 
-	private const string Server = @"stun.syncthing.net";
+	private const string Server = @"stun.hot-chilli.net";
 	private const ushort Port = 3478;
 
 	private static readonly IPEndPoint Any = new(IPAddress.Any, 0);
