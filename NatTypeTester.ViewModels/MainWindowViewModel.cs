@@ -61,7 +61,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 				return;
 			}
 
-			foreach (string? line in File.ReadLines(path))
+			foreach (string line in File.ReadLines(path))
 			{
 				if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out StunServer? stun))
 				{
