@@ -1,11 +1,9 @@
-using Dns.Net.Abstractions;
 using Dns.Net.Clients;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Messages;
-using STUN.Utils;
 using System.Net;
 using System.Net.Sockets;
 using static STUN.Utils.AttributeExtensions;
@@ -15,7 +13,7 @@ namespace UnitTest;
 [TestClass]
 public class StunClient3489Test
 {
-	private readonly IDnsClient _dnsClient = new DefaultDnsClient();
+	private readonly DefaultDnsClient _dnsClient = new();
 
 	private const string Server = @"stun.hot-chilli.net";
 	private const ushort Port = 3478;
@@ -54,47 +52,23 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(unknownResponse);
 		await TestAsync();
 
-		StunResponse r1 = new(new StunMessage5389
-		{
-			Attributes = new[]
-			{
-				BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-			}
-		}, ServerAddress, LocalAddress1);
+		StunResponse r1 = new(new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)] }, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 		await TestAsync();
 
-		StunResponse r2 = new(new StunMessage5389
-		{
-			Attributes = new[]
-			{
-				BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-			}
-		}, ServerAddress, LocalAddress1);
+		StunResponse r2 = new(new StunMessage5389 { Attributes = [BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] }, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 		await TestAsync();
 
-		StunResponse r3 = new(new StunMessage5389
-		{
-			Attributes = new[]
-			{
-				BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-				BuildChangeAddress(IpFamily.IPv4, ServerAddress.Address, (ushort)ChangedAddress1.Port)
-			}
-		}, ServerAddress, LocalAddress1);
+		StunResponse r3 = new(new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ServerAddress.Address, (ushort)ChangedAddress1.Port)] }, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 		await TestAsync();
 
-		StunResponse r4 = new(new StunMessage5389
-		{
-			Attributes = new[]
-			{
-				BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-				BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ServerAddress.Port)
-			}
-		}, ServerAddress, LocalAddress1);
+		StunResponse r4 = new(new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ServerAddress.Port)] }, ServerAddress, LocalAddress1);
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(r4);
 		await TestAsync();
+
+		return;
 
 		async Task TestAsync()
 		{
@@ -110,25 +84,12 @@ public class StunClient3489Test
 		StunClient3489 client = mock.Object;
 
 		StunResponse openInternetTest1Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ServerAddress,
 			MappedAddress1
 		);
 		StunResponse test2Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)] },
 			ChangedAddress1,
 			MappedAddress1
 		);
@@ -154,58 +115,27 @@ public class StunClient3489Test
 		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ServerAddress,
 			LocalAddress1
 		);
 		StunResponse fullConeResponse = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)] },
 			ChangedAddress1,
 			LocalAddress1
 		);
 		StunResponse unsupportedResponse1 = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)] },
 			ServerAddress,
 			LocalAddress1
 		);
 		StunResponse unsupportedResponse2 = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)] },
 			new IPEndPoint(ServerAddress.Address, ChangedAddress1.Port),
 			LocalAddress1
 		);
 		StunResponse unsupportedResponse3 = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port)] },
 			new IPEndPoint(ChangedAddress1.Address, ServerAddress.Port),
 			LocalAddress1
 		);
@@ -227,6 +157,8 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse3);
 		await TestUnsupportedServerAsync();
 
+		return;
+
 		async Task TestUnsupportedServerAsync()
 		{
 			await client.QueryAsync();
@@ -241,26 +173,12 @@ public class StunClient3489Test
 		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ServerAddress,
 			LocalAddress1
 		);
 		StunResponse test12Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress2.Address, (ushort)MappedAddress2.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress2.Address, (ushort)MappedAddress2.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ServerAddress,
 			LocalAddress1
 		);
@@ -286,38 +204,17 @@ public class StunClient3489Test
 		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ServerAddress,
 			LocalAddress1
 		);
 		StunResponse test3Response = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ChangedAddress2,
 			LocalAddress1
 		);
 		StunResponse test3ErrorResponse = new(
-			new StunMessage5389
-			{
-				Attributes = new[]
-				{
-					BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port),
-					BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)
-				}
-			},
+			new StunMessage5389 { Attributes = [BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port), BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port)] },
 			ServerAddress,
 			LocalAddress1
 		);

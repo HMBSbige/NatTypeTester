@@ -1,4 +1,3 @@
-using Dns.Net.Abstractions;
 using Dns.Net.Clients;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -15,7 +14,7 @@ namespace UnitTest;
 [TestClass]
 public class StunClien5389UDPTest
 {
-	private readonly IDnsClient _dnsClient = new DefaultDnsClient();
+	private readonly DefaultDnsClient _dnsClient = new();
 
 	private static readonly IPEndPoint Any = new(IPAddress.Any, 0);
 	private static readonly IPEndPoint LocalAddress1 = IPEndPoint.Parse(@"127.0.0.1:114");
@@ -115,6 +114,8 @@ public class StunClien5389UDPTest
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
 		await TestAsync();
 
+		return;
+
 		async Task TestAsync()
 		{
 			await client.MappingBehaviorTestAsync();
@@ -190,10 +191,7 @@ public class StunClien5389UDPTest
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		StunResult5389 r2 = new()
-		{
-			BindingTestResult = BindingTestResult.Fail,
-		};
+		StunResult5389 r2 = new() { BindingTestResult = BindingTestResult.Fail };
 
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
@@ -309,10 +307,7 @@ public class StunClien5389UDPTest
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		StunResult5389 r3 = new()
-		{
-			BindingTestResult = BindingTestResult.Fail
-		};
+		StunResult5389 r3 = new() { BindingTestResult = BindingTestResult.Fail };
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress1, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
@@ -381,6 +376,8 @@ public class StunClien5389UDPTest
 		};
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
 		await TestAsync();
+
+		return;
 
 		async Task TestAsync()
 		{
