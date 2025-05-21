@@ -24,8 +24,8 @@ public class XorMappedTest
 	private readonly IPAddress _ipv4 = IPAddress.Parse(@"192.0.2.1");
 	private readonly IPAddress _ipv6 = IPAddress.Parse(@"2001:db8:1234:5678:11:2233:4455:6677");
 
-	private readonly byte[] _ipv4Response = ((byte[]) [0x00, (byte)IpFamily.IPv4]).Concat(XorPort).Concat(XorIPv4).ToArray();
-	private readonly byte[] _ipv6Response = ((byte[]) [0x00, (byte)IpFamily.IPv6]).Concat(XorPort).Concat(XorIPv6).ToArray();
+	private readonly byte[] _ipv4Response = ((byte[])[0x00, (byte)IpFamily.IPv4]).Concat(XorPort).Concat(XorIPv4).ToArray();
+	private readonly byte[] _ipv6Response = ((byte[])[0x00, (byte)IpFamily.IPv6]).Concat(XorPort).Concat(XorIPv6).ToArray();
 
 	/// <summary>
 	/// https://datatracker.ietf.org/doc/html/rfc5769.html
