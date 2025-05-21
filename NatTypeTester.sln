@@ -21,7 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		build.ps1 = build.ps1
 		build.WinUI.ps1 = build.WinUI.ps1
-		common.props = common.props
 		Build\DotNetDllPathPatcher.ps1 = Build\DotNetDllPathPatcher.ps1
 		LICENSE = LICENSE
 		NuGet.Config = NuGet.Config
