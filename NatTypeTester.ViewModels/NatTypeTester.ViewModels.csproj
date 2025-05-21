@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\common.props" />
-
   <ItemGroup>
     <PackageReference Include="Dns.Net" Version="0.2.0" />
     <PackageReference Include="ReactiveUI" Version="20.2.45" />
