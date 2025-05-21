@@ -20,6 +20,7 @@ Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)
 - [x] UDP
 - [x] TCP
 - [x] TLS-over-TCP
+- [ ] DTLS-over-UDP
 
 ## RFC3489
 <details>
