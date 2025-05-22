@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Socks5" Version="1.0.2" />
+    <PackageReference Include="Socks5" />
   </ItemGroup>
 
 </Project>
