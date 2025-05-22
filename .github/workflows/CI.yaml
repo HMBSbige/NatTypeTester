@@ -1,5 +1,7 @@
 name: CI
-on: [push, pull_request, workflow_dispatch]
+on: 
+  - push
+  - pull_request
 env:
   ProjectName: ${{ github.event.repository.name }}
   NET_TFM: net8.0-windows10.0.22621.0
