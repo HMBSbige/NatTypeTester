@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\STUN\STUN.csproj" />
+    <ProjectReference Include="..\..\STUN\STUN.csproj" />
   </ItemGroup>
 
 </Project>

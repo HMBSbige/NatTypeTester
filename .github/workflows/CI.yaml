@@ -1,5 +1,5 @@
 name: CI
-on: 
+on:
   - push
   - pull_request
 env:
@@ -9,20 +9,17 @@ env:
 
 jobs:
   check_format:
+    name: Check format
     runs-on: ubuntu-latest
     steps:
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run dotnet format check
-        run: dotnet format -v diag --verify-no-changes
+      - run: dotnet format -v diag --verify-no-changes
 
   test:
+    name: Run tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -32,54 +29,45 @@ jobs:
           - macos-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-
-      - name: Run tests
-        working-directory: UnitTest
-        run: dotnet test -c Release
+      - run: dotnet test -c Release
 
   build:
     needs: [test, check_format]
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
 
       - name: Build
         shell: pwsh
         run: |
-          .\build.ps1
-          .\build.WinUI.ps1 x64
-          .\build.WinUI.ps1 arm64
+          .\scripts\build.ps1
+          .\scripts\build.WinUI.ps1 x64
+          .\scripts\build.WinUI.ps1 arm64
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ProjectName }}
-          path: ${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\generic\publish\
+          path: src\${{ env.ProjectName }}\bin\${{ env.Configuration }}\${{ env.NET_TFM }}\generic\publish\
 
       - name: Upload WinUI x64
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ProjectName }}.WinUI.x64
-          path: ${{ env.ProjectName }}.WinUI\bin\x64\${{ env.Configuration }}\${{ env.NET_TFM }}\win-x64\publish\
+          path: src\${{ env.ProjectName }}.WinUI\bin\x64\${{ env.Configuration }}\${{ env.NET_TFM }}\win-x64\publish\
 
       - name: Upload WinUI arm64
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ProjectName }}.WinUI.arm64
-          path: ${{ env.ProjectName }}.WinUI\bin\arm64\${{ env.Configuration }}\${{ env.NET_TFM }}\win-arm64\publish\
+          path: src\${{ env.ProjectName }}.WinUI\bin\arm64\${{ env.Configuration }}\${{ env.NET_TFM }}\win-arm64\publish\
 
   nuget:
     needs: [test, check_format]
@@ -93,20 +81,17 @@ jobs:
           - STUN
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
 
       - name: Build
-        working-directory: ${{ matrix.PackageName }}
-        run: dotnet build -c Release
+        working-directory: src/${{ matrix.PackageName }}
+        run: dotnet pack
 
       - name: Push nuget packages
-        working-directory: ${{ matrix.PackageName }}/bin/Release
+        working-directory: src/${{ matrix.PackageName }}/bin/Release
         run: |
           dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
           dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
