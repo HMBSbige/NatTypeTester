@@ -14,14 +14,14 @@
 	],
 	"packageRules": [
 		{
-			"matchPackagePrefixes": [
-				"Volo.Abp"
+			"matchSourceUrls": [
+				"https://github.com/abpframework/abp"
 			],
-			"groupName": "ABP"
+			"groupName": "abp"
 		},
 		{
-			"matchPackagePrefixes": [
-				"ReactiveUI"
+			"matchSourceUrls": [
+				"https://github.com/reactiveui/ReactiveUI"
 			],
 			"groupName": "ReactiveUI"
 		}
