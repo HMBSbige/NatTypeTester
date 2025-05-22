@@ -1,0 +1,56 @@
+﻿<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="build.ps1" />
+    <File Path="build.WinUI.ps1" />
+    <File Path="Build\DotNetDllPathPatcher.ps1" />
+    <File Path="LICENSE" />
+    <File Path="NuGet.Config" />
+    <File Path="README.md" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="NatTypeTester.Models\NatTypeTester.Models.csproj">
+    <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
+    <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+    <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
+    <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+  </Project>
+  <Project Path="NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj">
+    <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
+    <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+    <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
+    <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+  </Project>
+  <Project Path="NatTypeTester.WinUI\NatTypeTester.WinUI.csproj">
+    <Configuration Solution="Debug|Any CPU" Project="Debug|x64|Deploy" />
+    <Configuration Solution="Debug|ARM64" Project="Debug|ARM64|Deploy" />
+    <Configuration Solution="Debug|x64" Project="Debug|x64|Deploy" />
+    <Configuration Solution="Release|Any CPU" Project="Release|x64|Deploy" />
+    <Configuration Solution="Release|ARM64" Project="Release|ARM64|Deploy" />
+    <Configuration Solution="Release|x64" Project="Release|x64|Deploy" />
+  </Project>
+  <Project Path="NatTypeTester\NatTypeTester.csproj">
+    <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
+    <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+    <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
+    <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+  </Project>
+  <Project Path="STUN\STUN.csproj">
+    <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
+    <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+    <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
+    <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+  </Project>
+  <Project Path="UnitTest\UnitTest.csproj">
+    <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
+    <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+    <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
+    <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+  </Project>
+</Solution>
