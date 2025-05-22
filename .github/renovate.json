@@ -14,16 +14,16 @@
 	],
 	"packageRules": [
 		{
-			"matchPackagePrefixes": [
-				"Volo.Abp"
-			],
-			"groupName": "ABP"
+			"groupName": "ABP",
+			"matchPackageNames": [
+				"Volo.Abp{/,}**"
+			]
 		},
 		{
-			"matchPackagePrefixes": [
-				"ReactiveUI"
-			],
-			"groupName": "ReactiveUI"
+			"groupName": "ReactiveUI",
+			"matchPackageNames": [
+				"ReactiveUI{/,}**"
+			]
 		}
 	],
 	"labels": [
