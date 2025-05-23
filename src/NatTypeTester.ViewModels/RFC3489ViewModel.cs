@@ -94,9 +94,9 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 		try
 		{
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-				       .ObserveOn(RxApp.MainThreadScheduler)
-				       // ReSharper disable once AccessToDisposedClosure
-				       .Subscribe(_ => Result3489 = client.State with { }))
+						.ObserveOn(RxApp.MainThreadScheduler)
+						// ReSharper disable once AccessToDisposedClosure
+						.Subscribe(_ => Result3489 = client.State with { }))
 			{
 				await client.ConnectProxyAsync(token);
 

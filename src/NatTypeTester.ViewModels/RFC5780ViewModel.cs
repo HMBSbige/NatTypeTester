@@ -113,9 +113,9 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			try
 			{
 				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					       .ObserveOn(RxApp.MainThreadScheduler)
-					       // ReSharper disable once AccessToDisposedClosure
-					       .Subscribe(_ => Result5389 = _udpResult = client.State with { }))
+							.ObserveOn(RxApp.MainThreadScheduler)
+							// ReSharper disable once AccessToDisposedClosure
+							.Subscribe(_ => Result5389 = _udpResult = client.State with { }))
 				{
 					await client.ConnectProxyAsync(token);
 
@@ -142,8 +142,8 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			try
 			{
 				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					       .ObserveOn(RxApp.MainThreadScheduler)
-					       .Subscribe(_ => UpdateData()))
+							.ObserveOn(RxApp.MainThreadScheduler)
+							.Subscribe(_ => UpdateData()))
 				{
 					await client.QueryAsync(token);
 				}

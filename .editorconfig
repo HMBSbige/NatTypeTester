@@ -14,6 +14,7 @@ resharper_blank_lines_around_single_line_auto_property = 1
 resharper_blank_lines_before_block_statements = 1
 resharper_braces_for_ifelse = not_required
 resharper_braces_redundant = false
+resharper_csharp_alignment_tab_fill_style = use_tabs_only
 resharper_csharp_indent_style = tab
 resharper_csharp_insert_final_newline = true
 resharper_csharp_keep_existing_enum_arrangement = false
