@@ -26,10 +26,6 @@
       <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
       <Configuration Solution="Release|x64" Project="Release|Any CPU" />
     </Project>
-    <Project Path="src\NatTypeTester.WinUI\NatTypeTester.WinUI.csproj">
-      <Configuration Solution="Debug|Any CPU" Project="Debug|x64" />
-      <Configuration Solution="Release|Any CPU" Project="Release|x64" />
-    </Project>
     <Project Path="src\NatTypeTester\NatTypeTester.csproj" Type="Classic C#">
       <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
