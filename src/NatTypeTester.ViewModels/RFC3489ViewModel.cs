@@ -2,6 +2,7 @@ using Dns.Net.Abstractions;
 using Dns.Net.Clients;
 using JetBrains.Annotations;
 using Microsoft;
+using Microsoft.Extensions.DependencyInjection;
 using NatTypeTester.Models;
 using ReactiveUI;
 using Socks5.Models;
@@ -20,15 +21,19 @@ namespace NatTypeTester.ViewModels;
 public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 {
 	public string UrlPathSegment => @"RFC3489";
-	public IScreen HostScreen => LazyServiceProvider.LazyGetRequiredService<IScreen>();
 
-	private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
+	public IScreen HostScreen => TransientCachedServiceProvider.GetRequiredService<IScreen>();
 
-	private IDnsClient DnsClient => LazyServiceProvider.LazyGetRequiredService<IDnsClient>();
-	private IDnsClient AAAADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAAAAClient>();
-	private IDnsClient ADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAClient>();
+	private Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
+
+	private IDnsClient DnsClient => TransientCachedServiceProvider.GetRequiredService<IDnsClient>();
+
+	private IDnsClient AAAADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAAAAClient>();
+
+	private IDnsClient ADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAClient>();
 
 	private ClassicStunResult _result3489;
+
 	public ClassicStunResult Result3489
 	{
 		get => _result3489;
@@ -64,6 +69,7 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 		};
 
 		IPAddress? serverIp;
+
 		if (Result3489.LocalEndPoint is null)
 		{
 			serverIp = await DnsClient.QueryAsync(server.Hostname, token);
@@ -88,11 +94,12 @@ public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
 		try
 		{
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					.ObserveOn(RxApp.MainThreadScheduler)
-					// ReSharper disable once AccessToDisposedClosure
-					.Subscribe(_ => Result3489 = client.State with { }))
+				       .ObserveOn(RxApp.MainThreadScheduler)
+				       // ReSharper disable once AccessToDisposedClosure
+				       .Subscribe(_ => Result3489 = client.State with { }))
 			{
 				await client.ConnectProxyAsync(token);
+
 				try
 				{
 					await client.QueryAsync(token);

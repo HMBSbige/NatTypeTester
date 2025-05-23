@@ -1,5 +1,6 @@
 using DynamicData;
 using DynamicData.Binding;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Threading;
 using NatTypeTester.Models;
 using ReactiveUI;
@@ -16,22 +17,23 @@ namespace NatTypeTester.ViewModels;
 )]
 public class MainWindowViewModel : ViewModelBase, IScreen
 {
-	public RoutingState Router => LazyServiceProvider.LazyGetRequiredService<RoutingState>();
+	public RoutingState Router => TransientCachedServiceProvider.GetRequiredService<RoutingState>();
 
-	public Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
+	public Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
 
-	private static readonly FrozenSet<string> DefaultServers = new[]
-	{
+	private static readonly FrozenSet<string> DefaultServers =
+	[
 		@"stun.hot-chilli.net",
 		@"stun.fitauto.ru",
 		@"stun.internetcalls.com",
 		@"stun.miwifi.com",
 		@"stun.voip.aebc.com",
 		@"stun.voipbuster.com",
-		@"stun.voipstunt.com",
-	}.ToFrozenSet();
+		@"stun.voipstunt.com"
+	];
 
 	private SourceList<string> List { get; } = new();
+
 	public readonly IObservableCollection<string> StunServers = new ObservableCollectionExtended<string>();
 
 	public MainWindowViewModel()

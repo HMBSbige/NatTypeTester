@@ -2,6 +2,7 @@ using Dns.Net.Abstractions;
 using Dns.Net.Clients;
 using JetBrains.Annotations;
 using Microsoft;
+using Microsoft.Extensions.DependencyInjection;
 using NatTypeTester.Models;
 using ReactiveUI;
 using Socks5.Models;
@@ -21,15 +22,19 @@ namespace NatTypeTester.ViewModels;
 public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 {
 	public string UrlPathSegment => @"RFC5780";
-	public IScreen HostScreen => LazyServiceProvider.LazyGetRequiredService<IScreen>();
 
-	private Config Config => LazyServiceProvider.LazyGetRequiredService<Config>();
+	public IScreen HostScreen => TransientCachedServiceProvider.GetRequiredService<IScreen>();
 
-	private IDnsClient DnsClient => LazyServiceProvider.LazyGetRequiredService<IDnsClient>();
-	private IDnsClient AAAADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAAAAClient>();
-	private IDnsClient ADnsClient => LazyServiceProvider.LazyGetRequiredService<DefaultAClient>();
+	private Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
+
+	private IDnsClient DnsClient => TransientCachedServiceProvider.GetRequiredService<IDnsClient>();
+
+	private IDnsClient AAAADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAAAAClient>();
+
+	private IDnsClient ADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAClient>();
 
 	private StunResult5389 _result5389;
+
 	public StunResult5389 Result5389
 	{
 		get => _result5389;
@@ -41,6 +46,7 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 	private StunResult5389 _tlsResult;
 
 	private TransportType _transportType;
+
 	public TransportType TransportType
 	{
 		get => _transportType;
@@ -79,6 +85,7 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 		};
 
 		IPAddress? serverIp;
+
 		if (Result5389.LocalEndPoint is null)
 		{
 			serverIp = await DnsClient.QueryAsync(server.Hostname, token);
@@ -97,6 +104,7 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 		}
 
 		TransportType transport = TransportType;
+
 		if (transport is TransportType.Udp)
 		{
 			using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
@@ -105,11 +113,12 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			try
 			{
 				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-						.ObserveOn(RxApp.MainThreadScheduler)
-						// ReSharper disable once AccessToDisposedClosure
-						.Subscribe(_ => Result5389 = _udpResult = client.State with { }))
+					       .ObserveOn(RxApp.MainThreadScheduler)
+					       // ReSharper disable once AccessToDisposedClosure
+					       .Subscribe(_ => Result5389 = _udpResult = client.State with { }))
 				{
 					await client.ConnectProxyAsync(token);
+
 					try
 					{
 						await client.QueryAsync(token);
@@ -133,8 +142,8 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			try
 			{
 				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-						.ObserveOn(RxApp.MainThreadScheduler)
-						.Subscribe(_ => UpdateData()))
+					       .ObserveOn(RxApp.MainThreadScheduler)
+					       .Subscribe(_ => UpdateData()))
 				{
 					await client.QueryAsync(token);
 				}
@@ -148,6 +157,7 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 			{
 				// ReSharper disable once AccessToDisposedClosure
 				Result5389 = client.State with { };
+
 				if (transport is TransportType.Tcp)
 				{
 					_tcpResult = Result5389;
