@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="ReactiveUI.SourceGenerators" PrivateAssets="all" />
     <PackageReference Include="Volo.Abp.Core" />
   </ItemGroup>
 

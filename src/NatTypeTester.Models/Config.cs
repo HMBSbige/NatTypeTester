@@ -1,45 +1,27 @@
-using JetBrains.Annotations;
-using ReactiveUI;
-using STUN.Enums;
-using Volo.Abp.DependencyInjection;
-
 namespace NatTypeTester.Models;
 
 [UsedImplicitly]
-public record Config : ReactiveRecord, ISingletonDependency
+public sealed partial class Config : ReactiveObject, ISingletonDependency
 {
-	private string _stunServer = @"stunserver.stunprotocol.org";
-	public string StunServer
+	public Config()
 	{
-		get => _stunServer;
-		set => this.RaiseAndSetIfChanged(ref _stunServer, value);
+		StunServer = @"";
+		ProxyType = ProxyType.Plain;
+		ProxyServer = @"127.0.0.1:1080";
 	}
 
-	private ProxyType _proxyType = ProxyType.Plain;
-	public ProxyType ProxyType
-	{
-		get => _proxyType;
-		set => this.RaiseAndSetIfChanged(ref _proxyType, value);
-	}
+	[Reactive]
+	public partial string StunServer { get; set; }
 
-	private string _proxyServer = @"127.0.0.1:1080";
-	public string ProxyServer
-	{
-		get => _proxyServer;
-		set => this.RaiseAndSetIfChanged(ref _proxyServer, value);
-	}
+	[Reactive]
+	public partial ProxyType ProxyType { get; set; }
 
-	private string? _proxyUser;
-	public string? ProxyUser
-	{
-		get => _proxyUser;
-		set => this.RaiseAndSetIfChanged(ref _proxyUser, value);
-	}
+	[Reactive]
+	public partial string ProxyServer { get; set; }
 
-	private string? _proxyPassword;
-	public string? ProxyPassword
-	{
-		get => _proxyPassword;
-		set => this.RaiseAndSetIfChanged(ref _proxyPassword, value);
-	}
+	[Reactive]
+	public partial string? ProxyUser { get; set; }
+
+	[Reactive]
+	public partial string? ProxyPassword { get; set; }
 }
