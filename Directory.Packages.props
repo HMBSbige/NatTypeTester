@@ -13,7 +13,7 @@
     <PackageVersion Include="MSTest.TestFramework" Version="3.9.1" />
     <PackageVersion Include="ReactiveMarbles.ObservableEvents.SourceGenerator" Version="1.3.1" />
     <PackageVersion Include="ReactiveUI" Version="20.2.45" />
-    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.1.27" />
+    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.2.4" />
     <PackageVersion Include="ReactiveUI.WPF" Version="20.2.45" />
     <PackageVersion Include="Socks5" Version="1.0.2" />
     <PackageVersion Include="Splat.Microsoft.Extensions.DependencyInjection" Version="15.3.1" />
