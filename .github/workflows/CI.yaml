@@ -89,7 +89,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: ${{ env.ProjectName }}
           path: ${{ env.ProjectName }}
