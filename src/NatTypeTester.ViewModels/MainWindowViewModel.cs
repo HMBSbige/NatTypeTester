@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.Threading;
 using NatTypeTester.Models;
 using ReactiveUI;
 using STUN;
-using System.Collections.Frozen;
 using System.Reactive.Linq;
 using Volo.Abp.DependencyInjection;
 
@@ -21,7 +20,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	public Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
 
-	private static readonly FrozenSet<string> DefaultServers =
+	private static readonly List<string> DefaultServers =
 	[
 		@"stun.hot-chilli.net",
 		@"stun.fitauto.ru",
