@@ -1,5 +1,4 @@
 using Dns.Net.Clients;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
 using STUN;
@@ -418,6 +417,6 @@ public class StunClient5389TCPTest
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
 		IStunClient5389 client = mock.Object;
 
-		await Assert.ThrowsExceptionAsync<NotSupportedException>(async () => await client.FilteringBehaviorTestAsync());
+		await Assert.ThrowsExactlyAsync<NotSupportedException>(async () => await client.FilteringBehaviorTestAsync());
 	}
 }
