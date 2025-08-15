@@ -1,5 +1,4 @@
 using Dns.Net.Clients;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using STUN.Client;
 using STUN.Enums;
@@ -13,6 +12,10 @@ namespace UnitTest;
 [TestClass]
 public class StunClient3489Test
 {
+	public required TestContext TestContext { get; init; }
+
+	private CancellationToken CancellationToken => TestContext.CancellationTokenSource.Token;
+
 	private readonly DefaultDnsClient _dnsClient = new();
 
 	private const string Server = @"stun.hot-chilli.net";
@@ -37,7 +40,7 @@ public class StunClient3489Test
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.UdpBlocked, client.State.NatType);
 	}
 
@@ -72,7 +75,7 @@ public class StunClient3489Test
 
 		async Task TestAsync()
 		{
-			await client.QueryAsync();
+			await client.QueryAsync(CancellationToken);
 			Assert.AreEqual(NatType.UnsupportedServer, client.State.NatType);
 		}
 	}
@@ -99,12 +102,12 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test2Response);
 
 		Assert.AreEqual(NatType.Unknown, client.State.NatType);
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.OpenInternet, client.State.NatType);
 
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.SymmetricUdpFirewall, client.State.NatType);
 	}
 
@@ -145,7 +148,7 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fullConeResponse);
 
 		Assert.AreEqual(NatType.Unknown, client.State.NatType);
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.FullCone, client.State.NatType);
 
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse1);
@@ -161,7 +164,7 @@ public class StunClient3489Test
 
 		async Task TestUnsupportedServerAsync()
 		{
-			await client.QueryAsync();
+			await client.QueryAsync(CancellationToken);
 			Assert.AreEqual(NatType.UnsupportedServer, client.State.NatType);
 		}
 	}
@@ -188,12 +191,12 @@ public class StunClient3489Test
 		mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
 		Assert.AreEqual(NatType.Unknown, client.State.NatType);
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.Unknown, client.State.NatType);
 
 		mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test12Response);
 
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.Symmetric, client.State.NatType);
 	}
 
@@ -225,22 +228,22 @@ public class StunClient3489Test
 
 		mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3Response);
 		Assert.AreEqual(NatType.Unknown, client.State.NatType);
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.RestrictedCone, client.State.NatType);
 
 		mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3ErrorResponse);
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.PortRestrictedCone, client.State.NatType);
 
 		mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
-		await client.QueryAsync();
+		await client.QueryAsync(CancellationToken);
 		Assert.AreEqual(NatType.PortRestrictedCone, client.State.NatType);
 	}
 
 	[TestMethod]
 	public async Task Test1Async()
 	{
-		IPAddress ip = await _dnsClient.QueryAsync(Server);
+		IPAddress ip = await _dnsClient.QueryAsync(Server, CancellationToken);
 		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
 
 		// test I
