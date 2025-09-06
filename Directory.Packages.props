@@ -16,7 +16,7 @@
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.4.1" />
     <PackageVersion Include="ReactiveUI.WPF" Version="21.0.1" />
     <PackageVersion Include="Socks5" Version="1.0.2" />
-    <PackageVersion Include="Splat.Microsoft.Extensions.DependencyInjection" Version="16.1.1" />
+    <PackageVersion Include="Splat.Microsoft.Extensions.DependencyInjection" Version="16.2.1" />
     <PackageVersion Include="Volo.Abp.Autofac" Version="9.3.2" />
     <PackageVersion Include="Volo.Abp.Core" Version="9.3.2" />
   </ItemGroup>
