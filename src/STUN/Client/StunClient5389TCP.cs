@@ -20,15 +20,17 @@ public class StunClient5389TCP : IStunClient5389
 	private IPEndPoint _lastLocalEndPoint;
 
 	private readonly ITcpProxy _proxy;
+	private readonly bool _ownedProxy;
 
 	public StunResult5389 State { get; private set; } = new();
 
-	public StunClient5389TCP(IPEndPoint server, IPEndPoint local, ITcpProxy? proxy = default)
+	public StunClient5389TCP(IPEndPoint server, IPEndPoint local, ITcpProxy? proxy = default, bool ownedProxy = true)
 	{
 		Requires.NotNull(server, nameof(server));
 		Requires.NotNull(local, nameof(local));
 
 		_proxy = proxy ?? new DirectTcpProxy();
+		_ownedProxy = ownedProxy;
 
 		_remoteEndPoint = server;
 
@@ -232,7 +234,8 @@ public class StunClient5389TCP : IStunClient5389
 
 	public void Dispose()
 	{
-		_proxy.Dispose();
+		if (_ownedProxy)
+			_proxy.Dispose();
 
 		GC.SuppressFinalize(this);
 	}

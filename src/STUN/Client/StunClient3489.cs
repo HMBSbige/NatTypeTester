@@ -23,15 +23,17 @@ public class StunClient3489 : IUdpStunClient
 	private readonly IPEndPoint _remoteEndPoint;
 
 	private readonly IUdpProxy _proxy;
+	private readonly bool _ownedProxy;
 
 	public ClassicStunResult State { get; private set; } = new();
 
-	public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null)
+	public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null, bool ownedProxy = true)
 	{
 		Requires.NotNull(server, nameof(server));
 		Requires.NotNull(local, nameof(local));
 
 		_proxy = proxy ?? new NoneUdpProxy(local);
+		_ownedProxy = ownedProxy;
 
 		_remoteEndPoint = server;
 

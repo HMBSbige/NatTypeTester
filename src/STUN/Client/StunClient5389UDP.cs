@@ -25,14 +25,17 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	private readonly IUdpProxy _proxy;
 
+	private readonly bool _ownedProxy;
+
 	public StunResult5389 State { get; private set; } = new();
 
-	public StunClient5389UDP(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = default)
+	public StunClient5389UDP(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = default, bool ownedProxy = true)
 	{
 		Requires.NotNull(server, nameof(server));
 		Requires.NotNull(local, nameof(local));
 
 		_proxy = proxy ?? new NoneUdpProxy(local);
+		_ownedProxy = ownedProxy;
 
 		_remoteEndPoint = server;
 
@@ -293,7 +296,8 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	public void Dispose()
 	{
-		_proxy.Dispose();
+		if (_ownedProxy)
+			_proxy.Dispose();
 
 		GC.SuppressFinalize(this);
 	}
