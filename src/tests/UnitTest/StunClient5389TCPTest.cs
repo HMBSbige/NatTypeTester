@@ -153,7 +153,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestFailAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -173,7 +173,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestUnsupportedServerAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -222,7 +222,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestDirectAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 response = new()
@@ -248,7 +248,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestEndpointIndependentAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -272,7 +272,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTest2FailAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -299,7 +299,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestAddressDependentAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -341,7 +341,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestAddressAndPortDependentAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -383,7 +383,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task MappingBehaviorTest3FailAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()

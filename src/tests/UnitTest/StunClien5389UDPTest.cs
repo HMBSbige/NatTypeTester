@@ -65,7 +65,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestFailAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -85,7 +85,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestUnsupportedServerAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -134,7 +134,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestDirectAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 response = new()
@@ -160,7 +160,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestEndpointIndependentAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -184,7 +184,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTest2FailAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -211,7 +211,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestAddressDependentAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -252,7 +252,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTestAddressAndPortDependentAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -293,7 +293,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task MappingBehaviorTest3FailAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -328,7 +328,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTestFailAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -348,7 +348,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTestUnsupportedServerAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -397,7 +397,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTestEndpointIndependentAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -424,7 +424,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTest2UnsupportedServerAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -451,7 +451,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTestAddressAndPortDependentAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -478,7 +478,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTestAddressDependentAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -506,7 +506,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTest3UnsupportedServerAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -534,7 +534,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task QueryFailTestAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -554,7 +554,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task QueryUnsupportedServerTestAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -578,7 +578,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task QueryMappingBehaviorDirectTestAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -605,7 +605,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task QueryMappingBehaviorEndpointIndependentTestAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -632,7 +632,7 @@ public class StunClien5389UDPTest
 	[TestMethod]
 	public async Task QueryMappingBehaviorAddressAndPortDependentTestAsync()
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
