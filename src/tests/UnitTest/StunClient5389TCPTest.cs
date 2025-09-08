@@ -419,7 +419,7 @@ public class StunClient5389TCPTest
 	[TestMethod]
 	public async Task FilteringBehaviorTestAsync()
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
 		await Assert.ThrowsExactlyAsync<NotSupportedException>(async () => await client.FilteringBehaviorTestAsync(CancellationToken));
