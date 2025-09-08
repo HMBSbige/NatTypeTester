@@ -228,8 +228,10 @@ public class StunClient3489 : IUdpStunClient
 
 	public void Dispose()
 	{
-		_proxy.Dispose();
-
+		if (_ownedProxy)
+		{
+			_proxy.Dispose();
+		}
 		GC.SuppressFinalize(this);
 	}
 }

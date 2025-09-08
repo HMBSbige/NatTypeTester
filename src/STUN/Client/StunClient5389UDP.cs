@@ -297,7 +297,9 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 	public void Dispose()
 	{
 		if (_ownedProxy)
+		{
 			_proxy.Dispose();
+		}
 
 		GC.SuppressFinalize(this);
 	}

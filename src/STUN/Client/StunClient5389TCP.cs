@@ -235,7 +235,9 @@ public class StunClient5389TCP : IStunClient5389
 	public void Dispose()
 	{
 		if (_ownedProxy)
+		{
 			_proxy.Dispose();
+		}
 
 		GC.SuppressFinalize(this);
 	}
