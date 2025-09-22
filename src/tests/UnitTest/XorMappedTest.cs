@@ -1,11 +1,10 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Shouldly;
 using STUN.Enums;
 using STUN.Messages.StunAttributeValues;
 using System.Net;
 
 namespace UnitTest;
 
-[TestClass]
 public class XorMappedTest
 {
 	private static ReadOnlySpan<byte> MagicCookieAndTransactionId =>
@@ -30,7 +29,7 @@ public class XorMappedTest
 	/// <summary>
 	/// https://datatracker.ietf.org/doc/html/rfc5769.html
 	/// </summary>
-	[TestMethod]
+	[Fact]
 	public void TestXorMapped()
 	{
 		XorMappedAddressStunAttributeValue t = new(MagicCookieAndTransactionId)
@@ -42,23 +41,23 @@ public class XorMappedTest
 		Span<byte> temp = stackalloc byte[ushort.MaxValue];
 
 		int length4 = t.WriteTo(temp);
-		Assert.AreNotEqual(0, length4);
-		Assert.IsTrue(temp[..length4].SequenceEqual(_ipv4Response));
+		length4.ShouldNotBe(0);
+		temp[..length4].SequenceEqual(_ipv4Response).ShouldBeTrue();
 
 		t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
-		Assert.IsTrue(t.TryParse(_ipv4Response));
-		Assert.AreEqual(Port, t.Port);
-		Assert.AreEqual(IpFamily.IPv4, t.Family);
-		Assert.AreEqual(_ipv4, t.Address);
+		t.TryParse(_ipv4Response).ShouldBeTrue();
+		t.Port.ShouldBe(Port);
+		t.Family.ShouldBe(IpFamily.IPv4);
+		t.Address.ShouldBe(_ipv4);
 
 		t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
-		Assert.IsTrue(t.TryParse(_ipv6Response));
-		Assert.AreEqual(Port, t.Port);
-		Assert.AreEqual(IpFamily.IPv6, t.Family);
-		Assert.AreEqual(_ipv6, t.Address);
+		t.TryParse(_ipv6Response).ShouldBeTrue();
+		t.Port.ShouldBe(Port);
+		t.Family.ShouldBe(IpFamily.IPv6);
+		t.Address.ShouldBe(_ipv6);
 
 		int length6 = t.WriteTo(temp);
-		Assert.AreNotEqual(0, length6);
-		Assert.IsTrue(temp[..length6].SequenceEqual(_ipv6Response));
+		length6.ShouldNotBe(0);
+		temp[..length6].SequenceEqual(_ipv6Response).ShouldBeTrue();
 	}
 }

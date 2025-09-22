@@ -7,6 +7,7 @@ namespace STUN;
 public class HostnameEndpoint
 {
 	public string Hostname { get; }
+
 	public ushort Port { get; }
 
 	private HostnameEndpoint(string host, ushort port)
@@ -18,6 +19,7 @@ public class HostnameEndpoint
 	public static bool TryParse(string s, [NotNullWhen(true)] out HostnameEndpoint? result, ushort defaultPort = 0)
 	{
 		result = null;
+
 		if (string.IsNullOrEmpty(s))
 		{
 			return false;
@@ -40,6 +42,7 @@ public class HostnameEndpoint
 
 		string host = s[..hostLength];
 		UriHostNameType type = Uri.CheckHostName(host);
+
 		switch (type)
 		{
 			case UriHostNameType.Dns:

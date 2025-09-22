@@ -1,6 +1,7 @@
 using Dns.Net.Clients;
 using Moq;
 using Moq.Protected;
+using Shouldly;
 using STUN;
 using STUN.Client;
 using STUN.Enums;
@@ -10,13 +11,8 @@ using System.Net;
 
 namespace UnitTest;
 
-[TestClass]
-public class StunClient5389TCPTest
+public class StunClient5389TCPTest : TestBase
 {
-	public required TestContext TestContext { get; init; }
-
-	private CancellationToken CancellationToken => TestContext.CancellationTokenSource.Token;
-
 	private readonly DefaultDnsClient _dnsClient = new();
 
 	private static readonly IPEndPoint Any = new(IPAddress.Any, 0);
@@ -28,7 +24,7 @@ public class StunClient5389TCPTest
 	private static readonly IPEndPoint ChangedAddress2 = IPEndPoint.Parse(@"2.2.2.2:810");
 	private static readonly IPEndPoint ChangedAddress3 = IPEndPoint.Parse(@"3.3.3.3:1919");
 
-	[TestMethod]
+	[Fact]
 	public async Task BindingTestSuccessAsync()
 	{
 		IPAddress ip = await _dnsClient.QueryAsync(@"stun.hot-chilli.net", CancellationToken);
@@ -36,15 +32,15 @@ public class StunClient5389TCPTest
 
 		StunResult5389 response = await client.BindingTestAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, response.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Unknown, response.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.Unknown, response.FilteringBehavior);
-		Assert.IsNotNull(response.PublicEndPoint);
-		Assert.IsNotNull(response.LocalEndPoint);
-		Assert.IsNotNull(response.OtherEndPoint);
+		response.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		response.MappingBehavior.ShouldBe(MappingBehavior.Unknown);
+		response.FilteringBehavior.ShouldBe(FilteringBehavior.Unknown);
+		response.PublicEndPoint.ShouldNotBeNull();
+		response.LocalEndPoint.ShouldNotBeNull();
+		response.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task BindingTestFailAsync()
 	{
 		IPAddress ip = IPAddress.Parse(@"1.1.1.1");
@@ -52,35 +48,34 @@ public class StunClient5389TCPTest
 
 		StunResult5389 response = await client.BindingTestAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Fail, response.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Unknown, response.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.Unknown, response.FilteringBehavior);
-		Assert.IsNull(response.PublicEndPoint);
-		Assert.IsNull(response.LocalEndPoint);
-		Assert.IsNull(response.OtherEndPoint);
+		response.BindingTestResult.ShouldBe(BindingTestResult.Fail);
+		response.MappingBehavior.ShouldBe(MappingBehavior.Unknown);
+		response.FilteringBehavior.ShouldBe(FilteringBehavior.Unknown);
+		response.PublicEndPoint.ShouldBeNull();
+		response.LocalEndPoint.ShouldBeNull();
+		response.OtherEndPoint.ShouldBeNull();
 	}
 
-	[Ignore]// TODO
-	[TestMethod]
+	[Fact(Skip = "Dev test", SkipWhen = nameof(TestEnvironment.IsRunningOnGitHubActions), SkipType = typeof(TestEnvironment))]
 	public async Task TlsBindingTestSuccessAsync()
 	{
-		Assert.IsTrue(StunServer.TryParse(@"stun.fitauto.ru", out StunServer? stunServer, StunServer.DefaultTlsPort));
+		StunServer.TryParse(@"stun.fitauto.ru", out StunServer? stunServer, StunServer.DefaultTlsPort).ShouldBeTrue();
+		stunServer.ShouldNotBeNull();
 		IPAddress ip = await _dnsClient.QueryAsync(stunServer.Hostname, CancellationToken);
 		ITcpProxy tls = new TlsProxy(stunServer.Hostname);
 		using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, StunServer.DefaultPort), Any, tls);
 
 		StunResult5389 response = await client.BindingTestAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, response.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Unknown, response.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.Unknown, response.FilteringBehavior);
-		Assert.IsNotNull(response.PublicEndPoint);
-		Assert.IsNotNull(response.LocalEndPoint);
-		Assert.IsNotNull(response.OtherEndPoint);
+		response.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		response.MappingBehavior.ShouldBe(MappingBehavior.Unknown);
+		response.FilteringBehavior.ShouldBe(FilteringBehavior.Unknown);
+		response.PublicEndPoint.ShouldNotBeNull();
+		response.LocalEndPoint.ShouldNotBeNull();
+		response.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[Ignore]
-	[TestMethod]
+	[Fact(Explicit = true)]
 	public async Task TestServerAsync()
 	{
 		const string url = @"https://raw.githubusercontent.com/pradt2/always-online-stun/master/valid_hosts_tcp.txt";
@@ -114,8 +109,7 @@ public class StunClient5389TCPTest
 		}
 	}
 
-	[Ignore]
-	[TestMethod]
+	[Fact(Explicit = true)]
 	public async Task TestTlsServerAsync()
 	{
 		const string url = @"https://raw.githubusercontent.com/pradt2/always-online-stun/master/valid_hosts_tcp.txt";
@@ -150,7 +144,7 @@ public class StunClient5389TCPTest
 		}
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTestFailAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -162,15 +156,15 @@ public class StunClient5389TCPTest
 
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Fail, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Unknown, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNull(client.State.PublicEndPoint);
-		Assert.IsNull(client.State.LocalEndPoint);
-		Assert.IsNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Fail);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.Unknown);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldBeNull();
+		client.State.LocalEndPoint.ShouldBeNull();
+		client.State.OtherEndPoint.ShouldBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTestUnsupportedServerAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -211,15 +205,15 @@ public class StunClient5389TCPTest
 		{
 			await client.QueryAsync(CancellationToken);
 
-			Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-			Assert.AreEqual(MappingBehavior.UnsupportedServer, client.State.MappingBehavior);
-			Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-			Assert.IsNotNull(client.State.PublicEndPoint);
-			Assert.IsNotNull(client.State.LocalEndPoint);
+			client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+			client.State.MappingBehavior.ShouldBe(MappingBehavior.UnsupportedServer);
+			client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+			client.State.PublicEndPoint.ShouldNotBeNull();
+			client.State.LocalEndPoint.ShouldNotBeNull();
 		}
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTestDirectAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -237,15 +231,15 @@ public class StunClient5389TCPTest
 
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Direct, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNotNull(client.State.PublicEndPoint);
-		Assert.IsNotNull(client.State.LocalEndPoint);
-		Assert.IsNotNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.Direct);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldNotBeNull();
+		client.State.LocalEndPoint.ShouldNotBeNull();
+		client.State.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTestEndpointIndependentAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -261,15 +255,15 @@ public class StunClient5389TCPTest
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.EndpointIndependent, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNotNull(client.State.PublicEndPoint);
-		Assert.IsNotNull(client.State.LocalEndPoint);
-		Assert.IsNotNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.EndpointIndependent);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldNotBeNull();
+		client.State.LocalEndPoint.ShouldNotBeNull();
+		client.State.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTest2FailAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -288,15 +282,15 @@ public class StunClient5389TCPTest
 		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Fail, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNotNull(client.State.PublicEndPoint);
-		Assert.IsNotNull(client.State.LocalEndPoint);
-		Assert.IsNotNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.Fail);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldNotBeNull();
+		client.State.LocalEndPoint.ShouldNotBeNull();
+		client.State.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTestAddressDependentAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -330,15 +324,15 @@ public class StunClient5389TCPTest
 
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.AddressDependent, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNotNull(client.State.PublicEndPoint);
-		Assert.IsNotNull(client.State.LocalEndPoint);
-		Assert.IsNotNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.AddressDependent);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldNotBeNull();
+		client.State.LocalEndPoint.ShouldNotBeNull();
+		client.State.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTestAddressAndPortDependentAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -372,15 +366,15 @@ public class StunClient5389TCPTest
 
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.AddressAndPortDependent, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNotNull(client.State.PublicEndPoint);
-		Assert.IsNotNull(client.State.LocalEndPoint);
-		Assert.IsNotNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.AddressAndPortDependent);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldNotBeNull();
+		client.State.LocalEndPoint.ShouldNotBeNull();
+		client.State.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task MappingBehaviorTest3FailAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
@@ -408,20 +402,20 @@ public class StunClient5389TCPTest
 
 		await client.QueryAsync(CancellationToken);
 
-		Assert.AreEqual(BindingTestResult.Success, client.State.BindingTestResult);
-		Assert.AreEqual(MappingBehavior.Fail, client.State.MappingBehavior);
-		Assert.AreEqual(FilteringBehavior.None, client.State.FilteringBehavior);
-		Assert.IsNotNull(client.State.PublicEndPoint);
-		Assert.IsNotNull(client.State.LocalEndPoint);
-		Assert.IsNotNull(client.State.OtherEndPoint);
+		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
+		client.State.MappingBehavior.ShouldBe(MappingBehavior.Fail);
+		client.State.FilteringBehavior.ShouldBe(FilteringBehavior.None);
+		client.State.PublicEndPoint.ShouldNotBeNull();
+		client.State.LocalEndPoint.ShouldNotBeNull();
+		client.State.OtherEndPoint.ShouldNotBeNull();
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task FilteringBehaviorTestAsync()
 	{
 		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
 		IStunClient5389 client = mock.Object;
 
-		await Assert.ThrowsExactlyAsync<NotSupportedException>(async () => await client.FilteringBehaviorTestAsync(CancellationToken));
+		await Should.ThrowAsync<NotSupportedException>(async () => await client.FilteringBehaviorTestAsync(CancellationToken));
 	}
 }

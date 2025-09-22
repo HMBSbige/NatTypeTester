@@ -1,83 +1,82 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Shouldly;
 using STUN;
 
 namespace UnitTest;
 
-[TestClass]
 public class HostnameEndpointTest
 {
-	[TestMethod]
-	[DataRow(@"www.google.com", ushort.MinValue)]
-	[DataRow(@"1.1.1.1", (ushort)1)]
-	[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]", (ushort)1919)]
+	[Theory]
+	[InlineData(@"www.google.com", ushort.MinValue)]
+	[InlineData(@"1.1.1.1", (ushort)1)]
+	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]", (ushort)1919)]
 	public void IsTrue(string host, ushort port)
 	{
 		string str = $@"{host}:{port}";
-		Assert.IsTrue(StunServer.TryParse(str, out StunServer? server));
-		Assert.IsNotNull(server);
-		Assert.AreEqual(host, server.Hostname);
-		Assert.AreEqual(port, server.Port);
-		Assert.AreEqual(str, server.ToString());
+		StunServer.TryParse(str, out StunServer? server).ShouldBeTrue();
+		server.ShouldNotBeNull();
+		server.Hostname.ShouldBe(host);
+		server.Port.ShouldBe(port);
+		server.ToString().ShouldBe(str);
 	}
 
-	[TestMethod]
-	[DataRow(@"")]
-	[DataRow(@"www.google.com:114514")]
-	[DataRow(@"/dw.[/[:114")]
-	[DataRow(@"2001:db8:1234:5678:11:2233:4455:6677:65535")]
+	[Theory]
+	[InlineData(@"")]
+	[InlineData(@"www.google.com:114514")]
+	[InlineData(@"/dw.[/[:114")]
+	[InlineData(@"2001:db8:1234:5678:11:2233:4455:6677:65535")]
 	public void IsFalse(string str)
 	{
-		Assert.IsFalse(StunServer.TryParse(str, out StunServer? server));
-		Assert.IsNull(server);
+		StunServer.TryParse(str, out StunServer? server).ShouldBeFalse();
+		server.ShouldBeNull();
 	}
 
-	[TestMethod]
-	[DataRow(@"www.google.com")]
-	[DataRow(@"1.1.1.1")]
-	[DataRow(@"2001:db8:1234:5678:11:2233:4455:6677")]
-	[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]")]
-	[DataRow(@"2001:db8:1234:5678:11:2233:4455:db8")]
+	[Theory]
+	[InlineData(@"www.google.com")]
+	[InlineData(@"1.1.1.1")]
+	[InlineData(@"2001:db8:1234:5678:11:2233:4455:6677")]
+	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]")]
+	[InlineData(@"2001:db8:1234:5678:11:2233:4455:db8")]
 	public void TestDefaultPort(string str)
 	{
-		Assert.IsTrue(StunServer.TryParse(str, out StunServer? server));
-		Assert.IsNotNull(server);
-		Assert.AreEqual(str, server.Hostname);
-		Assert.AreEqual(3478, server.Port);
+		StunServer.TryParse(str, out StunServer? server).ShouldBeTrue();
+		server.ShouldNotBeNull();
+		server.Hostname.ShouldBe(str);
+		server.Port.ShouldBe((ushort)3478);
 	}
 
-	[TestMethod]
-	[DataRow(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
-	[DataRow(@"stun.syncthing.net:3478", @"stun.syncthing.net")]
-	[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
-	[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
-	[DataRow(@"1.1.1.1:3478", @"1.1.1.1")]
-	[DataRow(@"1.1.1.1:1919", @"1.1.1.1:1919")]
-	public void ToString(string str, string expected)
+	[Theory]
+	[InlineData(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
+	[InlineData(@"stun.syncthing.net:3478", @"stun.syncthing.net")]
+	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
+	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
+	[InlineData(@"1.1.1.1:3478", @"1.1.1.1")]
+	[InlineData(@"1.1.1.1:1919", @"1.1.1.1:1919")]
+	public void TestToString(string str, string expected)
 	{
-		Assert.IsTrue(StunServer.TryParse(str, out StunServer? server));
-		Assert.IsNotNull(server);
-		Assert.AreEqual(expected, server.ToString());
+		StunServer.TryParse(str, out StunServer? server).ShouldBeTrue();
+		server.ShouldNotBeNull();
+		server.ToString().ShouldBe(expected);
 	}
 
-	[TestMethod]
+	[Fact]
 	public void DefaultServer()
 	{
 		StunServer server = new();
-		Assert.AreEqual(@"stun.syncthing.net", server.Hostname);
-		Assert.AreEqual(3478, server.Port);
+		server.Hostname.ShouldBe("stun.syncthing.net");
+		server.Port.ShouldBe((ushort)3478);
 	}
 
-	[TestMethod]
-	[DataRow(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
-	[DataRow(@"stun.syncthing.net:3478", @"stun.syncthing.net:3478")]
-	[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
-	[DataRow(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]:3478")]
-	[DataRow(@"1.1.1.1:3478", @"1.1.1.1:3478")]
-	[DataRow(@"1.1.1.1:1919", @"1.1.1.1:1919")]
+	[Theory]
+	[InlineData(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
+	[InlineData(@"stun.syncthing.net:3478", @"stun.syncthing.net:3478")]
+	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
+	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]:3478")]
+	[InlineData(@"1.1.1.1:3478", @"1.1.1.1:3478")]
+	[InlineData(@"1.1.1.1:1919", @"1.1.1.1:1919")]
 	public void HostnameEndpointToString(string str, string expected)
 	{
-		Assert.IsTrue(HostnameEndpoint.TryParse(str, out HostnameEndpoint? server));
-		Assert.IsNotNull(server);
-		Assert.AreEqual(expected, server.ToString());
+		HostnameEndpoint.TryParse(str, out HostnameEndpoint? server).ShouldBeTrue();
+		server.ShouldNotBeNull();
+		server.ToString().ShouldBe(expected);
 	}
 }

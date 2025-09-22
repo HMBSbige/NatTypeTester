@@ -7,6 +7,7 @@ namespace STUN;
 public class StunServer
 {
 	public string Hostname { get; }
+
 	public ushort Port { get; }
 
 	public const ushort DefaultPort = 3478;
@@ -42,10 +43,12 @@ public class StunServer
 		{
 			return Hostname;
 		}
+
 		if (IPAddress.TryParse(Hostname, out IPAddress? ip) && ip.AddressFamily is AddressFamily.InterNetworkV6)
 		{
 			return $@"[{ip}]:{Port}";
 		}
+
 		return $@"{Hostname}:{Port}";
 	}
 }
