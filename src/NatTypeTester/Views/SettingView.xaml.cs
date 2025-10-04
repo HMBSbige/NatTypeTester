@@ -2,7 +2,7 @@ using JetBrains.Annotations;
 using NatTypeTester.ViewModels;
 using ReactiveUI;
 using STUN.Enums;
-using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using Volo.Abp.DependencyInjection;
 
 namespace NatTypeTester.Views;

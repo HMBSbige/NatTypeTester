@@ -46,7 +46,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	public void LoadStunServer()
 	{
-		foreach (string? server in DefaultServers)
+		foreach (string server in DefaultServers)
 		{
 			List.Add(server);
 		}
