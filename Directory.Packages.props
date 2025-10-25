@@ -9,9 +9,9 @@
     <PackageVersion Include="ModernWpfUI" Version="0.9.6" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="ReactiveMarbles.ObservableEvents.SourceGenerator" Version="1.3.1" />
-    <PackageVersion Include="ReactiveUI" Version="22.1.1" />
+    <PackageVersion Include="ReactiveUI" Version="22.2.1" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.5.1" />
-    <PackageVersion Include="ReactiveUI.WPF" Version="22.1.1" />
+    <PackageVersion Include="ReactiveUI.WPF" Version="22.2.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
     <PackageVersion Include="Splat.Microsoft.Extensions.DependencyInjection" Version="17.1.1" />
