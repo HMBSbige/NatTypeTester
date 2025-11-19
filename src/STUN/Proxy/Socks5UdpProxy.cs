@@ -49,11 +49,8 @@ public class Socks5UdpProxy : IUdpProxy
 
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
-		if (_socks5Client is not null)
-		{
-			_socks5Client.Dispose();
-			_socks5Client = null;
-		}
+		_socks5Client?.Dispose();
+		_socks5Client = null;
 		return default;
 	}
 

@@ -45,12 +45,10 @@ public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
 	private StunResult5389 _tcpResult;
 	private StunResult5389 _tlsResult;
 
-	private TransportType _transportType;
-
 	public TransportType TransportType
 	{
-		get => _transportType;
-		set => this.RaiseAndSetIfChanged(ref _transportType, value);
+		get;
+		set => this.RaiseAndSetIfChanged(ref field, value);
 	}
 
 	public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
