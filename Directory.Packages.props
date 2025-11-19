@@ -15,8 +15,8 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
     <PackageVersion Include="Splat.Microsoft.Extensions.DependencyInjection" Version="17.1.1" />
-    <PackageVersion Include="Volo.Abp.Autofac" Version="9.3.6" />
-    <PackageVersion Include="Volo.Abp.Core" Version="9.3.6" />
+    <PackageVersion Include="Volo.Abp.Autofac" Version="10.0.0" />
+    <PackageVersion Include="Volo.Abp.Core" Version="10.0.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="xunit.v3" Version="3.2.0" />
   </ItemGroup>
