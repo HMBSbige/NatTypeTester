@@ -18,7 +18,7 @@ function Build-Generic {
 
     Remove-Item $publishDir -Recurse -Force -Confirm:$false -ErrorAction Ignore
 
-    dotnet publish -c $configuration -f $net_tfm $proj_path -o $publishDir
+    dotnet publish -f $net_tfm $proj_path -o $publishDir
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
     & "$PSScriptRoot\DotNetDllPathPatcher.ps1" "$publishDir\$exe" bin
@@ -38,7 +38,7 @@ function Build {
 
     Remove-Item $publishDir -Recurse -Force -Confirm:$false -ErrorAction Ignore
 
-    dotnet publish -c $configuration -f $net_tfm -r $rid --no-self-contained true $proj_path
+    dotnet publish -f $net_tfm -r $rid --no-self-contained $proj_path -o $publishDir
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
     & "$PSScriptRoot\DotNetDllPathPatcher.ps1" "$publishDir\$exe" bin
