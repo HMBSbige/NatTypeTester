@@ -4,7 +4,7 @@ dotnet --info
 
 $proj = 'NatTypeTester'
 $exe = "$proj.exe"
-$net_tfm = 'net8.0-windows10.0.22621.0'
+$net_tfm = 'net10.0-windows10.0.26100.0'
 $configuration = 'Release'
 $output_dir = "src\$proj\bin\$configuration"
 $proj_path = "src\$proj\$proj.csproj"
