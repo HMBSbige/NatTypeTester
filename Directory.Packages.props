@@ -18,7 +18,7 @@
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
-    <PackageVersion Include="Splat.Serilog" Version="17.2.1" />
+    <PackageVersion Include="Splat.Serilog" Version="19.2.1" />
     <PackageVersion Include="Volo.Abp.Autofac" Version="10.0.2" />
     <PackageVersion Include="Volo.Abp.Core" Version="10.0.2" />
     <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.0.2" />
