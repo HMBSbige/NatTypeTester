@@ -19,12 +19,12 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
     <PackageVersion Include="Splat.Serilog" Version="17.2.1" />
-    <PackageVersion Include="Volo.Abp.Autofac" Version="10.0.2" />
-    <PackageVersion Include="Volo.Abp.Core" Version="10.0.2" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.0.2" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.0.2" />
-    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.0.2" />
-    <PackageVersion Include="Volo.Abp.Localization" Version="10.0.2" />
+    <PackageVersion Include="Volo.Abp.Autofac" Version="10.0.3" />
+    <PackageVersion Include="Volo.Abp.Core" Version="10.0.3" />
+    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.0.3" />
+    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.0.3" />
+    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.0.3" />
+    <PackageVersion Include="Volo.Abp.Localization" Version="10.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="xunit.v3" Version="3.2.2" />
   </ItemGroup>
