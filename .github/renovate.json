@@ -1,32 +1,24 @@
 {
-	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"assignees": [
-		"HMBSbige"
-	],
-	"dependencyDashboard": false,
-	"extends": [
-		"config:recommended",
-		":configMigration",
-		":automergeBranch",
-		":automergeDigest",
-		":automergeMinor",
-		":disableRateLimiting"
-	],
-	"packageRules": [
-		{
-			"matchSourceUrls": [
-				"https://github.com/abpframework/abp"
-			],
-			"groupName": "abp"
-		},
-		{
-			"matchSourceUrls": [
-				"https://github.com/reactiveui/ReactiveUI"
-			],
-			"groupName": "ReactiveUI"
-		}
-	],
-	"labels": [
-		"Automatic"
-	]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "assignees": ["HMBSbige"],
+  "dependencyDashboard": false,
+  "extends": [
+    "config:recommended",
+    ":configMigration",
+    ":automergeBranch",
+    ":automergeDigest",
+    ":automergeMinor",
+    ":disableRateLimiting"
+  ],
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/abpframework/abp"],
+      "groupName": "abp"
+    },
+    {
+      "matchSourceUrls": ["https://github.com/reactiveui/**"],
+      "groupName": "ReactiveUI"
+    }
+  ],
+  "labels": ["Automatic"]
 }

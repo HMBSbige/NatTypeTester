@@ -1,118 +1,46 @@
-using Dns.Net.Abstractions;
-using Dns.Net.Clients;
-using JetBrains.Annotations;
-using Microsoft;
-using Microsoft.Extensions.DependencyInjection;
-using NatTypeTester.Models;
-using ReactiveUI;
-using Socks5.Models;
-using STUN;
-using STUN.Client;
-using STUN.Proxy;
-using STUN.StunResult;
-using System.Net;
-using System.Net.Sockets;
-using System.Reactive;
-using System.Reactive.Linq;
-
 namespace NatTypeTester.ViewModels;
 
 [UsedImplicitly]
-public class RFC3489ViewModel : ViewModelBase, IRoutableViewModel
+public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 {
-	public string UrlPathSegment => @"RFC3489";
+	[Reactive]
+	public partial ClassicStunResult Result3489 { get; set; }
 
-	public IScreen HostScreen => TransientCachedServiceProvider.GetRequiredService<IScreen>();
-
-	private Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
-
-	private IDnsClient DnsClient => TransientCachedServiceProvider.GetRequiredService<IDnsClient>();
-
-	private IDnsClient AAAADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAAAAClient>();
-
-	private IDnsClient ADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAClient>();
-
-	private ClassicStunResult _result3489;
-
-	public ClassicStunResult Result3489
-	{
-		get => _result3489;
-		set => this.RaiseAndSetIfChanged(ref _result3489, value);
-	}
-
-	public ReactiveCommand<Unit, Unit> TestClassicNatType { get; }
+	[Reactive]
+	public partial string? LocalEnd { get; set; }
 
 	public RFC3489ViewModel()
 	{
-		_result3489 = new ClassicStunResult();
-		TestClassicNatType = ReactiveCommand.CreateFromTask(TestClassicNatTypeAsync);
+		Result3489 = new ClassicStunResult();
+
+		this.WhenAnyValue(x => x.LocalEnd)
+			.Subscribe(value =>
+			{
+				System.Net.IPEndPoint? newEndPoint = null;
+				if (!string.IsNullOrWhiteSpace(value))
+				{
+					System.Net.IPEndPoint.TryParse(value, out newEndPoint);
+				}
+				if (!Equals(Result3489.LocalEndPoint, newEndPoint))
+				{
+					Result3489 = Result3489 with { LocalEndPoint = newEndPoint };
+				}
+			});
+
+		this.WhenAnyValue(x => x.Result3489)
+			.Select(r => r.LocalEndPoint?.ToString())
+			.DistinctUntilChanged()
+			.Subscribe(value => LocalEnd = value);
 	}
 
+	[ReactiveCommand]
 	private async Task TestClassicNatTypeAsync(CancellationToken token)
 	{
-		Verify.Operation(StunServer.TryParse(Config.StunServer, out StunServer? server), @"Wrong STUN Server!");
+		StunClientAppService service = TransientCachedServiceProvider.GetRequiredService<StunClientAppService>();
 
-		if (!HostnameEndpoint.TryParse(Config.ProxyServer, out HostnameEndpoint? proxyIpe))
-		{
-			throw new NotSupportedException(@"Unknown proxy address");
-		}
-
-		Socks5CreateOption socks5Option = new()
-		{
-			Address = await DnsClient.QueryAsync(proxyIpe.Hostname, token),
-			Port = proxyIpe.Port,
-			UsernamePassword = new UsernamePassword
-			{
-				UserName = Config.ProxyUser,
-				Password = Config.ProxyPassword
-			}
-		};
-
-		IPAddress? serverIp;
-
-		if (Result3489.LocalEndPoint is null)
-		{
-			serverIp = await DnsClient.QueryAsync(server.Hostname, token);
-			Result3489.LocalEndPoint = serverIp.AddressFamily is AddressFamily.InterNetworkV6 ? new IPEndPoint(IPAddress.IPv6Any, IPEndPoint.MinPort) : new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
-		}
-		else
-		{
-			if (Result3489.LocalEndPoint.AddressFamily is AddressFamily.InterNetworkV6)
-			{
-				serverIp = await AAAADnsClient.QueryAsync(server.Hostname, token);
-			}
-			else
-			{
-				serverIp = await ADnsClient.QueryAsync(server.Hostname, token);
-			}
-		}
-
-		using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result3489.LocalEndPoint, socks5Option);
-
-		using StunClient3489 client = new(new IPEndPoint(serverIp, server.Port), Result3489.LocalEndPoint, proxy);
-
-		try
-		{
-			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-						.ObserveOn(RxApp.MainThreadScheduler)
-						// ReSharper disable once AccessToDisposedClosure
-						.Subscribe(_ => Result3489 = client.State with { }))
-			{
-				await client.ConnectProxyAsync(token);
-
-				try
-				{
-					await client.QueryAsync(token);
-				}
-				finally
-				{
-					await client.CloseProxyAsync(token);
-				}
-			}
-		}
-		finally
-		{
-			Result3489 = client.State with { };
-		}
+		Result3489 = await service.TestClassicNatTypeAsync(
+			Result3489,
+			result => Result3489 = result,
+			token);
 	}
 }

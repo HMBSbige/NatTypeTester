@@ -1,0 +1,60 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
+    xmlns:designViewModels="clr-namespace:NatTypeTester.DesignViewModels"
+    xmlns:ext="clr-namespace:NatTypeTester.Extensions"
+    xmlns:valueConverters="clr-namespace:NatTypeTester.ValueConverters"
+    mc:Ignorable="d"
+    d:DesignWidth="600" d:DesignHeight="400"
+    x:Class="NatTypeTester.Views.SettingsView"
+    x:DataType="vm:SettingsViewModel"
+    DataContext="{ext:ViewModelLocator Type=vm:SettingsViewModel}">
+    <Design.DataContext>
+        <designViewModels:DesignSettingsViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Margin="10" Spacing="20">
+            <!-- Proxy Settings -->
+            <StackPanel Spacing="10">
+                <TextBlock Text="{ext:L Proxy}" FontWeight="Bold" FontSize="16" />
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <RadioButton Content="{ext:L NoProxy}" GroupName="ProxyType"
+                                 IsChecked="{Binding Config.ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
+                    <RadioButton Content="{ext:L SOCKS5Proxy}" GroupName="ProxyType"
+                                 IsChecked="{Binding Config.ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
+                </StackPanel>
+
+                <!-- Proxy Config Grid -->
+                <StackPanel IsVisible="{Binding Config.ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
+                    <StackPanel>
+                        <TextBlock Text="{ext:L ProxyServer}" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Config.ProxyServer}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="{ext:L ProxyUsername}" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Config.ProxyUser}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="{ext:L ProxyPassword}" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Config.ProxyPassword}" PasswordChar="•" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Language Settings -->
+            <StackPanel Spacing="10">
+                <TextBlock Text="{ext:L Language}" FontWeight="Bold" FontSize="16" />
+                <ComboBox SelectedIndex="{Binding SelectedLanguageIndex}">
+                    <ComboBoxItem Content="{ext:L FollowSystem}" />
+                    <ComboBoxItem Content="{ext:L English}" />
+                    <ComboBoxItem Content="{ext:L SimplifiedChinese}" />
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

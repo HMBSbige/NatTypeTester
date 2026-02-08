@@ -1,170 +1,82 @@
-using Dns.Net.Abstractions;
-using Dns.Net.Clients;
-using JetBrains.Annotations;
-using Microsoft;
-using Microsoft.Extensions.DependencyInjection;
-using NatTypeTester.Models;
-using ReactiveUI;
-using Socks5.Models;
-using STUN;
-using STUN.Client;
-using STUN.Enums;
-using STUN.Proxy;
-using STUN.StunResult;
-using System.Net;
-using System.Net.Sockets;
-using System.Reactive;
-using System.Reactive.Linq;
-
 namespace NatTypeTester.ViewModels;
 
 [UsedImplicitly]
-public class RFC5780ViewModel : ViewModelBase, IRoutableViewModel
+public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 {
-	public string UrlPathSegment => @"RFC5780";
+	[Reactive]
+	public partial StunResult5389 Result5389 { get; set; }
 
-	public IScreen HostScreen => TransientCachedServiceProvider.GetRequiredService<IScreen>();
+	[Reactive]
+	public partial string? LocalEnd { get; set; }
 
-	private Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
+	[Reactive]
+	public partial TransportType TransportType { get; set; }
 
-	private IDnsClient DnsClient => TransientCachedServiceProvider.GetRequiredService<IDnsClient>();
-
-	private IDnsClient AAAADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAAAAClient>();
-
-	private IDnsClient ADnsClient => TransientCachedServiceProvider.GetRequiredService<DefaultAClient>();
-
-	private StunResult5389 _result5389;
-
-	public StunResult5389 Result5389
-	{
-		get => _result5389;
-		set => this.RaiseAndSetIfChanged(ref _result5389, value);
-	}
-
-	private StunResult5389 _udpResult;
-	private StunResult5389 _tcpResult;
-	private StunResult5389 _tlsResult;
-
-	public TransportType TransportType
-	{
-		get;
-		set => this.RaiseAndSetIfChanged(ref field, value);
-	}
-
-	public ReactiveCommand<Unit, Unit> DiscoveryNatType { get; }
+	private StunResult5389 _udpResult = new();
+	private StunResult5389 _tcpResult = new();
+	private StunResult5389 _tlsResult = new();
 
 	public RFC5780ViewModel()
 	{
-		_udpResult = new StunResult5389();
-		_tcpResult = new StunResult5389();
-		_tlsResult = new StunResult5389();
-		_result5389 = _udpResult;
-		DiscoveryNatType = ReactiveCommand.CreateFromTask(DiscoveryNatTypeAsync);
+		Result5389 = _udpResult;
+
+		this.WhenAnyValue(x => x.LocalEnd)
+			.Subscribe(value =>
+			{
+				System.Net.IPEndPoint? newEndPoint = null;
+				if (!string.IsNullOrWhiteSpace(value))
+				{
+					System.Net.IPEndPoint.TryParse(value, out newEndPoint);
+				}
+				if (!Equals(Result5389.LocalEndPoint, newEndPoint))
+				{
+					Result5389 = Result5389 with { LocalEndPoint = newEndPoint };
+				}
+			});
+
+		this.WhenAnyValue(x => x.Result5389)
+			.Select(r => r.LocalEndPoint?.ToString())
+			.DistinctUntilChanged()
+			.Subscribe(value => LocalEnd = value);
+
+		this.WhenAnyValue(x => x.TransportType)
+			.Subscribe(_ => ResetResult());
 	}
 
+	[ReactiveCommand]
 	private async Task DiscoveryNatTypeAsync(CancellationToken token)
 	{
-		Verify.Operation(StunServer.TryParse(Config.StunServer, out StunServer? server, TransportType is TransportType.Tls ? StunServer.DefaultTlsPort : StunServer.DefaultPort), @"Wrong STUN Server!");
-
-		if (!HostnameEndpoint.TryParse(Config.ProxyServer, out HostnameEndpoint? proxyIpe))
-		{
-			throw new NotSupportedException(@"Unknown proxy address");
-		}
-
-		Socks5CreateOption socks5Option = new()
-		{
-			Address = await DnsClient.QueryAsync(proxyIpe.Hostname, token),
-			Port = proxyIpe.Port,
-			UsernamePassword = new UsernamePassword
-			{
-				UserName = Config.ProxyUser,
-				Password = Config.ProxyPassword
-			}
-		};
-
-		IPAddress? serverIp;
-
-		if (Result5389.LocalEndPoint is null)
-		{
-			serverIp = await DnsClient.QueryAsync(server.Hostname, token);
-			Result5389.LocalEndPoint = serverIp.AddressFamily is AddressFamily.InterNetworkV6 ? new IPEndPoint(IPAddress.IPv6Any, IPEndPoint.MinPort) : new IPEndPoint(IPAddress.Any, IPEndPoint.MinPort);
-		}
-		else
-		{
-			if (Result5389.LocalEndPoint.AddressFamily is AddressFamily.InterNetworkV6)
-			{
-				serverIp = await AAAADnsClient.QueryAsync(server.Hostname, token);
-			}
-			else
-			{
-				serverIp = await ADnsClient.QueryAsync(server.Hostname, token);
-			}
-		}
+		StunClientAppService service = TransientCachedServiceProvider.GetRequiredService<StunClientAppService>();
 
 		TransportType transport = TransportType;
 
-		if (transport is TransportType.Udp)
+		StunResult5389 result = await service.TestRfc5780NatTypeAsync(
+			Result5389,
+			transport,
+			r =>
+			{
+				Result5389 = r;
+				UpdateCachedResult(transport, r);
+			},
+			token);
+
+		Result5389 = result;
+		UpdateCachedResult(transport, result);
+	}
+
+	private void UpdateCachedResult(TransportType transport, StunResult5389 result)
+	{
+		switch (transport)
 		{
-			using IUdpProxy proxy = ProxyFactory.CreateProxy(Config.ProxyType, Result5389.LocalEndPoint, socks5Option);
-			using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, proxy);
-
-			try
-			{
-				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-							.ObserveOn(RxApp.MainThreadScheduler)
-							// ReSharper disable once AccessToDisposedClosure
-							.Subscribe(_ => Result5389 = _udpResult = client.State with { }))
-				{
-					await client.ConnectProxyAsync(token);
-
-					try
-					{
-						await client.QueryAsync(token);
-					}
-					finally
-					{
-						await client.CloseProxyAsync(token);
-					}
-				}
-			}
-			finally
-			{
-				Result5389 = _udpResult = client.State with { };
-			}
-		}
-		else
-		{
-			using ITcpProxy proxy = ProxyFactory.CreateProxy(transport, Config.ProxyType, socks5Option, server.Hostname);
-			using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(serverIp, server.Port), Result5389.LocalEndPoint, proxy);
-
-			try
-			{
-				using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-							.ObserveOn(RxApp.MainThreadScheduler)
-							.Subscribe(_ => UpdateData()))
-				{
-					await client.QueryAsync(token);
-				}
-			}
-			finally
-			{
-				UpdateData();
-			}
-
-			void UpdateData()
-			{
-				// ReSharper disable once AccessToDisposedClosure
-				Result5389 = client.State with { };
-
-				if (transport is TransportType.Tcp)
-				{
-					_tcpResult = Result5389;
-				}
-				else
-				{
-					_tlsResult = Result5389;
-				}
-			}
+			case TransportType.Udp:
+				_udpResult = result;
+				break;
+			case TransportType.Tcp:
+				_tcpResult = result;
+				break;
+			case TransportType.Tls:
+				_tlsResult = result;
+				break;
 		}
 	}
 

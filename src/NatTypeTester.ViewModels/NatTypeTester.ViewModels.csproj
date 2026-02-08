@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Dns.Net" />
     <PackageReference Include="ReactiveUI" />
-    <PackageReference Include="Volo.Abp.Core" />
+    <PackageReference Include="ReactiveUI.SourceGenerators" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NatTypeTester.Models\NatTypeTester.Models.csproj" />
+    <ProjectReference Include="..\NatTypeTester.Application\NatTypeTester.Application.csproj" />
   </ItemGroup>
 
 </Project>

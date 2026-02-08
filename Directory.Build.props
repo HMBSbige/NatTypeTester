@@ -1,10 +1,44 @@
 <Project>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ILLinkTreatWarningsAsErrors>false</ILLinkTreatWarningsAsErrors>
     <Authors>HMBSbige</Authors>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+    <!--     <IsAotCompatible>true</IsAotCompatible> -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DebugType>embedded</DebugType>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!--    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>-->
+    <PublishTrimmed>true</PublishTrimmed>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <TrimMode>partial</TrimMode>
+    <!--    <PublishAot>true</PublishAot>-->
+  </PropertyGroup>
+
+  <Target Name="CleanPreviousPublish" BeforeTargets="PrepareForPublish">
+    <RemoveDir Directories="$(PublishDir)" />
+  </Target>
+
+  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+    <DebuggerSupport>false</DebuggerSupport>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <NoWarn>IL2026;IL2104</NoWarn>
+  </PropertyGroup>
+
 </Project>

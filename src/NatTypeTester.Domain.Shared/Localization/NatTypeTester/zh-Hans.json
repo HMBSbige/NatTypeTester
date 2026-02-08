@@ -1,0 +1,31 @@
+{
+  "culture": "zh-Hans",
+  "texts": {
+    "StunServer": "STUN 服务器",
+    "RFC5780": "RFC 5780",
+    "RFC3489": "RFC 3489",
+    "Settings": "设置",
+    "BindingTest": "绑定测试",
+    "MappingBehavior": "映射行为",
+    "FilteringBehavior": "过滤行为",
+    "LocalEnd": "本地地址",
+    "LocalEndPlaceholder": "任意地址",
+    "PublicEnd": "公网地址",
+    "NatType": "NAT 类型",
+    "RFC3489Warning": "该协议已过时，可能不适用于现代路由器或 NAT。",
+    "Test": "测试",
+    "Proxy": "代理设置",
+    "NoProxy": "不使用代理",
+    "SOCKS5Proxy": "SOCKS5 代理",
+    "ProxyServer": "服务器",
+    "ProxyUsername": "用户名",
+    "ProxyPassword": "密码",
+    "OK": "确定",
+    "WrongStunServer": "STUN 服务器输入有误！",
+    "UnknownProxyAddress": "代理服务器地址输入有误！",
+    "Language": "语言",
+    "FollowSystem": "跟随系统",
+    "English": "English",
+    "SimplifiedChinese": "简体中文"
+  }
+}

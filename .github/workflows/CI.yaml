@@ -1,14 +1,19 @@
 name: CI
 on:
-  - push
-  - pull_request
+  push:
+    tags:
+      - "*"
+    branches:
+      - master
+      - renovate/**
+  pull_request:
 env:
   ProjectName: ${{ github.event.repository.name }}
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_NOLOGO: 1
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  NET_TFM: net10.0
   NET_VERSION: 10.0.x
-  NET_TFM: net10.0-windows10.0.26100.0
 
 jobs:
   check_format:
@@ -40,7 +45,14 @@ jobs:
 
   build:
     needs: [test, check_format]
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid:
+          - win-x64
+          - linux-x64
+          - linux-arm64
+          - osx-arm64
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
@@ -49,14 +61,15 @@ jobs:
 
       - name: Build
         shell: pwsh
+        working-directory: src/${{ env.ProjectName }}.Desktop
         run: |
-          .\scripts\build.ps1
+          dotnet publish -r ${{ matrix.rid }}
 
       - name: Upload
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ env.ProjectName }}
-          path: src\${{ env.ProjectName }}\bin\Release\${{ env.NET_TFM }}\generic\publish\
+          name: ${{ env.ProjectName }}-${{ matrix.rid }}
+          path: src/${{ env.ProjectName }}.Desktop/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
 
   nuget:
     needs: [test, check_format]
@@ -93,17 +106,24 @@ jobs:
 
     steps:
       - uses: actions/download-artifact@v7
-        with:
-          name: ${{ env.ProjectName }}
-          path: ${{ env.ProjectName }}
 
       - name: Package
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path builtfiles -Force > $null
-          $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}.7z"
-          7z a -mx9 "$zip_path" ${{ env.ProjectName }}
-          echo "GENERIC_SHA256=$((Get-FileHash $zip_path -Algorithm SHA256).Hash)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $rids = @('win-x64', 'linux-x64', 'linux-arm64', 'osx-arm64')
+          $hashLines = @()
+          foreach ($rid in $rids) {
+            $artifactDir = "$env:ProjectName-$rid"
+            $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}-$rid.7z"
+            7z a -mx9 "$zip_path" $artifactDir
+            $hash = (Get-FileHash $zip_path -Algorithm SHA256).Hash
+            $hashLines += "| <sub>$env:ProjectName-${{ github.ref_name }}-$rid.7z</sub> | <sub>$hash</sub> |"
+          }
+          $hashTable = $hashLines -join "`n"
+          echo "HASH_TABLE<<EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo $hashTable | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Create a new GitHub release
         uses: ncipollo/release-action@v1
@@ -116,4 +136,4 @@ jobs:
             ## Hash
             | Filename | SHA-256 |
             | :- | :- |
-            | <sub>${{ env.ProjectName }}-${{ github.ref_name }}.7z</sub> | <sub>${{ env.GENERIC_SHA256 }}</sub> |
+            ${{ env.HASH_TABLE }}

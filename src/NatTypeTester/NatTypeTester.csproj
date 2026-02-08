@@ -1,38 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
-    <OutputType>WinExe</OutputType>
-    <UseWPF>true</UseWPF>
-    <Version>8.0.5</Version>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>
-    <Page Remove="Properties\DesignTimeResources.xaml" />
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <Compile Remove="DesignViewModels\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="ModernWpfUI" />
-    <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" PrivateAssets="all" />
-    <PackageReference Include="ReactiveUI.WPF" />
-    <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="ReactiveUI.Avalonia.Autofac" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.Async" />
+    <PackageReference Include="Serilog.Sinks.Debug" />
+    <PackageReference Include="Splat.Serilog" />
     <PackageReference Include="Volo.Abp.Autofac" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Properties\DesignTimeResources.xaml">
-      <ContainsDesignTimeResources>True</ContainsDesignTimeResources>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-  </ItemGroup>
-
 </Project>

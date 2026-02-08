@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Dns.Net" />
+    <PackageReference Include="Volo.Abp.Ddd.Application" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NatTypeTester.Application.Contracts\NatTypeTester.Application.Contracts.csproj" />
+    <ProjectReference Include="..\NatTypeTester.Domain\NatTypeTester.Domain.csproj" />
+    <ProjectReference Include="..\STUN\STUN.csproj" />
+  </ItemGroup>
+</Project>

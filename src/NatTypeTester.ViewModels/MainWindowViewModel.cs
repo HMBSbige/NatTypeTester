@@ -1,23 +1,9 @@
-using DynamicData;
-using DynamicData.Binding;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.Threading;
-using NatTypeTester.Models;
-using ReactiveUI;
-using STUN;
-using System.Reactive.Linq;
-using Volo.Abp.DependencyInjection;
+using System.Globalization;
 
 namespace NatTypeTester.ViewModels;
 
-[ExposeServices(
-	typeof(MainWindowViewModel),
-	typeof(IScreen)
-)]
-public class MainWindowViewModel : ViewModelBase, IScreen
+public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 {
-	public RoutingState Router => TransientCachedServiceProvider.GetRequiredService<RoutingState>();
-
 	public Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
 
 	private static readonly List<string> DefaultServers =
@@ -33,7 +19,10 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
 	private SourceList<string> List { get; } = new();
 
-	public readonly IObservableCollection<string> StunServers = new ObservableCollectionExtended<string>();
+	public IObservableCollection<string> StunServers { get; } = new ObservableCollectionExtended<string>();
+
+	[Reactive]
+	public partial string? CurrentCulture { get; set; }
 
 	public MainWindowViewModel()
 	{
@@ -42,6 +31,10 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 			.ObserveOn(RxApp.MainThreadScheduler)
 			.Bind(StunServers)
 			.Subscribe();
+
+		Locator.Current.GetService<ObservableCultureService>()?
+			.CultureChanged
+			.Subscribe(_ => CurrentCulture = CultureInfo.CurrentCulture.DisplayName);
 	}
 
 	public void LoadStunServer()
@@ -69,6 +62,6 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 					List.Add(stun.ToString());
 				}
 			}
-		}).Forget();
+		});
 	}
 }

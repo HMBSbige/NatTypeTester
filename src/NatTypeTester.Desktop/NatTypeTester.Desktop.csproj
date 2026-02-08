@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Desktop" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NatTypeTester\NatTypeTester.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TrimmerRootAssembly Include="ReactiveUI" />
+  </ItemGroup>
+
+  <Target Name="RemoveUnwantedDlls" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)av_libglesv2.dll" />
+  </Target>
+
+</Project>

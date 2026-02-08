@@ -1,0 +1,31 @@
+{
+  "culture": "en",
+  "texts": {
+    "StunServer": "STUN Server",
+    "RFC5780": "RFC 5780",
+    "RFC3489": "RFC 3489",
+    "Settings": "Settings",
+    "BindingTest": "Binding test",
+    "MappingBehavior": "Mapping behavior",
+    "FilteringBehavior": "Filtering behavior",
+    "LocalEnd": "Local end",
+    "LocalEndPlaceholder": "Any",
+    "PublicEnd": "Public end",
+    "NatType": "NAT type",
+    "RFC3489Warning": "This protocol is obsoleted and may not be suitable for modern routers or NAT.",
+    "Test": "Test",
+    "Proxy": "Proxy",
+    "NoProxy": "Don't use Proxy",
+    "SOCKS5Proxy": "SOCKS5",
+    "ProxyServer": "Server",
+    "ProxyUsername": "Username",
+    "ProxyPassword": "Password",
+    "OK": "OK",
+    "WrongStunServer": "Wrong STUN Server!",
+    "UnknownProxyAddress": "Unknown proxy address",
+    "Language": "Language",
+    "FollowSystem": "Follow System",
+    "English": "English",
+    "SimplifiedChinese": "简体中文"
+  }
+}

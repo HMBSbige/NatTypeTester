@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\NatTypeTester.Domain.Shared\NatTypeTester.Domain.Shared.csproj" />
+    <ProjectReference Include="..\STUN\STUN.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="ReactiveUI.SourceGenerators" PrivateAssets="all" />
+    <PackageReference Include="Volo.Abp.Ddd.Application.Contracts" />
+  </ItemGroup>
+</Project>

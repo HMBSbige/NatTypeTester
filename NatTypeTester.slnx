@@ -1,11 +1,8 @@
 ﻿<Solution>
-  <Configurations>
-    <Platform Name="Any CPU" />
-    <Platform Name="ARM64" />
-    <Platform Name="x64" />
-  </Configurations>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path=".github/renovate.json" />
+    <File Path=".github/workflows/CI.yaml" />
     <File Path=".gitignore" />
     <File Path="LICENSE" />
     <File Path="NuGet.Config" />
@@ -14,37 +11,16 @@
     <File Path="Directory.Build.props" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src\NatTypeTester.Models\NatTypeTester.Models.csproj" Type="Classic C#">
-      <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
-      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
-      <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
-      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
-    </Project>
-    <Project Path="src\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" Type="Classic C#">
-      <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
-      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
-      <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
-      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
-    </Project>
-    <Project Path="src\NatTypeTester\NatTypeTester.csproj" Type="Classic C#">
-      <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
-      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
-      <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
-      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
-    </Project>
-    <Project Path="src\STUN\STUN.csproj" Type="Classic C#">
-      <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
-      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
-      <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
-      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
-    </Project>
+    <Project Path="src\NatTypeTester.Application.Contracts\NatTypeTester.Application.Contracts.csproj" />
+    <Project Path="src\NatTypeTester.Application\NatTypeTester.Application.csproj" />
+    <Project Path="src\NatTypeTester.Desktop\NatTypeTester.Desktop.csproj" />
+    <Project Path="src\NatTypeTester.Domain.Shared\NatTypeTester.Domain.Shared.csproj" />
+    <Project Path="src\NatTypeTester.Domain\NatTypeTester.Domain.csproj" />
+    <Project Path="src\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
+    <Project Path="src\NatTypeTester\NatTypeTester.csproj" />
+    <Project Path="src\STUN\STUN.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="src\tests\UnitTest\UnitTest.csproj" Type="Classic C#">
-      <Configuration Solution="Debug|ARM64" Project="Debug|Any CPU" />
-      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
-      <Configuration Solution="Release|ARM64" Project="Release|Any CPU" />
-      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
-    </Project>
+    <Project Path="src\tests\UnitTest\UnitTest.csproj" />
   </Folder>
 </Solution>

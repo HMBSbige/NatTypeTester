@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Core" />
+    <PackageReference Include="Volo.Abp.Localization" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\NatTypeTester\*.json" />
+  </ItemGroup>
+</Project>
