@@ -31,6 +31,12 @@
     <RemoveDir Directories="$(PublishDir)" />
   </Target>
 
+  <Target Name="ExcludeXmlDocFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.xml'" />
+    </ItemGroup>
+  </Target>
+
   <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
     <DebuggerSupport>false</DebuggerSupport>
     <DebugType>none</DebugType>
