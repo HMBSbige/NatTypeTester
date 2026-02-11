@@ -1,6 +1,5 @@
 using Dns.Net.Clients;
 using Moq;
-using Moq.Protected;
 using Shouldly;
 using STUN;
 using STUN.Client;
@@ -66,7 +65,7 @@ public class StunClien5389UDPTest : TestBase
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
 
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(fail);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fail);
 
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
@@ -90,7 +89,7 @@ public class StunClien5389UDPTest : TestBase
 			PublicEndPoint = MappedAddress1,
 			LocalEndPoint = LocalAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 		await TestAsync();
 
 		StunResult5389 r2 = new()
@@ -100,7 +99,7 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress2
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 		await TestAsync();
 
 		StunResult5389 r3 = new()
@@ -110,7 +109,7 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress3
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 		await TestAsync();
 
 		return;
@@ -141,7 +140,7 @@ public class StunClien5389UDPTest : TestBase
 			OtherEndPoint = ChangedAddress1
 		};
 
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(response);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(response);
 
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
@@ -166,7 +165,7 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
 		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
@@ -192,8 +191,8 @@ public class StunClien5389UDPTest : TestBase
 		};
 		StunResult5389 r2 = new() { BindingTestResult = BindingTestResult.Fail };
 
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(ServerAddress, It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress3, It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
 		client.State.BindingTestResult.ShouldBe(BindingTestResult.Success);
@@ -231,9 +230,9 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress1, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(ServerAddress, It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress3, It.IsAny<CancellationToken>())).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress1, It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
@@ -272,9 +271,9 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress1, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(ServerAddress, It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress3, It.IsAny<CancellationToken>())).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress1, It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
@@ -307,9 +306,9 @@ public class StunClien5389UDPTest : TestBase
 			OtherEndPoint = ChangedAddress1
 		};
 		StunResult5389 r3 = new() { BindingTestResult = BindingTestResult.Fail };
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress1, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(ServerAddress, It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress3, It.IsAny<CancellationToken>())).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress1, It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 
 		await client.MappingBehaviorTestAsync(CancellationToken);
 
@@ -329,7 +328,7 @@ public class StunClien5389UDPTest : TestBase
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
 
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(fail);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fail);
 
 		await client.FilteringBehaviorTestAsync(CancellationToken);
 
@@ -353,7 +352,7 @@ public class StunClien5389UDPTest : TestBase
 			PublicEndPoint = MappedAddress1,
 			LocalEndPoint = LocalAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 		await TestAsync();
 
 		StunResult5389 r2 = new()
@@ -363,7 +362,7 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress2
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 		await TestAsync();
 
 		StunResult5389 r3 = new()
@@ -373,7 +372,7 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress3
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 		await TestAsync();
 
 		return;
@@ -404,8 +403,8 @@ public class StunClien5389UDPTest : TestBase
 			OtherEndPoint = ChangedAddress1
 		};
 		StunResponse r2 = new(DefaultStunMessage, ChangedAddress1, LocalAddress1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 
 		await client.FilteringBehaviorTestAsync(CancellationToken);
 
@@ -431,8 +430,8 @@ public class StunClien5389UDPTest : TestBase
 			OtherEndPoint = ChangedAddress1
 		};
 		StunResponse r2 = new(DefaultStunMessage, ServerAddress, LocalAddress1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(r2);
 
 		await client.FilteringBehaviorTestAsync(CancellationToken);
 
@@ -457,9 +456,9 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest3Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.FilteringBehaviorTest3Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
 		await client.FilteringBehaviorTestAsync(CancellationToken);
 
@@ -485,9 +484,9 @@ public class StunClien5389UDPTest : TestBase
 			OtherEndPoint = ChangedAddress1
 		};
 		StunResponse r3 = new(DefaultStunMessage, ChangedAddress2, LocalAddress1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest3Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.FilteringBehaviorTest3Async(It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 
 		await client.FilteringBehaviorTestAsync(CancellationToken);
 
@@ -513,9 +512,9 @@ public class StunClien5389UDPTest : TestBase
 			OtherEndPoint = ChangedAddress1
 		};
 		StunResponse r3 = new(DefaultStunMessage, ServerAddress, LocalAddress1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest3Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.FilteringBehaviorTest3Async(It.IsAny<CancellationToken>())).ReturnsAsync(r3);
 
 		await client.FilteringBehaviorTestAsync(CancellationToken);
 
@@ -535,7 +534,7 @@ public class StunClien5389UDPTest : TestBase
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
 
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(fail);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fail);
 
 		await client.QueryAsync(CancellationToken);
 
@@ -560,7 +559,7 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ServerAddress
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
 
 		await client.QueryAsync(CancellationToken);
 
@@ -584,9 +583,9 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = MappedAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest3Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.BindingTestBaseAsync(ServerAddress, It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.FilteringBehaviorTest3Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
 		await client.QueryAsync(CancellationToken);
 
@@ -611,9 +610,9 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ItExpr.IsAny<IPEndPoint>(), ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest3Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.BindingTestBaseAsync(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.FilteringBehaviorTest3Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
 		await client.QueryAsync(CancellationToken);
 
@@ -652,11 +651,11 @@ public class StunClien5389UDPTest : TestBase
 			LocalEndPoint = LocalAddress1,
 			OtherEndPoint = ChangedAddress1
 		};
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ServerAddress, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r1);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress3, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r2);
-		mock.Protected().Setup<ValueTask<StunResult5389>>(@"BindingTestBaseAsync", ChangedAddress1, ItExpr.IsAny<CancellationToken>()).ReturnsAsync(r3);
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest2Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
-		mock.Protected().Setup<ValueTask<StunResponse?>>(@"FilteringBehaviorTest3Async", ItExpr.IsAny<CancellationToken>()).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.BindingTestBaseAsync(ServerAddress, It.IsAny<CancellationToken>())).ReturnsAsync(r1);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress3, It.IsAny<CancellationToken>())).ReturnsAsync(r2);
+		mock.Setup(x => x.BindingTestBaseAsync(ChangedAddress1, It.IsAny<CancellationToken>())).ReturnsAsync(r3);
+		mock.Setup(x => x.FilteringBehaviorTest2Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
+		mock.Setup(x => x.FilteringBehaviorTest3Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
 		await client.QueryAsync(CancellationToken);
 

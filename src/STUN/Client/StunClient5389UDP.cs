@@ -89,7 +89,7 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 		return await BindingTestBaseAsync(_remoteEndPoint, cancellationToken);
 	}
 
-	protected virtual async ValueTask<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken cancellationToken = default)
+	internal virtual async ValueTask<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken cancellationToken = default)
 	{
 		StunResult5389 result = new();
 		StunMessage5389 test = new()
@@ -237,7 +237,7 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 		}
 	}
 
-	protected virtual async ValueTask<StunResponse?> FilteringBehaviorTest2Async(CancellationToken cancellationToken = default)
+	internal virtual async ValueTask<StunResponse?> FilteringBehaviorTest2Async(CancellationToken cancellationToken = default)
 	{
 		Assumes.NotNull(State.OtherEndPoint);
 
@@ -249,7 +249,7 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 		return await RequestAsync(message, _remoteEndPoint, State.OtherEndPoint, cancellationToken);
 	}
 
-	protected virtual async ValueTask<StunResponse?> FilteringBehaviorTest3Async(CancellationToken cancellationToken = default)
+	internal virtual async ValueTask<StunResponse?> FilteringBehaviorTest3Async(CancellationToken cancellationToken = default)
 	{
 		Assumes.NotNull(State.OtherEndPoint);
 
