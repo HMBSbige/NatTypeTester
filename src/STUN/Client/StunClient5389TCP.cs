@@ -123,7 +123,7 @@ public class StunClient5389TCP : IStunClient5389
 		return await BindingTestBaseAsync(_remoteEndPoint, cancellationToken);
 	}
 
-	protected virtual async ValueTask<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken cancellationToken = default)
+	internal virtual async ValueTask<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken cancellationToken = default)
 	{
 		StunResult5389 result = new();
 		StunMessage5389 test = new()

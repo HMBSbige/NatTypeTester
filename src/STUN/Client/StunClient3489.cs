@@ -16,7 +16,7 @@ namespace STUN.Client;
 /// </summary>
 public class StunClient3489 : IUdpStunClient
 {
-	public virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
+	internal virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
 
 	public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
@@ -184,7 +184,7 @@ public class StunClient3489 : IUdpStunClient
 		return default;
 	}
 
-	public virtual async ValueTask<StunResponse?> Test1Async(CancellationToken cancellationToken)
+	internal virtual async ValueTask<StunResponse?> Test1Async(CancellationToken cancellationToken)
 	{
 		StunMessage5389 message = new()
 		{
@@ -194,7 +194,7 @@ public class StunClient3489 : IUdpStunClient
 		return await RequestAsync(message, _remoteEndPoint, _remoteEndPoint, cancellationToken);
 	}
 
-	public virtual async ValueTask<StunResponse?> Test2Async(IPEndPoint other, CancellationToken cancellationToken)
+	internal virtual async ValueTask<StunResponse?> Test2Async(IPEndPoint other, CancellationToken cancellationToken)
 	{
 		StunMessage5389 message = new()
 		{
@@ -205,7 +205,7 @@ public class StunClient3489 : IUdpStunClient
 		return await RequestAsync(message, _remoteEndPoint, other, cancellationToken);
 	}
 
-	public virtual async ValueTask<StunResponse?> Test1_2Async(IPEndPoint other, CancellationToken cancellationToken)
+	internal virtual async ValueTask<StunResponse?> Test1_2Async(IPEndPoint other, CancellationToken cancellationToken)
 	{
 		StunMessage5389 message = new()
 		{
@@ -215,7 +215,7 @@ public class StunClient3489 : IUdpStunClient
 		return await RequestAsync(message, other, other, cancellationToken);
 	}
 
-	public virtual async ValueTask<StunResponse?> Test3Async(CancellationToken cancellationToken)
+	internal virtual async ValueTask<StunResponse?> Test3Async(CancellationToken cancellationToken)
 	{
 		StunMessage5389 message = new()
 		{
