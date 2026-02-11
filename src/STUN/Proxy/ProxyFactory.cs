@@ -17,7 +17,7 @@ public static class ProxyFactory
 			}
 			case ProxyType.Socks5:
 			{
-				Requires.NotNull(option, nameof(option));
+				Requires.NotNull(option);
 				Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
 				return new Socks5UdpProxy(local, option);
 			}
@@ -38,7 +38,7 @@ public static class ProxyFactory
 			}
 			case (TransportType.Tcp, ProxyType.Socks5):
 			{
-				Requires.NotNull(option, nameof(option));
+				Requires.NotNull(option);
 				Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
 				return new Socks5TcpProxy(option);
 			}
@@ -48,7 +48,7 @@ public static class ProxyFactory
 			}
 			case (TransportType.Tls, ProxyType.Socks5):
 			{
-				Requires.NotNull(option, nameof(option));
+				Requires.NotNull(option);
 				Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
 				return new TlsOverSocks5Proxy(option, targetHost);
 			}

@@ -30,8 +30,8 @@ public class Socks5UdpProxy : IUdpProxy
 
 	public Socks5UdpProxy(IPEndPoint localEndPoint, Socks5CreateOption socks5Options)
 	{
-		Requires.NotNull(localEndPoint, nameof(localEndPoint));
-		Requires.NotNull(socks5Options, nameof(socks5Options));
+		Requires.NotNull(localEndPoint);
+		Requires.NotNull(socks5Options);
 		Requires.Argument(socks5Options.Address is not null, nameof(socks5Options), @"SOCKS5 address is null");
 
 		_localEndPoint = localEndPoint;

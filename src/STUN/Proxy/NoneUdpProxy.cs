@@ -10,7 +10,7 @@ public class NoneUdpProxy : IUdpProxy
 
 	public NoneUdpProxy(IPEndPoint localEndPoint)
 	{
-		Requires.NotNull(localEndPoint, nameof(localEndPoint));
+		Requires.NotNull(localEndPoint);
 
 		Client = new Socket(localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
 		Client.Bind(localEndPoint);

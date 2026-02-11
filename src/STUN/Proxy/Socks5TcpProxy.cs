@@ -23,7 +23,7 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 	public Socks5TcpProxy(Socks5CreateOption socks5Options)
 	{
-		Requires.NotNull(socks5Options, nameof(socks5Options));
+		Requires.NotNull(socks5Options);
 		Requires.Argument(socks5Options.Address is not null, nameof(socks5Options), @"SOCKS5 address is null");
 
 		Socks5Options = socks5Options;
@@ -32,8 +32,8 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		Verify.NotDisposed(this);
-		Requires.NotNull(local, nameof(local));
-		Requires.NotNull(dst, nameof(dst));
+		Requires.NotNull(local);
+		Requires.NotNull(dst);
 
 		await CloseAsync(cancellationToken);
 

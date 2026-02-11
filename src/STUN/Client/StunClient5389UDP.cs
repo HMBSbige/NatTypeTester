@@ -31,8 +31,8 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	public StunClient5389UDP(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = default, bool ownedProxy = true)
 	{
-		Requires.NotNull(server, nameof(server));
-		Requires.NotNull(local, nameof(local));
+		Requires.NotNull(server);
+		Requires.NotNull(local);
 
 		_proxy = proxy ?? new NoneUdpProxy(local);
 		_ownedProxy = ownedProxy;

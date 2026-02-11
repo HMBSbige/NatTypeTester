@@ -22,8 +22,8 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		Verify.NotDisposed(this);
-		Requires.NotNull(local, nameof(local));
-		Requires.NotNull(dst, nameof(dst));
+		Requires.NotNull(local);
+		Requires.NotNull(dst);
 
 		await CloseAsync(cancellationToken);
 

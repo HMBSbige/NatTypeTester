@@ -26,8 +26,8 @@ public class StunClient5389TCP : IStunClient5389
 
 	public StunClient5389TCP(IPEndPoint server, IPEndPoint local, ITcpProxy? proxy = default, bool ownedProxy = true)
 	{
-		Requires.NotNull(server, nameof(server));
-		Requires.NotNull(local, nameof(local));
+		Requires.NotNull(server);
+		Requires.NotNull(local);
 
 		_proxy = proxy ?? new DirectTcpProxy();
 		_ownedProxy = ownedProxy;
