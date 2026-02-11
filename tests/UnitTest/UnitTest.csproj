@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\STUN\STUN.csproj" />
+    <ProjectReference Include="..\..\src\STUN\STUN.csproj" />
   </ItemGroup>
 
 </Project>

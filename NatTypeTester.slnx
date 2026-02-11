@@ -21,6 +21,6 @@
     <Project Path="src\STUN\STUN.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="src\tests\UnitTest\UnitTest.csproj" />
+    <Project Path="tests\UnitTest\UnitTest.csproj" />
   </Folder>
 </Solution>
