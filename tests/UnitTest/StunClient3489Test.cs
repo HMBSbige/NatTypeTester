@@ -12,7 +12,7 @@ namespace UnitTest;
 
 public class StunClient3489Test : TestBase
 {
-	private readonly DefaultDnsClient _dnsClient = new();
+	private readonly DefaultAClient _dnsClient = new();
 
 	private const string Server = @"stun.hot-chilli.net";
 	private const ushort Port = 3478;

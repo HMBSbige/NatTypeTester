@@ -13,7 +13,7 @@ namespace UnitTest;
 
 public class StunClient5389TCPTest : TestBase
 {
-	private readonly DefaultDnsClient _dnsClient = new();
+	private readonly DefaultAClient _dnsClient = new();
 
 	private static readonly IPEndPoint Any = new(IPAddress.Any, 0);
 	private static readonly IPEndPoint LocalAddress1 = IPEndPoint.Parse(@"127.0.0.1:114");
