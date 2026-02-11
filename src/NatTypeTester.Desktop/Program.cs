@@ -1,7 +1,6 @@
 using Autofac.Extensions.DependencyInjection;
 using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
-using NatTypeTester;
 using ReactiveUI.Avalonia.Splat;
 using Splat;
 using Volo.Abp;

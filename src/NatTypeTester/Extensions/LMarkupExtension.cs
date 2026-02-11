@@ -1,6 +1,4 @@
 using Avalonia;
-using Avalonia.Data;
-using Avalonia.Markup.Xaml;
 
 namespace NatTypeTester.Extensions;
 

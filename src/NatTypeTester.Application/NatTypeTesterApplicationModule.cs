@@ -1,7 +1,6 @@
 global using Dns.Net.Abstractions;
 global using Dns.Net.Clients;
 global using JetBrains.Annotations;
-global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using NatTypeTester.Application.Contracts;
 global using NatTypeTester.Domain;

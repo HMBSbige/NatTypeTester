@@ -1,5 +1,3 @@
-using Avalonia.Controls;
-
 namespace NatTypeTester.DesignViewModels;
 
 public class DesignRFC5780ViewModel : RFC5780ViewModel

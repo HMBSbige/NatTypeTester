@@ -1,5 +1,3 @@
-using NatTypeTester.Domain.Shared.Localization;
-
 namespace NatTypeTester.Extensions;
 
 public class ObservableStringLocalizer(string key) : IObservable<string>

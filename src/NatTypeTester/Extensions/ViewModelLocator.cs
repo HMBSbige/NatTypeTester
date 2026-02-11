@@ -1,5 +1,3 @@
-using Avalonia.Markup.Xaml;
-
 namespace NatTypeTester.Extensions;
 
 public class ViewModelLocator : MarkupExtension
