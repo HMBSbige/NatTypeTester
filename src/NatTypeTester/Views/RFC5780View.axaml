@@ -41,7 +41,7 @@
             </StackPanel>
 
             <!-- Filtering Behavior -->
-            <StackPanel IsVisible="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsUdpConverter}}">
+            <StackPanel IsVisible="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.UdpConverter}}">
                 <TextBlock Text="{ext:L FilteringBehavior}" Margin="0,0,0,5" />
                 <TextBox IsReadOnly="True" Text="{Binding Result5389.FilteringBehavior, Mode=OneWay}" />
             </StackPanel>

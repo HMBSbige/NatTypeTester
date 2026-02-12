@@ -126,11 +126,11 @@ public class StunMessage5389
 			Span<byte> attributeBuffer = tempBuffer.AsSpan(0, length);
 			ReadOnlySpan<byte> magicCookieAndTransactionId = tempBuffer.AsSpan(length, SizeOfMagicCookie + SizeOfTransactionId);
 
-			while (attributeBuffer.Length > default(int))
+			while (attributeBuffer.Length > 0)
 			{
 				StunAttribute attribute = new();
 				int offset = attribute.TryParse(attributeBuffer, magicCookieAndTransactionId);
-				if (offset <= default(int))
+				if (offset <= 0)
 				{
 					Debug.WriteLine($@"[Warning] Ignore wrong attribute: {Convert.ToHexString(attributeBuffer)}");
 					break;

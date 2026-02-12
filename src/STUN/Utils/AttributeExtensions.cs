@@ -19,16 +19,10 @@ public static class AttributeExtensions
 
 	public static StunAttribute BuildMapping(IpFamily family, IPAddress ip, ushort port)
 	{
-		int length = family switch
-		{
-			IpFamily.IPv4 => 4,
-			IpFamily.IPv6 => 16,
-			_ => throw new ArgumentOutOfRangeException(nameof(family), family, null)
-		};
 		return new StunAttribute
 		{
 			Type = AttributeType.MappedAddress,
-			Length = (ushort)(4 + length),
+			Length = (ushort)(4 + GetAddressLength(family)),
 			Value = new MappedAddressStunAttributeValue
 			{
 				Family = family,
@@ -40,22 +34,26 @@ public static class AttributeExtensions
 
 	public static StunAttribute BuildChangeAddress(IpFamily family, IPAddress ip, ushort port)
 	{
-		int length = family switch
-		{
-			IpFamily.IPv4 => 4,
-			IpFamily.IPv6 => 16,
-			_ => throw new ArgumentOutOfRangeException(nameof(family), family, null)
-		};
 		return new StunAttribute
 		{
 			Type = AttributeType.ChangedAddress,
-			Length = (ushort)(4 + length),
+			Length = (ushort)(4 + GetAddressLength(family)),
 			Value = new ChangedAddressStunAttributeValue
 			{
 				Family = family,
 				Address = ip,
 				Port = port
 			}
+		};
+	}
+
+	private static int GetAddressLength(IpFamily family)
+	{
+		return family switch
+		{
+			IpFamily.IPv4 => 4,
+			IpFamily.IPv6 => 16,
+			_ => throw new ArgumentOutOfRangeException(nameof(family), family, null)
 		};
 	}
 

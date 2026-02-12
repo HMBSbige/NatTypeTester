@@ -10,9 +10,9 @@ public sealed partial class Config : ReactiveObject, ISingletonDependency
 {
 	public Config()
 	{
-		StunServer = @"";
+		StunServer = "";
 		ProxyType = ProxyType.Plain;
-		ProxyServer = @"127.0.0.1:1080";
+		ProxyServer = "127.0.0.1:1080";
 	}
 
 	[Reactive]

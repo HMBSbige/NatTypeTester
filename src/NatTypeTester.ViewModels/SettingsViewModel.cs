@@ -19,28 +19,14 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 			.Skip(1) // Skip initial value
 			.Subscribe(index =>
 			{
-				CultureInfo? culture = index switch
+				CultureInfo culture = index switch
 				{
 					1 => new CultureInfo("en"),
 					2 => new CultureInfo("zh-CN"),
-					_ => null // Follow system
+					_ => CultureInfo.InstalledUICulture // Follow system
 				};
 
-				ObservableCultureService? service = Locator.Current.GetService<ObservableCultureService>();
-
-				if (service is null)
-				{
-					return;
-				}
-
-				if (culture is not null)
-				{
-					service.ChangeCulture(culture);
-				}
-				else
-				{
-					service.ChangeCulture(CultureInfo.InstalledUICulture);
-				}
+				Locator.Current.GetService<ObservableCultureService>()?.ChangeCulture(culture);
 			});
 	}
 
