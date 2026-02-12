@@ -58,7 +58,8 @@ public class StunClientAppService(
 			{
 				await client.ConnectProxyAsync(ct);
 
-				try { await client.QueryAsync(ct); }
+				try
+				{ await client.QueryAsync(ct); }
 				finally { await client.CloseProxyAsync(ct); }
 			},
 			cancellationToken
@@ -119,7 +120,8 @@ public class StunClientAppService(
 				{
 					await client.ConnectProxyAsync(ct);
 
-					try { await client.QueryAsync(ct); }
+					try
+					{ await client.QueryAsync(ct); }
 					finally { await client.CloseProxyAsync(ct); }
 				},
 				cancellationToken
