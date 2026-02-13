@@ -36,7 +36,7 @@ public class NatTypeTesterDomainSharedModule : AbpModule
 				}
 
 				string cultureName = resourceName[prefix.Length..^suffix.Length];
-				CultureInfo cultureInfo = new CultureInfo(cultureName);
+				CultureInfo cultureInfo = new(cultureName);
 				options.Languages.Add(new LanguageInfo(cultureName, cultureName, cultureInfo.NativeName));
 			}
 		});

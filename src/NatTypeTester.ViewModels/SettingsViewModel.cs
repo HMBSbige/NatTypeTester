@@ -12,7 +12,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	public Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
 
 	[Reactive]
-	public partial ReadOnlyObservableCollection<LanguageOption> Languages { get; private set; }
+	public partial ReadOnlyObservableCollection<LanguageOption>? Languages { get; private set; }
 
 	[Reactive]
 	public partial LanguageOption? SelectedLanguage { get; set; }
