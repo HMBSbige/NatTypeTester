@@ -12,6 +12,9 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 	[Reactive]
 	public partial TransportType TransportType { get; set; }
 
+	[Reactive]
+	public partial bool IsTesting { get; set; }
+
 	private StunResult5389 _udpResult = new();
 	private StunResult5389 _tcpResult = new();
 	private StunResult5389 _tlsResult = new();
@@ -46,22 +49,30 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 	[ReactiveCommand]
 	private async Task DiscoveryNatTypeAsync(CancellationToken token)
 	{
-		StunClientAppService service = TransientCachedServiceProvider.GetRequiredService<StunClientAppService>();
+		IsTesting = true;
+		try
+		{
+			StunClientAppService service = TransientCachedServiceProvider.GetRequiredService<StunClientAppService>();
 
-		TransportType transport = TransportType;
+			TransportType transport = TransportType;
 
-		StunResult5389 result = await service.TestRfc5780NatTypeAsync(
-			Result5389,
-			transport,
-			r =>
-			{
-				Result5389 = r;
-				UpdateCachedResult(transport, r);
-			},
-			token);
+			StunResult5389 result = await service.TestRfc5780NatTypeAsync(
+				Result5389,
+				transport,
+				r =>
+				{
+					Result5389 = r;
+					UpdateCachedResult(transport, r);
+				},
+				token);
 
-		Result5389 = result;
-		UpdateCachedResult(transport, result);
+			Result5389 = result;
+			UpdateCachedResult(transport, result);
+		}
+		finally
+		{
+			IsTesting = false;
+		}
 	}
 
 	private void UpdateCachedResult(TransportType transport, StunResult5389 result)

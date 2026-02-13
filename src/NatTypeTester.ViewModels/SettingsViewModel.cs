@@ -1,6 +1,10 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
+using Volo.Abp.Localization;
 
 namespace NatTypeTester.ViewModels;
+
+public record LanguageOption(string CultureName, string DisplayName);
 
 [UsedImplicitly]
 public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
@@ -8,40 +12,41 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	public Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
 
 	[Reactive]
-	public partial int SelectedLanguageIndex { get; set; }
+	public partial ReadOnlyObservableCollection<LanguageOption> Languages { get; private set; }
 
-	public SettingsViewModel()
+	[Reactive]
+	public partial LanguageOption? SelectedLanguage { get; set; }
+
+	public void Initialize()
 	{
-		// Initialize language index based on current culture
-		SelectedLanguageIndex = GetLanguageIndex(CultureInfo.CurrentUICulture);
+		ILanguageProvider languageProvider = TransientCachedServiceProvider.GetRequiredService<ILanguageProvider>();
+		IEnumerable<LanguageOption> languages = languageProvider.GetLanguagesAsync().GetAwaiter().GetResult()
+			.Select(l => new LanguageOption(l.CultureName, l.DisplayName));
 
-		this.WhenAnyValue(x => x.SelectedLanguageIndex)
-			.Skip(1) // Skip initial value
-			.Subscribe(index =>
+		LanguageOption followSystem = new(string.Empty, L["FollowSystem"]);
+		Languages = new ReadOnlyObservableCollection<LanguageOption>(new ObservableCollection<LanguageOption>(languages.Prepend(followSystem)));
+
+		SelectedLanguage = Languages.FirstOrDefault(l => l.CultureName == Config.Language)
+			?? followSystem;
+
+		ApplyCulture(Config.Language);
+
+		this.WhenAnyValue(x => x.SelectedLanguage)
+			.Skip(1)
+			.WhereNotNull()
+			.Subscribe(lang =>
 			{
-				CultureInfo culture = index switch
-				{
-					1 => new CultureInfo("en"),
-					2 => new CultureInfo("zh-CN"),
-					_ => CultureInfo.InstalledUICulture // Follow system
-				};
-
-				Locator.Current.GetService<ObservableCultureService>()?.ChangeCulture(culture);
+				Config.Language = lang.CultureName;
+				ApplyCulture(Config.Language);
 			});
 	}
 
-	private static int GetLanguageIndex(CultureInfo culture)
+	private void ApplyCulture(string? language)
 	{
-		if (culture.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase))
-		{
-			return 1;
-		}
+		CultureInfo culture = string.IsNullOrEmpty(language)
+			? CultureInfo.InstalledUICulture
+			: new CultureInfo(language);
 
-		if (culture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
-		{
-			return 2;
-		}
-
-		return 0; // Follow system
+		TransientCachedServiceProvider.GetRequiredService<ObservableCultureService>().ChangeCulture(culture);
 	}
 }

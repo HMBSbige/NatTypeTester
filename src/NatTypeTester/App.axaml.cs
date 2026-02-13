@@ -16,6 +16,10 @@ public class App : Avalonia.Application
 			desktop.Exit += (sender, e) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
 			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
 
+			// Initialize language settings
+			SettingsViewModel settingsVm = serviceProvider.GetRequiredService<SettingsViewModel>();
+			settingsVm.Initialize();
+
 			// Load STUN servers
 			MainWindowViewModel mainVm = serviceProvider.GetRequiredService<MainWindowViewModel>();
 			mainVm.LoadStunServer();

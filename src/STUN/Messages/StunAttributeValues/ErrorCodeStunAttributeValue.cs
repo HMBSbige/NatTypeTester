@@ -31,7 +31,7 @@ public class ErrorCodeStunAttributeValue : IStunAttributeValue
 
 	public bool TryParse(ReadOnlySpan<byte> buffer)
 	{
-		if (buffer.Length is < 4 or > (4 + MaxReasonPhraseBytesLength))
+		if (buffer.Length is < 4 or > 4 + MaxReasonPhraseBytesLength)
 		{
 			return false;
 		}

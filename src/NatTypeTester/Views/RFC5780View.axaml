@@ -19,7 +19,7 @@
     <Grid Margin="10" RowDefinitions="Auto,*">
         <StackPanel Spacing="10">
             <!-- Transport Type Selection -->
-            <StackPanel Orientation="Horizontal" Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="10" IsEnabled="{Binding !IsTesting}">
                 <RadioButton Content="UDP" GroupName="TransportType"
                              IsChecked="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.UdpConverter}}" />
                 <RadioButton Content="TCP" GroupName="TransportType"

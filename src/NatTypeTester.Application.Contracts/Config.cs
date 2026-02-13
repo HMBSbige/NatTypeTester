@@ -13,6 +13,7 @@ public sealed partial class Config : ReactiveObject, ISingletonDependency
 		StunServer = "";
 		ProxyType = ProxyType.Plain;
 		ProxyServer = "127.0.0.1:1080";
+		Language = string.Empty; // Follow system by default
 	}
 
 	[Reactive]
@@ -29,4 +30,10 @@ public sealed partial class Config : ReactiveObject, ISingletonDependency
 
 	[Reactive]
 	public partial string? ProxyPassword { get; set; }
+
+	/// <summary>
+	/// Language setting. Empty = follow system, "en" = English, "zh-Hans" = Simplified Chinese.
+	/// </summary>
+	[Reactive]
+	public partial string Language { get; set; }
 }

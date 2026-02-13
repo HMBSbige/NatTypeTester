@@ -48,11 +48,9 @@
             <!-- Language Settings -->
             <StackPanel Spacing="10">
                 <TextBlock Text="{ext:L Language}" FontWeight="Bold" FontSize="16" />
-                <ComboBox SelectedIndex="{Binding SelectedLanguageIndex}">
-                    <ComboBoxItem Content="{ext:L FollowSystem}" />
-                    <ComboBoxItem Content="{ext:L English}" />
-                    <ComboBoxItem Content="{ext:L SimplifiedChinese}" />
-                </ComboBox>
+                <ComboBox ItemsSource="{Binding Languages}"
+                          SelectedItem="{Binding SelectedLanguage}"
+                          DisplayMemberBinding="{Binding DisplayName}" />
             </StackPanel>
         </StackPanel>
     </ScrollViewer>
