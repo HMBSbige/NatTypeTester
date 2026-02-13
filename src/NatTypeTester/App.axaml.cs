@@ -17,17 +17,19 @@ public class App : Avalonia.Application
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			desktop.Exit += (sender, e) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
-			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
-
-			WindowNotificationManager notificationManager = desktop.MainWindow.FindControl<WindowNotificationManager>("NotificationManager")!;
 			RxApp.DefaultExceptionHandler = System.Reactive.Observer.Create<Exception>(ex =>
 			{
 				RxApp.MainThreadScheduler.Schedule(() =>
 				{
-					notificationManager.Show(new Notification("Error", ex.Message, NotificationType.Error));
+					Window? window = desktop.MainWindow;
+					WindowNotificationManager? notificationManager = window?.FindControl<WindowNotificationManager>("NotificationManager");
+
+					notificationManager?.Show(new Notification("Error", ex.Message, NotificationType.Error));
 				});
 			});
+
+			desktop.Exit += (sender, e) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
+			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
 
 			// Initialize language settings
 			SettingsViewModel settingsVm = serviceProvider.GetRequiredService<SettingsViewModel>();
