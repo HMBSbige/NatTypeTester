@@ -1,3 +1,7 @@
+using Avalonia.Controls.Notifications;
+using ReactiveUI;
+using System.Reactive.Concurrency;
+
 namespace NatTypeTester;
 
 public class App : Avalonia.Application
@@ -15,6 +19,15 @@ public class App : Avalonia.Application
 		{
 			desktop.Exit += (sender, e) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
 			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
+
+			WindowNotificationManager notificationManager = desktop.MainWindow.FindControl<WindowNotificationManager>("NotificationManager")!;
+			RxApp.DefaultExceptionHandler = System.Reactive.Observer.Create<Exception>(ex =>
+			{
+				RxApp.MainThreadScheduler.Schedule(() =>
+				{
+					notificationManager.Show(new Notification("Error", ex.Message, NotificationType.Error));
+				});
+			});
 
 			// Initialize language settings
 			SettingsViewModel settingsVm = serviceProvider.GetRequiredService<SettingsViewModel>();
