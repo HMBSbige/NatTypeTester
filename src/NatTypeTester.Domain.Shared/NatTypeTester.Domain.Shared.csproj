@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\STUN\STUN.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Volo.Abp.Core" />
     <PackageReference Include="Volo.Abp.Localization" />
   </ItemGroup>

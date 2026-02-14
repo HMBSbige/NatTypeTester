@@ -22,7 +22,7 @@
             <TextBlock Text="{ext:L StunServer}" Margin="0,0,0,5" />
             <ComboBox IsEditable="True"
                       ItemsSource="{Binding StunServers}"
-                      Text="{Binding Config.StunServer, Mode=TwoWay}"
+                      Text="{Binding Settings.StunServer, Mode=TwoWay}"
                       HorizontalAlignment="Stretch" />
         </StackPanel>
 

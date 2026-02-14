@@ -36,11 +36,20 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 	[ReactiveCommand]
 	private async Task TestClassicNatTypeAsync(CancellationToken token)
 	{
-		StunClientAppService service = TransientCachedServiceProvider.GetRequiredService<StunClientAppService>();
+		IRfc3489AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc3489AppService>();
+		SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
 
-		Result3489 = await service.TestClassicNatTypeAsync(
-			Result3489,
-			result => Result3489 = result,
-			token);
+		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+			.ObserveOn(RxApp.MainThreadScheduler)
+			.Subscribe(_ =>
+			{
+				if (service.State is { } state)
+				{
+					Result3489 = state;
+				}
+			}))
+		{
+			Result3489 = await service.TestAsync(settings.ToInput(), Result3489, token);
+		}
 	}
 }

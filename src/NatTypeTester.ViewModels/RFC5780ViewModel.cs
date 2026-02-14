@@ -52,22 +52,27 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 		IsTesting = true;
 		try
 		{
-			StunClientAppService service = TransientCachedServiceProvider.GetRequiredService<StunClientAppService>();
+			IRfc5780AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc5780AppService>();
+			SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
 
 			TransportType transport = TransportType;
 
-			StunResult5389 result = await service.TestRfc5780NatTypeAsync(
-				Result5389,
-				transport,
-				r =>
+			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+				.ObserveOn(RxApp.MainThreadScheduler)
+				.Subscribe(_ =>
 				{
-					Result5389 = r;
-					UpdateCachedResult(transport, r);
-				},
-				token);
+					if (service.State is { } state)
+					{
+						Result5389 = state;
+						UpdateCachedResult(transport, state);
+					}
+				}))
+			{
+				StunResult5389 result = await service.TestAsync(settings.ToInput(), Result5389, transport, token);
 
-			Result5389 = result;
-			UpdateCachedResult(transport, result);
+				Result5389 = result;
+				UpdateCachedResult(transport, result);
+			}
 		}
 		finally
 		{

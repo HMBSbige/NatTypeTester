@@ -23,24 +23,24 @@
                 <TextBlock Text="{ext:L Proxy}" FontWeight="Bold" FontSize="16" />
                 <StackPanel Orientation="Horizontal" Spacing="20">
                     <RadioButton Content="{ext:L NoProxy}" GroupName="ProxyType"
-                                 IsChecked="{Binding Config.ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
+                                 IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
                     <RadioButton Content="{ext:L SOCKS5Proxy}" GroupName="ProxyType"
-                                 IsChecked="{Binding Config.ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
+                                 IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
                 </StackPanel>
 
                 <!-- Proxy Config Grid -->
-                <StackPanel IsVisible="{Binding Config.ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
+                <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
                     <StackPanel>
                         <TextBlock Text="{ext:L ProxyServer}" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Config.ProxyServer}" />
+                        <TextBox Text="{Binding ProxyServer}" />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="{ext:L ProxyUsername}" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Config.ProxyUser}" />
+                        <TextBox Text="{Binding ProxyUser}" />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="{ext:L ProxyPassword}" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Config.ProxyPassword}" PasswordChar="•" />
+                        <TextBox Text="{Binding ProxyPassword}" PasswordChar="•" />
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

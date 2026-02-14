@@ -4,7 +4,7 @@ namespace NatTypeTester.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 {
-	public Config Config => TransientCachedServiceProvider.GetRequiredService<Config>();
+	public SettingsViewModel Settings => TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
 
 	private static readonly List<string> DefaultServers =
 	[
@@ -44,7 +44,7 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 			List.Add(server);
 		}
 
-		Config.StunServer = DefaultServers.First();
+		Settings.StunServer = DefaultServers.First();
 
 		Task.Run(() =>
 		{

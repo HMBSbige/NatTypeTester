@@ -5,6 +5,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Localization;
 global using NatTypeTester.Application;
 global using NatTypeTester.Application.Contracts;
+global using NatTypeTester.Domain.Shared;
 global using NatTypeTester.Domain.Shared.Localization;
 global using ReactiveUI;
 global using ReactiveUI.SourceGenerators;

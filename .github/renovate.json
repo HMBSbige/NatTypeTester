@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "assignees": ["HMBSbige"],
+  "assignees": [
+    "HMBSbige"
+  ],
   "dependencyDashboard": false,
   "extends": [
     "config:recommended",
@@ -12,13 +14,19 @@
   ],
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/abpframework/abp"],
+      "matchSourceUrls": [
+        "https://github.com/abpframework/abp"
+      ],
       "groupName": "abp"
     },
     {
-      "matchSourceUrls": ["https://github.com/reactiveui/**"],
+      "matchSourceUrls": [
+        "https://github.com/reactiveui/**"
+      ],
       "groupName": "ReactiveUI"
     }
   ],
-  "labels": ["Automatic"]
+  "labels": [
+    "Automatic"
+  ]
 }

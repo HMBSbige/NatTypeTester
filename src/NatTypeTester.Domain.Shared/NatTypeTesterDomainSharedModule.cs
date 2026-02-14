@@ -1,5 +1,8 @@
 global using JetBrains.Annotations;
 global using NatTypeTester.Domain.Shared.Localization;
+global using STUN;
+global using STUN.Enums;
+global using STUN.StunResult;
 global using System.Globalization;
 global using Volo.Abp.Localization;
 global using Volo.Abp.Modularity;
