@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <AssemblyName>NatTypeTester</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -8,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NatTypeTester\NatTypeTester.csproj" />
+    <ProjectReference Include="..\NatTypeTester.Views\NatTypeTester.Views.csproj" />
   </ItemGroup>
 
   <ItemGroup>

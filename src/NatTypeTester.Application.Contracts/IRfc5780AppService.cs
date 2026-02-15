@@ -4,9 +4,5 @@ public interface IRfc5780AppService : IApplicationService
 {
 	StunResult5389? State { get; }
 
-	Task<StunResult5389> TestAsync(
-		StunTestInput input,
-		StunResult5389 currentResult,
-		TransportType transportType,
-		CancellationToken cancellationToken = default);
+	Task<StunResult5389> TestAsync(StunTestInput input, TransportType transportType, CancellationToken cancellationToken = default);
 }

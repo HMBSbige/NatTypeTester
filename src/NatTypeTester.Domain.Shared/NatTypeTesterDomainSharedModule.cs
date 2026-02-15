@@ -4,10 +4,10 @@ global using STUN;
 global using STUN.Enums;
 global using STUN.StunResult;
 global using System.Globalization;
+global using System.Reflection;
 global using Volo.Abp.Localization;
 global using Volo.Abp.Modularity;
 global using Volo.Abp.VirtualFileSystem;
-using System.Reflection;
 
 namespace NatTypeTester.Domain.Shared;
 

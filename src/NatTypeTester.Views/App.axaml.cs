@@ -1,8 +1,4 @@
-using Avalonia.Controls.Notifications;
-using ReactiveUI;
-using System.Reactive.Concurrency;
-
-namespace NatTypeTester;
+namespace NatTypeTester.Views;
 
 public class App : Avalonia.Application
 {
@@ -17,18 +13,9 @@ public class App : Avalonia.Application
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			RxApp.DefaultExceptionHandler = System.Reactive.Observer.Create<Exception>(ex =>
-			{
-				RxApp.MainThreadScheduler.Schedule(() =>
-				{
-					Window? window = desktop.MainWindow;
-					WindowNotificationManager? notificationManager = window?.FindControl<WindowNotificationManager>("NotificationManager");
+			NotificationExceptionHandler.Install(serviceProvider);
 
-					notificationManager?.Show(new Notification("Error", ex.Message, NotificationType.Error));
-				});
-			});
-
-			desktop.Exit += (sender, e) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
+			desktop.Exit += (_, _) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
 			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
 
 			// Initialize language settings

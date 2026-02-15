@@ -1,7 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Globalization;
-using Volo.Abp.Localization;
-
 namespace NatTypeTester.ViewModels;
 
 public record LanguageOption(string CultureName, string DisplayName);
@@ -39,11 +35,6 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		ProxyType = ProxyType.Plain;
 		ProxyServer = @"127.0.0.1:1080";
 		Language = string.Empty;
-	}
-
-	public StunTestInput ToInput()
-	{
-		return new StunTestInput(StunServer, ProxyType, ProxyServer, ProxyUser, ProxyPassword);
 	}
 
 	public void Initialize()

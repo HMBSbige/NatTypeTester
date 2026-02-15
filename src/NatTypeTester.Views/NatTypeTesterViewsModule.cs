@@ -1,23 +1,40 @@
+global using Avalonia;
 global using Avalonia.Controls;
 global using Avalonia.Controls.ApplicationLifetimes;
+global using Avalonia.Controls.Notifications;
+global using Avalonia.Data;
+global using Avalonia.Data.Converters;
 global using Avalonia.Markup.Xaml;
 global using JetBrains.Annotations;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Localization;
 global using Microsoft.Extensions.Logging;
+global using NatTypeTester.Domain.Shared.Localization;
 global using NatTypeTester.ViewModels;
-global using NatTypeTester.Views;
+global using NatTypeTester.Views.Extensions;
+global using NatTypeTester.Views.Views;
+global using ReactiveUI;
 global using ReactiveUI.Avalonia;
 global using Serilog;
 global using Serilog.Core;
+global using Serilog.Debugging;
 global using Serilog.Events;
 global using Splat;
 global using Splat.Serilog;
+global using STUN.Enums;
+global using System.Diagnostics;
+global using System.Globalization;
+global using System.Reactive.Disposables;
+global using System.Reactive.Disposables.Fluent;
+global using System.Reactive.Linq;
+global using System.Reactive.Subjects;
 global using Volo.Abp;
 global using Volo.Abp.Autofac;
 global using Volo.Abp.DependencyInjection;
 global using Volo.Abp.Modularity;
+global using Volo.Abp.Validation;
 
-namespace NatTypeTester;
+namespace NatTypeTester.Views;
 
 [DependsOn
 (
@@ -25,7 +42,7 @@ namespace NatTypeTester;
 	typeof(NatTypeTesterViewModelsModule)
 )]
 [UsedImplicitly]
-public class NatTypeTesterModule : AbpModule
+public class NatTypeTesterViewsModule : AbpModule
 {
 	public override void ConfigureServices(ServiceConfigurationContext context)
 	{
@@ -35,11 +52,11 @@ public class NatTypeTesterModule : AbpModule
 	private static void ConfigureLogging(ServiceConfigurationContext context)
 	{
 #if DEBUG
-		Serilog.Debugging.SelfLog.Enable
+		SelfLog.Enable
 		(msg =>
 			{
-				System.Diagnostics.Debug.Print(msg);
-				System.Diagnostics.Debugger.Break();
+				Debug.Print(msg);
+				Debugger.Break();
 			}
 		);
 #endif

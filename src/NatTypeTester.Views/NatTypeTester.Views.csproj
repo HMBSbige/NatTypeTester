@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="FluentIcons.Avalonia" />
     <PackageReference Include="ReactiveUI.Avalonia.Autofac" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />

@@ -4,14 +4,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
-    xmlns:designViewModels="clr-namespace:NatTypeTester.DesignViewModels"
-    xmlns:ext="clr-namespace:NatTypeTester.Extensions"
-    xmlns:valueConverters="clr-namespace:NatTypeTester.ValueConverters"
+    xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
+    xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     mc:Ignorable="d"
     d:DesignWidth="600" d:DesignHeight="400"
-    x:Class="NatTypeTester.Views.RFC5780View"
-    x:DataType="vm:RFC5780ViewModel"
-    DataContext="{ext:ViewModelLocator Type=vm:RFC5780ViewModel}">
+    x:Class="NatTypeTester.Views.Views.RFC5780View"
+    x:DataType="vm:RFC5780ViewModel">
     <Design.DataContext>
         <designViewModels:DesignRFC5780ViewModel />
     </Design.DataContext>
@@ -30,26 +28,26 @@
 
             <!-- Binding Test -->
             <StackPanel>
-                <TextBlock Text="{ext:L BindingTest}" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding Result5389.BindingTestResult, Mode=OneWay}" />
+                <TextBlock x:Name="BindingTestLabel" Margin="0,0,0,5" />
+                <TextBox IsReadOnly="True" Text="{Binding BindingTestResult, Mode=OneWay}" />
             </StackPanel>
 
             <!-- Mapping Behavior -->
             <StackPanel>
-                <TextBlock Text="{ext:L MappingBehavior}" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding Result5389.MappingBehavior, Mode=OneWay}" />
+                <TextBlock x:Name="MappingBehaviorLabel" Margin="0,0,0,5" />
+                <TextBox IsReadOnly="True" Text="{Binding MappingBehavior, Mode=OneWay}" />
             </StackPanel>
 
             <!-- Filtering Behavior -->
             <StackPanel IsVisible="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.UdpConverter}}">
-                <TextBlock Text="{ext:L FilteringBehavior}" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding Result5389.FilteringBehavior, Mode=OneWay}" />
+                <TextBlock x:Name="FilteringBehaviorLabel" Margin="0,0,0,5" />
+                <TextBox IsReadOnly="True" Text="{Binding FilteringBehavior, Mode=OneWay}" />
             </StackPanel>
 
             <!-- Local End -->
-            <StackPanel>
-                <TextBlock Text="{ext:L LocalEnd}" Margin="0,0,0,5" />
-                <ComboBox IsEditable="True"
+            <StackPanel IsEnabled="{Binding !IsTesting}">
+                <TextBlock x:Name="LocalEndLabel" Margin="0,0,0,5" />
+                <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
                           Text="{Binding LocalEnd}"
                           HorizontalAlignment="Stretch">
                     <ComboBoxItem Content="0.0.0.0:0" />
@@ -59,14 +57,13 @@
 
             <!-- Public End -->
             <StackPanel>
-                <TextBlock Text="{ext:L PublicEnd}" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding Result5389.PublicEndPoint, Mode=OneWay}" />
+                <TextBlock x:Name="PublicEndLabel" Margin="0,0,0,5" />
+                <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
             </StackPanel>
         </StackPanel>
 
         <!-- Test Button -->
-        <Button Grid.Row="1"
-                Content="{ext:L Test}"
+        <Button x:Name="TestButton" Grid.Row="1"
                 Command="{Binding DiscoveryNatTypeCommand}"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"

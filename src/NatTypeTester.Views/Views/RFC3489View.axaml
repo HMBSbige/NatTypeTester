@@ -4,13 +4,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
-    xmlns:designViewModels="clr-namespace:NatTypeTester.DesignViewModels"
-    xmlns:ext="clr-namespace:NatTypeTester.Extensions"
+    xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
+    xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
     d:DesignWidth="600" d:DesignHeight="400"
-    x:Class="NatTypeTester.Views.RFC3489View"
-    x:DataType="vm:RFC3489ViewModel"
-    DataContext="{ext:ViewModelLocator Type=vm:RFC3489ViewModel}">
+    x:Class="NatTypeTester.Views.Views.RFC3489View"
+    x:DataType="vm:RFC3489ViewModel">
     <Design.DataContext>
         <designViewModels:DesignRFC3489ViewModel />
     </Design.DataContext>
@@ -20,21 +19,21 @@
             <!-- Warning Info Bar -->
             <Border Background="#FFF4CE" BorderBrush="#FFE699" BorderThickness="1" CornerRadius="4" Padding="10">
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <PathIcon Data="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" Width="20" Height="20" Foreground="#B7791F" />
-                    <TextBlock Text="{ext:L RFC3489Warning}" TextWrapping="Wrap" Foreground="#744210" />
+                    <ic:FluentIcon Icon="Warning" IconVariant="Color" />
+                    <TextBlock x:Name="Rfc3489WarningText" TextWrapping="Wrap" Foreground="#744210" />
                 </StackPanel>
             </Border>
 
             <!-- NAT Type -->
             <StackPanel>
-                <TextBlock Text="{ext:L NatType}" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding Result3489.NatType, Mode=OneWay}" />
+                <TextBlock x:Name="NatTypeLabel" Margin="0,0,0,5" />
+                <TextBox IsReadOnly="True" Text="{Binding NatType, Mode=OneWay}" />
             </StackPanel>
 
             <!-- Local End -->
-            <StackPanel>
-                <TextBlock Text="{ext:L LocalEnd}" Margin="0,0,0,5" />
-                <ComboBox IsEditable="True"
+            <StackPanel IsEnabled="{Binding !IsTesting}">
+                <TextBlock x:Name="LocalEndLabel" Margin="0,0,0,5" />
+                <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
                           Text="{Binding LocalEnd}"
                           HorizontalAlignment="Stretch">
                     <ComboBoxItem Content="0.0.0.0:0" />
@@ -44,14 +43,13 @@
 
             <!-- Public End -->
             <StackPanel>
-                <TextBlock Text="{ext:L PublicEnd}" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding Result3489.PublicEndPoint, Mode=OneWay}" />
+                <TextBlock x:Name="PublicEndLabel" Margin="0,0,0,5" />
+                <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
             </StackPanel>
         </StackPanel>
 
         <!-- Test Button -->
-        <Button Grid.Row="1"
-                Content="{ext:L Test}"
+        <Button x:Name="TestButton" Grid.Row="1"
                 Command="{Binding TestClassicNatTypeCommand}"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"

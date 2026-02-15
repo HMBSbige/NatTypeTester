@@ -4,33 +4,20 @@ namespace NatTypeTester.ViewModels;
 public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 {
 	[Reactive]
-	public partial ClassicStunResult Result3489 { get; set; }
+	public partial NatType NatType { get; set; }
+
+	[Reactive]
+	public partial string? PublicEndPoint { get; set; }
 
 	[Reactive]
 	public partial string? LocalEnd { get; set; }
 
+	[ObservableAsProperty]
+	public partial bool IsTesting { get; }
+
 	public RFC3489ViewModel()
 	{
-		Result3489 = new ClassicStunResult();
-
-		this.WhenAnyValue(x => x.LocalEnd)
-			.Subscribe(value =>
-			{
-				System.Net.IPEndPoint? newEndPoint = null;
-				if (!string.IsNullOrWhiteSpace(value))
-				{
-					System.Net.IPEndPoint.TryParse(value, out newEndPoint);
-				}
-				if (!Equals(Result3489.LocalEndPoint, newEndPoint))
-				{
-					Result3489 = Result3489 with { LocalEndPoint = newEndPoint };
-				}
-			});
-
-		this.WhenAnyValue(x => x.Result3489)
-			.Select(r => r.LocalEndPoint?.ToString())
-			.DistinctUntilChanged()
-			.Subscribe(value => LocalEnd = value);
+		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting);
 	}
 
 	[ReactiveCommand]
@@ -40,16 +27,39 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 		SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
 
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-			.ObserveOn(RxApp.MainThreadScheduler)
-			.Subscribe(_ =>
-			{
-				if (service.State is { } state)
-				{
-					Result3489 = state;
-				}
-			}))
+					.ObserveOn(RxApp.MainThreadScheduler)
+					.Subscribe
+					(_ =>
+						{
+							if (service.State is { } state)
+							{
+								ApplyResult(state);
+							}
+						}
+					))
 		{
-			Result3489 = await service.TestAsync(settings.ToInput(), Result3489, token);
+			ClassicStunResult result = await service.TestAsync
+			(
+				new StunTestInput
+				{
+					StunServer = settings.StunServer,
+					ProxyType = settings.ProxyType,
+					ProxyServer = settings.ProxyServer,
+					ProxyUser = settings.ProxyUser,
+					ProxyPassword = settings.ProxyPassword,
+					LocalEndPoint = LocalEnd
+				},
+				token
+			);
+
+			ApplyResult(result);
 		}
+	}
+
+	private void ApplyResult(ClassicStunResult result)
+	{
+		NatType = result.NatType;
+		PublicEndPoint = result.PublicEndPoint?.ToString();
+		LocalEnd = result.LocalEndPoint?.ToString();
 	}
 }

@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace NatTypeTester.ViewModels;
 
 [UsedImplicitly]
@@ -9,7 +7,7 @@ public class ObservableCultureService : ISingletonDependency
 
 	public IObservable<Unit> CultureChanged => _observableCultureChanged;
 
-	private readonly System.Reactive.Subjects.BehaviorSubject<Unit> _observableCultureChanged = new(default);
+	private readonly BehaviorSubject<Unit> _observableCultureChanged = new(default);
 
 	public void ChangeCulture(CultureInfo culture)
 	{

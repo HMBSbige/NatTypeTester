@@ -1,4 +1,4 @@
-namespace NatTypeTester.Extensions;
+namespace NatTypeTester.Views.Extensions;
 
 public class ObservableStringLocalizer(string key) : IObservable<string>
 {

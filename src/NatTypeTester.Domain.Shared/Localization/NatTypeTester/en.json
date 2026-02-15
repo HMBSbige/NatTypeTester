@@ -20,12 +20,11 @@
     "ProxyServer": "Server",
     "ProxyUsername": "Username",
     "ProxyPassword": "Password",
-    "OK": "OK",
     "WrongStunServer": "Wrong STUN Server!",
     "UnknownProxyAddress": "Unknown proxy address",
+    "InvalidLocalEndPoint": "Invalid local endpoint",
     "Language": "Language",
     "FollowSystem": "Follow System",
-    "English": "English",
-    "SimplifiedChinese": "简体中文"
+    "Error": "Error"
   }
 }

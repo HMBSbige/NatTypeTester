@@ -4,14 +4,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
-    xmlns:designViewModels="clr-namespace:NatTypeTester.DesignViewModels"
-    xmlns:ext="clr-namespace:NatTypeTester.Extensions"
-    xmlns:valueConverters="clr-namespace:NatTypeTester.ValueConverters"
+    xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
+    xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     mc:Ignorable="d"
     d:DesignWidth="600" d:DesignHeight="400"
-    x:Class="NatTypeTester.Views.SettingsView"
-    x:DataType="vm:SettingsViewModel"
-    DataContext="{ext:ViewModelLocator Type=vm:SettingsViewModel}">
+    x:Class="NatTypeTester.Views.Views.SettingsView"
+    x:DataType="vm:SettingsViewModel">
     <Design.DataContext>
         <designViewModels:DesignSettingsViewModel />
     </Design.DataContext>
@@ -20,26 +18,26 @@
         <StackPanel Margin="10" Spacing="20">
             <!-- Proxy Settings -->
             <StackPanel Spacing="10">
-                <TextBlock Text="{ext:L Proxy}" FontWeight="Bold" FontSize="16" />
+                <TextBlock x:Name="ProxyLabel" FontWeight="Bold" FontSize="16" />
                 <StackPanel Orientation="Horizontal" Spacing="20">
-                    <RadioButton Content="{ext:L NoProxy}" GroupName="ProxyType"
+                    <RadioButton x:Name="NoProxyRadioButton" GroupName="ProxyType"
                                  IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
-                    <RadioButton Content="{ext:L SOCKS5Proxy}" GroupName="ProxyType"
+                    <RadioButton x:Name="Socks5ProxyRadioButton" GroupName="ProxyType"
                                  IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
                 </StackPanel>
 
                 <!-- Proxy Config Grid -->
                 <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
                     <StackPanel>
-                        <TextBlock Text="{ext:L ProxyServer}" Margin="0,0,0,5" />
+                        <TextBlock x:Name="ProxyServerLabel" Margin="0,0,0,5" />
                         <TextBox Text="{Binding ProxyServer}" />
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Text="{ext:L ProxyUsername}" Margin="0,0,0,5" />
+                        <TextBlock x:Name="ProxyUsernameLabel" Margin="0,0,0,5" />
                         <TextBox Text="{Binding ProxyUser}" />
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Text="{ext:L ProxyPassword}" Margin="0,0,0,5" />
+                        <TextBlock x:Name="ProxyPasswordLabel" Margin="0,0,0,5" />
                         <TextBox Text="{Binding ProxyPassword}" PasswordChar="•" />
                     </StackPanel>
                 </StackPanel>
@@ -47,7 +45,7 @@
 
             <!-- Language Settings -->
             <StackPanel Spacing="10">
-                <TextBlock Text="{ext:L Language}" FontWeight="Bold" FontSize="16" />
+                <TextBlock x:Name="LanguageLabel" FontWeight="Bold" FontSize="16" />
                 <ComboBox ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedLanguage}"
                           DisplayMemberBinding="{Binding DisplayName}" />

@@ -1,10 +1,10 @@
-using System.Globalization;
-
 namespace NatTypeTester.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 {
-	public SettingsViewModel Settings => TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
+	public RFC3489ViewModel RFC3489ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC3489ViewModel>();
+	public RFC5780ViewModel RFC5780ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC5780ViewModel>();
+	public SettingsViewModel SettingsViewModel => TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
 
 	private static readonly List<string> DefaultServers =
 	[
@@ -44,24 +44,26 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 			List.Add(server);
 		}
 
-		Settings.StunServer = DefaultServers.First();
+		SettingsViewModel.StunServer = DefaultServers.First();
 
-		Task.Run(() =>
-		{
-			const string path = @"stun.txt";
-
-			if (!File.Exists(path))
+		Task.Run
+		(() =>
 			{
-				return;
-			}
+				const string path = @"stun.txt";
 
-			foreach (string line in File.ReadLines(path))
-			{
-				if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out StunServer? stun))
+				if (!File.Exists(path))
 				{
-					List.Add(stun.ToString());
+					return;
+				}
+
+				foreach (string line in File.ReadLines(path))
+				{
+					if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out StunServer? stun))
+					{
+						List.Add(stun.ToString());
+					}
 				}
 			}
-		});
+		);
 	}
 }

@@ -1,8 +1,4 @@
-using Avalonia.Data.Converters;
-using STUN.Enums;
-using System.Globalization;
-
-namespace NatTypeTester.ValueConverters;
+namespace NatTypeTester.Views.ValueConverters;
 
 public static class TransportTypeConverters
 {
@@ -27,7 +23,7 @@ public static class TransportTypeConverters
 			{
 				return targetType;
 			}
-			return Avalonia.Data.BindingOperations.DoNothing;
+			return BindingOperations.DoNothing;
 		}
 	}
 }

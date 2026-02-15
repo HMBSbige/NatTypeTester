@@ -1,0 +1,60 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
+    xmlns:views="clr-namespace:NatTypeTester.Views.Views"
+    xmlns:ic="using:FluentIcons.Avalonia"
+    xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
+    mc:Ignorable="d"
+    d:DesignWidth="500" d:DesignHeight="600"
+    x:Class="NatTypeTester.Views.Views.MainView"
+    x:DataType="vm:MainWindowViewModel">
+    <Design.DataContext>
+        <designViewModels:DesignMainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- STUN Server ComboBox -->
+        <StackPanel Grid.Row="0" Margin="10">
+            <TextBlock x:Name="StunServerLabel" Margin="0,0,0,5" />
+            <ComboBox IsEditable="True"
+                      ItemsSource="{Binding StunServers}"
+                      Text="{Binding SettingsViewModel.StunServer, Mode=TwoWay}"
+                      HorizontalAlignment="Stretch" />
+        </StackPanel>
+
+        <!-- Tab Control for different views -->
+        <TabControl Grid.Row="1" Margin="10,0,10,10">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <ic:FluentIcon Icon="NetworkCheck" IconVariant="Regular" />
+                        <TextBlock x:Name="Rfc5780TabLabel" />
+                    </StackPanel>
+                </TabItem.Header>
+                <views:RFC5780View DataContext="{Binding RFC5780ViewModel}" />
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <ic:FluentIcon Icon="Globe" IconVariant="Color" />
+                        <TextBlock x:Name="Rfc3489TabLabel" />
+                    </StackPanel>
+                </TabItem.Header>
+                <views:RFC3489View DataContext="{Binding RFC3489ViewModel}" />
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <ic:FluentIcon Icon="Settings" IconVariant="Color" />
+                        <TextBlock x:Name="SettingsTabLabel" />
+                    </StackPanel>
+                </TabItem.Header>
+                <views:SettingsView DataContext="{Binding SettingsViewModel}" />
+            </TabItem>
+        </TabControl>
+    </Grid>
+
+</UserControl>

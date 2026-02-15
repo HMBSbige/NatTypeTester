@@ -1,6 +1,7 @@
 using Autofac.Extensions.DependencyInjection;
 using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
+using NatTypeTester.Views;
 using ReactiveUI.Avalonia.Splat;
 using Splat;
 using Volo.Abp;
@@ -33,7 +34,7 @@ internal static class Program
 				{
 					ServiceCollection services = new();
 
-					AbpApplicationFactory.Create<NatTypeTesterModule>(services);
+					AbpApplicationFactory.Create<NatTypeTesterViewsModule>(services);
 
 					builder.Populate(services);
 				},

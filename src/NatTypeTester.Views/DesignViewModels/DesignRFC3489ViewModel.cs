@@ -1,8 +1,8 @@
-namespace NatTypeTester.DesignViewModels;
+namespace NatTypeTester.Views.DesignViewModels;
 
-public class DesignMainWindowViewModel : MainWindowViewModel
+public class DesignRFC3489ViewModel : RFC3489ViewModel
 {
-	public DesignMainWindowViewModel()
+	public DesignRFC3489ViewModel()
 	{
 		if (!Design.IsDesignMode)
 		{

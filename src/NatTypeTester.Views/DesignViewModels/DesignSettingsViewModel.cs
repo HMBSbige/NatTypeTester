@@ -1,4 +1,4 @@
-namespace NatTypeTester.DesignViewModels;
+namespace NatTypeTester.Views.DesignViewModels;
 
 public class DesignSettingsViewModel : SettingsViewModel
 {

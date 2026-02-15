@@ -1,6 +1,7 @@
 global using Dns.Net.Abstractions;
 global using Dns.Net.Clients;
 global using JetBrains.Annotations;
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using NatTypeTester.Application.Contracts;
 global using NatTypeTester.Domain;
@@ -13,7 +14,7 @@ global using STUN.StunResult;
 global using System.Net;
 global using System.Net.Sockets;
 global using Volo.Abp.Application;
-global using Volo.Abp.DependencyInjection;
+global using Volo.Abp.Application.Services;
 global using Volo.Abp.Modularity;
 
 namespace NatTypeTester.Application;

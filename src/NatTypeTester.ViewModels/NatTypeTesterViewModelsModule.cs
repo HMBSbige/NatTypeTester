@@ -13,9 +13,14 @@ global using Splat;
 global using STUN;
 global using STUN.Enums;
 global using STUN.StunResult;
+global using System.Collections.ObjectModel;
+global using System.Globalization;
+global using System.Net;
 global using System.Reactive;
 global using System.Reactive.Linq;
+global using System.Reactive.Subjects;
 global using Volo.Abp.DependencyInjection;
+global using Volo.Abp.Localization;
 global using Volo.Abp.Modularity;
 
 namespace NatTypeTester.ViewModels;

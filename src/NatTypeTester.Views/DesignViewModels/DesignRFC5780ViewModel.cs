@@ -1,8 +1,8 @@
-namespace NatTypeTester.DesignViewModels;
+namespace NatTypeTester.Views.DesignViewModels;
 
-public class DesignRFC3489ViewModel : RFC3489ViewModel
+public class DesignRFC5780ViewModel : RFC5780ViewModel
 {
-	public DesignRFC3489ViewModel()
+	public DesignRFC5780ViewModel()
 	{
 		if (!Design.IsDesignMode)
 		{

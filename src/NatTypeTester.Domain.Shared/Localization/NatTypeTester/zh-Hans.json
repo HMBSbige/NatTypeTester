@@ -20,12 +20,11 @@
     "ProxyServer": "服务器",
     "ProxyUsername": "用户名",
     "ProxyPassword": "密码",
-    "OK": "确定",
     "WrongStunServer": "STUN 服务器输入有误！",
     "UnknownProxyAddress": "代理服务器地址输入有误！",
+    "InvalidLocalEndPoint": "本地地址输入有误！",
     "Language": "语言",
     "FollowSystem": "跟随系统",
-    "English": "English",
-    "SimplifiedChinese": "简体中文"
+    "Error": "错误"
   }
 }
