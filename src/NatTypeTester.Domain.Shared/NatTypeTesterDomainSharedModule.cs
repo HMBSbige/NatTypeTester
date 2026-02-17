@@ -1,10 +1,7 @@
 global using JetBrains.Annotations;
 global using NatTypeTester.Domain.Shared.Localization;
-global using STUN;
-global using STUN.Enums;
-global using STUN.StunResult;
+global using System.Collections.Immutable;
 global using System.Globalization;
-global using System.Reflection;
 global using Volo.Abp.Localization;
 global using Volo.Abp.Modularity;
 global using Volo.Abp.VirtualFileSystem;
@@ -19,29 +16,21 @@ public class NatTypeTesterDomainSharedModule : AbpModule
 	{
 		Configure<AbpVirtualFileSystemOptions>(options => options.FileSets.AddEmbedded<NatTypeTesterDomainSharedModule>(typeof(NatTypeTesterDomainSharedModule).Namespace));
 
-		Configure<AbpLocalizationOptions>(options =>
-		{
-			options.DefaultResourceType = typeof(NatTypeTesterResource);
-
-			options.Resources
-				.Add<NatTypeTesterResource>("en")
-				.AddVirtualJson("/Localization/NatTypeTester");
-
-			Assembly assembly = typeof(NatTypeTesterDomainSharedModule).Assembly;
-			string prefix = $"{typeof(NatTypeTesterDomainSharedModule).Namespace}.Localization.NatTypeTester.";
-			const string suffix = ".json";
-
-			foreach (string resourceName in assembly.GetManifestResourceNames())
+		Configure<AbpLocalizationOptions>
+		(options =>
 			{
-				if (!resourceName.StartsWith(prefix) || !resourceName.EndsWith(suffix))
-				{
-					continue;
-				}
+				options.DefaultResourceType = typeof(NatTypeTesterResource);
 
-				string cultureName = resourceName[prefix.Length..^suffix.Length];
-				CultureInfo cultureInfo = new(cultureName);
-				options.Languages.Add(new LanguageInfo(cultureName, cultureName, cultureInfo.NativeName));
+				options.Resources
+					.Add<NatTypeTesterResource>("en")
+					.AddVirtualJson("/Localization/NatTypeTester");
+
+				foreach (string cultureName in SupportedCultures.All)
+				{
+					CultureInfo cultureInfo = new(cultureName);
+					options.Languages.Add(new LanguageInfo(cultureName, cultureName, cultureInfo.NativeName));
+				}
 			}
-		});
+		);
 	}
 }

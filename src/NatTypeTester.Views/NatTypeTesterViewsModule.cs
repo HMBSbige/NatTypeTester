@@ -9,10 +9,12 @@ global using JetBrains.Annotations;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Localization;
 global using Microsoft.Extensions.Logging;
+global using NatTypeTester.Configuration;
 global using NatTypeTester.Domain.Shared.Localization;
 global using NatTypeTester.ViewModels;
 global using NatTypeTester.Views.Extensions;
 global using NatTypeTester.Views.Views;
+global using Nito.AsyncEx;
 global using ReactiveUI;
 global using ReactiveUI.Avalonia;
 global using Serilog;
@@ -24,7 +26,6 @@ global using Splat.Serilog;
 global using STUN.Enums;
 global using System.Diagnostics;
 global using System.Globalization;
-global using System.Reactive.Disposables;
 global using System.Reactive.Disposables.Fluent;
 global using System.Reactive.Linq;
 global using System.Reactive.Subjects;
@@ -39,7 +40,8 @@ namespace NatTypeTester.Views;
 [DependsOn
 (
 	typeof(AbpAutofacModule),
-	typeof(NatTypeTesterViewModelsModule)
+	typeof(NatTypeTesterViewModelsModule),
+	typeof(NatTypeTesterConfigurationModule)
 )]
 [UsedImplicitly]
 public class NatTypeTesterViewsModule : AbpModule
@@ -79,8 +81,9 @@ public class NatTypeTesterViewsModule : AbpModule
 		context.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(logger, true));
 	}
 
-	public override void OnApplicationShutdown(ApplicationShutdownContext context)
+	public override void OnApplicationInitialization(ApplicationInitializationContext context)
 	{
-		context.ServiceProvider.GetService<ILoggerProvider>()?.Dispose();
+		MainWindowViewModel mainVm = context.ServiceProvider.GetRequiredService<MainWindowViewModel>();
+		AsyncContext.Run(mainVm.InitializeAsync);
 	}
 }

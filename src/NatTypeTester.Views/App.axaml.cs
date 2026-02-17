@@ -15,16 +15,13 @@ public class App : Avalonia.Application
 		{
 			NotificationExceptionHandler.Install(serviceProvider);
 
-			desktop.Exit += (_, _) => serviceProvider.GetRequiredService<IAbpApplication>().Shutdown();
+			desktop.Exit += (_, _) =>
+			{
+				using IAbpApplication app = serviceProvider.GetRequiredService<IAbpApplication>();
+				app.Shutdown();
+			};
+
 			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
-
-			// Initialize language settings
-			SettingsViewModel settingsVm = serviceProvider.GetRequiredService<SettingsViewModel>();
-			settingsVm.Initialize();
-
-			// Load STUN servers
-			MainWindowViewModel mainVm = serviceProvider.GetRequiredService<MainWindowViewModel>();
-			mainVm.LoadStunServer();
 		}
 		else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
 		{

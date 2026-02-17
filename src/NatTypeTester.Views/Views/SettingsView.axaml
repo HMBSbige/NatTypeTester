@@ -48,7 +48,8 @@
                 <TextBlock x:Name="LanguageLabel" FontWeight="Bold" FontSize="16" />
                 <ComboBox ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedLanguage}"
-                          DisplayMemberBinding="{Binding DisplayName}" />
+                          DisplayMemberBinding="{Binding DisplayName}" 
+                          MinWidth="150" />
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

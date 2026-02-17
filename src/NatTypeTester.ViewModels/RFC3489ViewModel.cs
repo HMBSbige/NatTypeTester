@@ -17,17 +17,17 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 
 	public RFC3489ViewModel()
 	{
-		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting);
+		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
 	}
 
 	[ReactiveCommand]
-	private async Task TestClassicNatTypeAsync(CancellationToken token)
+	private async Task TestClassicNatTypeAsync(CancellationToken cancellationToken = default)
 	{
 		IRfc3489AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc3489AppService>();
 		SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
+		MainWindowViewModel mainWindowViewModel = TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>();
 
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe
 					(_ =>
 						{
@@ -36,20 +36,21 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 								ApplyResult(state);
 							}
 						}
-					))
+					)
+			)
 		{
 			ClassicStunResult result = await service.TestAsync
 			(
 				new StunTestInput
 				{
-					StunServer = settings.StunServer,
+					StunServer = mainWindowViewModel.CurrentStunServer,
 					ProxyType = settings.ProxyType,
 					ProxyServer = settings.ProxyServer,
 					ProxyUser = settings.ProxyUser,
 					ProxyPassword = settings.ProxyPassword,
 					LocalEndPoint = LocalEnd
 				},
-				token
+				cancellationToken
 			);
 
 			ApplyResult(result);

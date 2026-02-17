@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NatTypeTester.Configuration\NatTypeTester.Configuration.csproj" />
     <ProjectReference Include="..\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
   </ItemGroup>
 </Project>

@@ -9,4 +9,23 @@
   <ItemGroup>
     <EmbeddedResource Include="Localization\NatTypeTester\*.json" />
   </ItemGroup>
+  <Target Name="GenerateLocalizationCultures" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_LocFile Include="Localization\NatTypeTester\*.json" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_CultureArray>@(_LocFile -> '&quot;%(Filename)&quot;', ', ')</_CultureArray>
+    </PropertyGroup>
+    <ItemGroup>
+      <_GenLine Include="namespace NatTypeTester.Domain.Shared%3B" />
+      <_GenLine Include="internal static class SupportedCultures" />
+      <_GenLine Include="{" />
+      <_GenLine Include="internal static readonly string[] All = [$(_CultureArray)]%3B" />
+      <_GenLine Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(IntermediateOutputPath)SupportedCultures.g.cs" Lines="@(_GenLine)" Overwrite="true" />
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)SupportedCultures.g.cs" />
+    </ItemGroup>
+  </Target>
 </Project>

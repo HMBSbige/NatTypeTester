@@ -3,67 +3,57 @@ namespace NatTypeTester.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 {
 	public RFC3489ViewModel RFC3489ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC3489ViewModel>();
+
 	public RFC5780ViewModel RFC5780ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC5780ViewModel>();
+
 	public SettingsViewModel SettingsViewModel => TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
 
-	private static readonly List<string> DefaultServers =
-	[
-		@"stun.hot-chilli.net",
-		@"stun.fitauto.ru",
-		@"stun.internetcalls.com",
-		@"stun.miwifi.com",
-		@"stun.voip.aebc.com",
-		@"stun.voipbuster.com",
-		@"stun.voipstunt.com"
-	];
-
-	private SourceList<string> List { get; } = new();
-
-	public IObservableCollection<string> StunServers { get; } = new ObservableCollectionExtended<string>();
-
 	[Reactive]
-	public partial string? CurrentCulture { get; set; }
+	public partial string CurrentStunServer { get; set; } = string.Empty;
+
+	[BindableDerivedList]
+	private readonly ReadOnlyObservableCollection<string> _stunServers;
+
+	private readonly SourceList<string> _stunServerSource = new();
 
 	public MainWindowViewModel()
 	{
-		List.Connect()
-			.DistinctValues(x => x)
-			.ObserveOn(RxApp.MainThreadScheduler)
-			.Bind(StunServers)
-			.Subscribe();
+		_stunServerSource.DisposeWith(Disposables);
 
-		Locator.Current.GetService<ObservableCultureService>()?
-			.CultureChanged
-			.Subscribe(_ => CurrentCulture = CultureInfo.CurrentCulture.DisplayName);
+		_stunServerSource.Connect()
+			.Bind(out _stunServers)
+			.Subscribe()
+			.DisposeWith(Disposables);
 	}
 
-	public void LoadStunServer()
+	public async Task InitializeAsync()
 	{
-		foreach (string server in DefaultServers)
-		{
-			List.Add(server);
-		}
+		IAppConfigManager configManager = TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
+		AppConfig config = await configManager.GetAsync();
 
-		SettingsViewModel.StunServer = DefaultServers.First();
+		await SettingsViewModel.InitializeAsync(config);
 
-		Task.Run
-		(() =>
-			{
-				const string path = @"stun.txt";
+		_stunServerSource.AddRange(config.StunServers);
 
-				if (!File.Exists(path))
-				{
-					return;
-				}
+		string? savedServer = config.CurrentStunServer;
+		CurrentStunServer = string.IsNullOrEmpty(savedServer) ? _stunServerSource.Items[0] : savedServer;
 
-				foreach (string line in File.ReadLines(path))
-				{
-					if (!string.IsNullOrWhiteSpace(line) && StunServer.TryParse(line, out StunServer? stun))
+		this.WhenAnyValue(x => x.CurrentStunServer)
+			.Skip(1)
+			.Throttle(TimeSpan.FromMilliseconds(500))
+			.DistinctUntilChanged()
+			.Select
+			(value => Observable.FromAsync(ct => configManager.UpdateAsync(cfg => cfg.CurrentStunServer = value, ct).AsTask())
+				.Catch<Unit, Exception>
+				(ex =>
 					{
-						List.Add(stun.ToString());
+						RxApp.DefaultExceptionHandler.OnNext(ex);
+						return Observable.Empty<Unit>();
 					}
-				}
-			}
-		);
+				)
+			)
+			.Switch()
+			.Subscribe()
+			.DisposeWith(Disposables);
 	}
 }

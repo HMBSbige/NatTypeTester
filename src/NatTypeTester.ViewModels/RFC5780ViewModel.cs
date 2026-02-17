@@ -28,29 +28,31 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 		BindingTestResult BindingTestResult = default,
 		MappingBehavior MappingBehavior = default,
 		FilteringBehavior FilteringBehavior = default,
-		string? PublicEndPoint = null,
-		string? LocalEnd = null
+		string? PublicEndPoint = default,
+		string? LocalEnd = default
 	);
 
 	private readonly Dictionary<TransportType, ResultSnapshot> _cachedResults = new();
 
 	public RFC5780ViewModel()
 	{
-		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting);
+		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
 
-		this.WhenAnyValue(x => x.TransportType).Subscribe(_ => ResetResult());
+		this.WhenAnyValue(x => x.TransportType)
+			.Subscribe(transportType => ApplySnapshot(_cachedResults.GetValueOrDefault(transportType)))
+			.DisposeWith(Disposables);
 	}
 
 	[ReactiveCommand]
-	private async Task DiscoveryNatTypeAsync(CancellationToken token)
+	private async Task DiscoveryNatTypeAsync(CancellationToken cancellationToken = default)
 	{
 		IRfc5780AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc5780AppService>();
 		SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
+		MainWindowViewModel mainWindowViewModel = TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>();
 
 		TransportType transport = TransportType;
 
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe
 					(_ =>
 						{
@@ -65,7 +67,7 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 			(
 				new StunTestInput
 				{
-					StunServer = settings.StunServer,
+					StunServer = mainWindowViewModel.CurrentStunServer,
 					ProxyType = settings.ProxyType,
 					ProxyServer = settings.ProxyServer,
 					ProxyUser = settings.ProxyUser,
@@ -73,7 +75,7 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 					LocalEndPoint = LocalEnd
 				},
 				transport,
-				token
+				cancellationToken
 			);
 
 			ApplyAndCacheResult(result, transport);
@@ -101,10 +103,5 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 		FilteringBehavior = snapshot.FilteringBehavior;
 		PublicEndPoint = snapshot.PublicEndPoint;
 		LocalEnd = snapshot.LocalEnd;
-	}
-
-	public void ResetResult()
-	{
-		ApplySnapshot(_cachedResults.GetValueOrDefault(TransportType));
 	}
 }

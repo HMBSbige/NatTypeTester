@@ -20,7 +20,8 @@ global using Volo.Abp.Modularity;
 namespace NatTypeTester.Application;
 
 [UsedImplicitly]
-[DependsOn(
+[DependsOn
+(
 	typeof(AbpDddApplicationModule),
 	typeof(NatTypeTesterApplicationContractsModule),
 	typeof(NatTypeTesterDomainModule)
@@ -30,7 +31,8 @@ public class NatTypeTesterApplicationModule : AbpModule
 	public override void ConfigureServices(ServiceConfigurationContext context)
 	{
 		context.Services.TryAddTransient<IDnsClient, DefaultDnsClient>();
-		context.Services.TryAddTransient<DefaultAClient>();
-		context.Services.TryAddTransient<DefaultAAAAClient>();
+		context.Services.TryAddKeyedTransient<IDnsClient, DefaultAClient>(AddressFamily.InterNetwork);
+		context.Services.TryAddKeyedTransient<IDnsClient, DefaultAAAAClient>(AddressFamily.InterNetworkV6);
+		context.Services.TryAddTransient<StunTestInputResolver>();
 	}
 }

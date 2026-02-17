@@ -1,7 +1,7 @@
 namespace NatTypeTester.ViewModels;
 
 [UsedImplicitly]
-public class ObservableCultureService : ISingletonDependency
+public sealed class ObservableCultureService : ISingletonDependency, IDisposable
 {
 	public required IStringLocalizer<NatTypeTesterResource> L { get; init; }
 
@@ -11,8 +11,15 @@ public class ObservableCultureService : ISingletonDependency
 
 	public void ChangeCulture(CultureInfo culture)
 	{
+		CultureInfo.DefaultThreadCurrentCulture = culture;
+		CultureInfo.DefaultThreadCurrentUICulture = culture;
 		CultureInfo.CurrentCulture = culture;
 		CultureInfo.CurrentUICulture = culture;
 		_observableCultureChanged.OnNext(default);
+	}
+
+	public void Dispose()
+	{
+		_observableCultureChanged.Dispose();
 	}
 }

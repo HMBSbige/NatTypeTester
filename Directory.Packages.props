@@ -25,6 +25,7 @@
     <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.0.3" />
     <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.0.3" />
     <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
     <PackageVersion Include="Volo.Abp.Localization" Version="10.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="xunit.v3" Version="3.2.2" />

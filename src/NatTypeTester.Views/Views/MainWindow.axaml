@@ -9,7 +9,7 @@
     x:Class="NatTypeTester.Views.Views.MainWindow"
     Icon="/Assets/icon.ico"
     Title="NatTypeTester"
-    Width="500" Height="600"
+    Width="620" Height="600"
     WindowStartupLocation="CenterScreen">
 
     <Panel>

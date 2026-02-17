@@ -6,7 +6,7 @@ public sealed class StunTestInput : EntityDto, IValidatableObject
 
 	public ProxyType ProxyType { get; init; }
 
-	public string ProxyServer { get; init; } = string.Empty;
+	public string? ProxyServer { get; init; }
 
 	public string? ProxyUser { get; init; }
 
@@ -23,9 +23,12 @@ public sealed class StunTestInput : EntityDto, IValidatableObject
 			yield return new ValidationResult(l["WrongStunServer"], [nameof(StunServer)]);
 		}
 
-		if (!HostnameEndpoint.TryParse(ProxyServer, out _))
+		if (ProxyType is not ProxyType.Plain)
 		{
-			yield return new ValidationResult(l["UnknownProxyAddress"], [nameof(ProxyServer)]);
+			if (string.IsNullOrEmpty(ProxyServer) || !HostnameEndpoint.TryParse(ProxyServer, out _))
+			{
+				yield return new ValidationResult(l["UnknownProxyAddress"], [nameof(ProxyServer)]);
+			}
 		}
 
 		if (LocalEndPoint is not null && !IPEndPoint.TryParse(LocalEndPoint, out _))

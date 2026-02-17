@@ -8,7 +8,7 @@
     xmlns:ic="using:FluentIcons.Avalonia"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     mc:Ignorable="d"
-    d:DesignWidth="500" d:DesignHeight="600"
+    d:DesignWidth="620" d:DesignHeight="600"
     x:Class="NatTypeTester.Views.Views.MainView"
     x:DataType="vm:MainWindowViewModel">
     <Design.DataContext>
@@ -21,7 +21,7 @@
             <TextBlock x:Name="StunServerLabel" Margin="0,0,0,5" />
             <ComboBox IsEditable="True"
                       ItemsSource="{Binding StunServers}"
-                      Text="{Binding SettingsViewModel.StunServer, Mode=TwoWay}"
+                      Text="{Binding CurrentStunServer}"
                       HorizontalAlignment="Stretch" />
         </StackPanel>
 
