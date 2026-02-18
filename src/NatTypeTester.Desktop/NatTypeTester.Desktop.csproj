@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AssemblyName>NatTypeTester</AssemblyName>
-    <Version>10.0.0</Version>
+    <Version>10.0.1</Version>
     <ApplicationIcon>..\NatTypeTester.Views\Assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
