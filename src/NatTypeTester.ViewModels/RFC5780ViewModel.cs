@@ -36,6 +36,8 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 
 	public RFC5780ViewModel()
 	{
+		DiscoveryNatTypeCommand.DisposeWith(Disposables);
+
 		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
 
 		this.WhenAnyValue(x => x.TransportType)

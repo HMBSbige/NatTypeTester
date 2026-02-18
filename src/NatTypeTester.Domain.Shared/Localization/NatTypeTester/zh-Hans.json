@@ -25,6 +25,12 @@
     "InvalidLocalEndPoint": "本地地址输入有误！",
     "Language": "语言",
     "FollowSystem": "跟随系统",
-    "Error": "错误"
+    "Error": "错误",
+    "AddStunServer": "添加 STUN 服务器",
+    "DeleteStunServer": "删除 STUN 服务器",
+    "StunServerList": "STUN 服务器列表",
+    "LoadStunServerList": "从 URL 或文件路径加载 STUN 服务器列表",
+    "StunServerListLoaded": "已加载 {0} 个 STUN 服务器",
+    "StunServerListEmpty": "未找到有效的 STUN 服务器"
   }
 }

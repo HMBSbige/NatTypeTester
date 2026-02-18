@@ -8,7 +8,6 @@ global using Avalonia.Markup.Xaml;
 global using JetBrains.Annotations;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Localization;
-global using Microsoft.Extensions.Logging;
 global using NatTypeTester.Configuration;
 global using NatTypeTester.Domain.Shared.Localization;
 global using NatTypeTester.ViewModels;
@@ -84,6 +83,6 @@ public class NatTypeTesterViewsModule : AbpModule
 	public override void OnApplicationInitialization(ApplicationInitializationContext context)
 	{
 		MainWindowViewModel mainVm = context.ServiceProvider.GetRequiredService<MainWindowViewModel>();
-		AsyncContext.Run(mainVm.InitializeAsync);
+		AsyncContext.Run(() => mainVm.InitializeAsync());
 	}
 }

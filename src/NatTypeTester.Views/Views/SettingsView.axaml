@@ -6,6 +6,7 @@
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
+    xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
     d:DesignWidth="600" d:DesignHeight="400"
     x:Class="NatTypeTester.Views.Views.SettingsView"
@@ -48,8 +49,20 @@
                 <TextBlock x:Name="LanguageLabel" FontWeight="Bold" FontSize="16" />
                 <ComboBox ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedLanguage}"
-                          DisplayMemberBinding="{Binding DisplayName}" 
+                          DisplayMemberBinding="{Binding DisplayName}"
                           MinWidth="150" />
+            </StackPanel>
+
+            <!-- STUN Server List Source -->
+            <StackPanel Spacing="10">
+                <TextBlock x:Name="StunServerListLabel" FontWeight="Bold" FontSize="16" />
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0" Text="{Binding StunServerListUri}" />
+                    <Button x:Name="LoadStunServerListButton" Grid.Column="1"
+                            Command="{Binding LoadStunServerListCommand}" Margin="5,0,0,0">
+                        <ic:FluentIcon Icon="ArrowDownload" IconVariant="Regular" />
+                    </Button>
+                </Grid>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

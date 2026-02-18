@@ -16,6 +16,8 @@ public partial class SettingsView : ReactiveUserControl<SettingsViewModel>, ISin
 				ProxyUsernameLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("ProxyUsername")).DisposeWith(d);
 				ProxyPasswordLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("ProxyPassword")).DisposeWith(d);
 				LanguageLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Language")).DisposeWith(d);
+				StunServerListLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("StunServerList")).DisposeWith(d);
+				LoadStunServerListButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("LoadStunServerList")).DisposeWith(d);
 			}
 		);
 	}

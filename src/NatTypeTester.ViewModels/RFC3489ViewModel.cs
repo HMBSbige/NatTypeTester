@@ -17,6 +17,8 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 
 	public RFC3489ViewModel()
 	{
+		TestClassicNatTypeCommand.DisposeWith(Disposables);
+
 		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
 	}
 

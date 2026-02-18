@@ -19,10 +19,18 @@
         <!-- STUN Server ComboBox -->
         <StackPanel Grid.Row="0" Margin="10">
             <TextBlock x:Name="StunServerLabel" Margin="0,0,0,5" />
-            <ComboBox IsEditable="True"
-                      ItemsSource="{Binding StunServers}"
-                      Text="{Binding CurrentStunServer}"
-                      HorizontalAlignment="Stretch" />
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <ComboBox Grid.Column="0" IsEditable="True"
+                          ItemsSource="{Binding StunServers}"
+                          Text="{Binding CurrentStunServer}"
+                          HorizontalAlignment="Stretch" />
+                <Button x:Name="AddStunServerButton" Grid.Column="1" Command="{Binding AddStunServerCommand}" Margin="5,0,0,0">
+                    <ic:FluentIcon Icon="Add" IconVariant="Regular" />
+                </Button>
+                <Button x:Name="DeleteStunServerButton" Grid.Column="2" Command="{Binding DeleteStunServerCommand}" Margin="5,0,0,0">
+                    <ic:FluentIcon Icon="Delete" IconVariant="Regular" />
+                </Button>
+            </Grid>
         </StackPanel>
 
         <!-- Tab Control for different views -->

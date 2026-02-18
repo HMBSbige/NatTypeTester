@@ -8,7 +8,7 @@ internal static class NotificationExceptionHandler
 	{
 		RxApp.DefaultExceptionHandler = ExceptionSubject;
 
-		MainWindow mainWindow = serviceProvider.GetRequiredService<MainWindow>();
+		INotificationService notificationService = serviceProvider.GetRequiredService<INotificationService>();
 		IStringLocalizer localizer = serviceProvider.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();
 
 		ExceptionSubject
@@ -17,7 +17,7 @@ internal static class NotificationExceptionHandler
 			(ex =>
 				{
 					string message = FormatMessage(ex);
-					mainWindow.NotificationManager?.Show(new Notification(localizer["Error"], message, NotificationType.Error));
+					notificationService.Show(localizer["Error"], message, AppNotificationType.Error);
 				}
 			);
 	}

@@ -12,6 +12,7 @@ global using STUN.Enums;
 global using STUN.Proxy;
 global using STUN.StunResult;
 global using System.Net;
+global using System.Net.Http;
 global using System.Net.Sockets;
 global using Volo.Abp.Application;
 global using Volo.Abp.Application.Services;
@@ -30,6 +31,7 @@ public class NatTypeTesterApplicationModule : AbpModule
 {
 	public override void ConfigureServices(ServiceConfigurationContext context)
 	{
+		context.Services.AddHttpClient();
 		context.Services.TryAddTransient<IDnsClient, DefaultDnsClient>();
 		context.Services.TryAddKeyedTransient<IDnsClient, DefaultAClient>(AddressFamily.InterNetwork);
 		context.Services.TryAddKeyedTransient<IDnsClient, DefaultAAAAClient>(AddressFamily.InterNetworkV6);

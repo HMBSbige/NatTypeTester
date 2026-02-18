@@ -25,6 +25,12 @@
     "InvalidLocalEndPoint": "Invalid local endpoint",
     "Language": "Language",
     "FollowSystem": "Follow System",
-    "Error": "Error"
+    "Error": "Error",
+    "AddStunServer": "Add STUN server",
+    "DeleteStunServer": "Delete STUN server",
+    "StunServerList": "STUN Server List",
+    "LoadStunServerList": "Load STUN server list from URL or file path",
+    "StunServerListLoaded": "Loaded {0} STUN servers",
+    "StunServerListEmpty": "No valid STUN servers found"
   }
 }

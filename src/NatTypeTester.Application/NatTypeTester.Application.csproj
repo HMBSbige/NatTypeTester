@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Dns.Net" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Volo.Abp.Ddd.Application" />
   </ItemGroup>
   <ItemGroup>

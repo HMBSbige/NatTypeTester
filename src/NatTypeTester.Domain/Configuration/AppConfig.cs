@@ -1,6 +1,6 @@
 namespace NatTypeTester.Domain.Configuration;
 
-public class AppConfig
+public record AppConfig
 {
 	public string? Language { get; set; }
 
@@ -15,4 +15,7 @@ public class AppConfig
 	public string? CurrentStunServer { get; set; }
 
 	public List<string> StunServers { get; set; } = [];
+
+	public string? StunServerListUri { get; set; }
+
 }
