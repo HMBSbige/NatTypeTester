@@ -44,7 +44,7 @@ jobs:
       - run: dotnet test -c Release
 
   build:
-    needs: [test, check_format]
+    needs: [ test, check_format ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -72,7 +72,7 @@ jobs:
           path: src/${{ env.ProjectName }}.Desktop/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
 
   nuget:
-    needs: [test, check_format]
+    needs: [ test, check_format ]
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
@@ -99,7 +99,7 @@ jobs:
           dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
   release:
-    needs: [build, nuget]
+    needs: [ build, nuget ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -130,8 +130,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: true
-          draft: false
+          allowUpdates: true
+          artifactErrorsFailBuild: true
           artifacts: builtfiles/*
+          immutableCreate: true
+          updateOnlyUnreleased: true
           body: |
             ## Hash
             | Filename | SHA-256 |
