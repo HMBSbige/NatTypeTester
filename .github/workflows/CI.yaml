@@ -44,7 +44,7 @@ jobs:
       - run: dotnet test -c Release
 
   build:
-    needs: [ test, check_format ]
+    needs: [test, check_format]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -72,7 +72,7 @@ jobs:
           path: src/${{ env.ProjectName }}.Desktop/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
 
   nuget:
-    needs: [ test, check_format ]
+    needs: [test, check_format]
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
@@ -99,7 +99,7 @@ jobs:
           dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
   release:
-    needs: [ build, nuget ]
+    needs: [build, nuget]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -112,18 +112,11 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path builtfiles -Force > $null
           $rids = @('win-x64', 'linux-x64', 'linux-arm64', 'osx-arm64')
-          $hashLines = @()
           foreach ($rid in $rids) {
             $artifactDir = "$env:ProjectName-$rid"
             $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}-$rid.7z"
             7z a -mx9 "$zip_path" $artifactDir
-            $hash = (Get-FileHash $zip_path -Algorithm SHA256).Hash
-            $hashLines += "| <sub>$env:ProjectName-${{ github.ref_name }}-$rid.7z</sub> | <sub>$hash</sub> |"
           }
-          $hashTable = $hashLines -join "`n"
-          echo "HASH_TABLE<<EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo $hashTable | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Create a new GitHub release
         uses: ncipollo/release-action@v1
@@ -135,8 +128,3 @@ jobs:
           artifacts: builtfiles/*
           immutableCreate: true
           updateOnlyUnreleased: true
-          body: |
-            ## Hash
-            | Filename | SHA-256 |
-            | :- | :- |
-            ${{ env.HASH_TABLE }}
