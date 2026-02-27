@@ -8,7 +8,6 @@
     <PackageProjectUrl>https://github.com/HMBSbige/NatTypeTester</PackageProjectUrl>
     <RepositoryUrl>https://github.com/HMBSbige/NatTypeTester</RepositoryUrl>
     <PackageTags>stun;nat;rfc3489;rfc5389;rfc5780;rfc8489</PackageTags>
-    <Version>10.0.0</Version>
     <PackageId>Stun.Net</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>

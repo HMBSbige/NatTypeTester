@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
@@ -38,6 +40,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
@@ -55,6 +59,8 @@ jobs:
           - osx-arm64
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
@@ -84,6 +90,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}

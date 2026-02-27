@@ -27,6 +27,10 @@
     <!--    <PublishAot>true</PublishAot>-->
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
   <Target Name="CleanPreviousPublish" BeforeTargets="PrepareForPublish">
     <RemoveDir Directories="$(PublishDir)" />
   </Target>
