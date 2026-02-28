@@ -66,10 +66,8 @@ jobs:
           dotnet-version: ${{ env.NET_VERSION }}
 
       - name: Build
-        shell: pwsh
         working-directory: src/${{ env.ProjectName }}.Desktop
-        run: |
-          dotnet publish -r ${{ matrix.rid }}
+        run: dotnet publish -r ${{ matrix.rid }}
 
       - name: Upload
         uses: actions/upload-artifact@v7
@@ -82,6 +80,7 @@ jobs:
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       packages: write
     strategy:
       matrix:
@@ -96,15 +95,21 @@ jobs:
         with:
           dotnet-version: ${{ env.NET_VERSION }}
 
-      - name: Build
+      - name: Pack
         working-directory: src/${{ matrix.PackageName }}
         run: dotnet pack
+
+      - name: NuGet Login
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
 
       - name: Push nuget packages
         working-directory: src/${{ matrix.PackageName }}/bin/Release
         run: |
+          dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --skip-duplicate
           dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
-          dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NuGetAPIKey }} --skip-duplicate
 
   release:
     needs: [build, nuget]
@@ -116,21 +121,17 @@ jobs:
       - uses: actions/download-artifact@v8
 
       - name: Package
-        shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path builtfiles -Force > $null
-          $rids = @('win-x64', 'linux-x64', 'linux-arm64', 'osx-arm64')
-          foreach ($rid in $rids) {
-            $artifactDir = "$env:ProjectName-$rid"
-            $zip_path = "builtfiles/$env:ProjectName-${{ github.ref_name }}-$rid.7z"
-            7z a -mx9 "$zip_path" $artifactDir
-          }
+          mkdir -p builtfiles
+          for rid in win-x64 linux-x64 linux-arm64 osx-arm64; do
+            7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}-${rid}"
+          done
 
       - name: Create a new GitHub release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: builtfiles/*
