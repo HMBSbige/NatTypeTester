@@ -19,6 +19,7 @@
     <Project Path="src\NatTypeTester.Domain\NatTypeTester.Domain.csproj" />
     <Project Path="src\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
     <Project Path="src\NatTypeTester.Views\NatTypeTester.Views.csproj" />
+    <Project Path="src\NatTypeTester.CLI\NatTypeTester.CLI.csproj" />
     <Project Path="src\STUN\STUN.csproj" />
   </Folder>
   <Folder Name="/tests/">
