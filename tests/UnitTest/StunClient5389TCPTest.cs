@@ -9,7 +9,7 @@ using System.Net;
 
 namespace UnitTest;
 
-public class StunClient5389TCPTest : TestBase
+public class StunClient5389TCPTest
 {
 	private readonly DefaultAClient _dnsClient = new();
 
@@ -55,12 +55,12 @@ public class StunClient5389TCPTest : TestBase
 	}
 
 	[Test]
-	[Skip("Dev test")]
 	public async Task TlsBindingTestSuccessAsync(CancellationToken cancellationToken)
 	{
+		Skip.When(TestEnvironment.IsCI, "Skipped on CI");
 		await Assert.That(StunServer.TryParse(@"stun.fitauto.ru", out StunServer? stunServer, StunServer.DefaultTlsPort)).IsTrue();
 		await Assert.That(stunServer).IsNotNull();
-		IPAddress ip = await _dnsClient.QueryAsync(stunServer!.Hostname, cancellationToken);
+		IPAddress ip = await _dnsClient.QueryAsync(stunServer.Hostname, cancellationToken);
 		ITcpProxy tls = new TlsProxy(stunServer.Hostname);
 		using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, StunServer.DefaultPort), Any, tls);
 

@@ -9,7 +9,7 @@ using System.Net;
 
 namespace UnitTest;
 
-public class StunClien5389UDPTest : TestBase
+public class StunClien5389UDPTest
 {
 	private readonly DefaultAClient _dnsClient = new();
 

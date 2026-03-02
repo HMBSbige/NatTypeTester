@@ -13,7 +13,7 @@ public class HostnameEndpointTest
 		string str = $@"{host}:{port}";
 		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsTrue();
 		await Assert.That(server).IsNotNull();
-		await Assert.That(server!.Hostname).IsEqualTo(host);
+		await Assert.That(server.Hostname).IsEqualTo(host);
 		await Assert.That(server.Port).IsEqualTo(port);
 		await Assert.That(server.ToString()).IsEqualTo(str);
 	}
@@ -39,7 +39,7 @@ public class HostnameEndpointTest
 	{
 		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsTrue();
 		await Assert.That(server).IsNotNull();
-		await Assert.That(server!.Hostname).IsEqualTo(str);
+		await Assert.That(server.Hostname).IsEqualTo(str);
 		await Assert.That(server.Port).IsEqualTo((ushort)3478);
 	}
 
@@ -54,7 +54,7 @@ public class HostnameEndpointTest
 	{
 		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsTrue();
 		await Assert.That(server).IsNotNull();
-		await Assert.That(server!.ToString()).IsEqualTo(expected);
+		await Assert.That(server.ToString()).IsEqualTo(expected);
 	}
 
 	[Test]
@@ -76,6 +76,6 @@ public class HostnameEndpointTest
 	{
 		await Assert.That(HostnameEndpoint.TryParse(str, out HostnameEndpoint? server)).IsTrue();
 		await Assert.That(server).IsNotNull();
-		await Assert.That(server!.ToString()).IsEqualTo(expected);
+		await Assert.That(server.ToString()).IsEqualTo(expected);
 	}
 }

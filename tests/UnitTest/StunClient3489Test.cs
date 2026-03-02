@@ -9,7 +9,7 @@ using static STUN.Utils.AttributeExtensions;
 
 namespace UnitTest;
 
-public class StunClient3489Test : TestBase
+public class StunClient3489Test
 {
 	private readonly DefaultAClient _dnsClient = new();
 
@@ -245,7 +245,7 @@ public class StunClient3489Test : TestBase
 		StunResponse? response1 = await client.Test1Async(cancellationToken);
 
 		await Assert.That(response1).IsNotNull();
-		await Assert.That(response1!.Remote.Address).IsEqualTo(ip);
+		await Assert.That(response1.Remote.Address).IsEqualTo(ip);
 		await Assert.That(response1.Remote.Port).IsEqualTo(Port);
 		await Assert.That(client.LocalEndPoint).IsNotEqualTo(Any);
 
@@ -255,41 +255,41 @@ public class StunClient3489Test : TestBase
 		await Assert.That(mappedAddress).IsNotNull();
 		await Assert.That(changedAddress).IsNotNull();
 
-		await Assert.That(changedAddress!.Address).IsNotEqualTo(ip);
+		await Assert.That(changedAddress.Address).IsNotEqualTo(ip);
 		await Assert.That(changedAddress.Port).IsNotEqualTo(Port);
 
 		// Test I(#2)
 		StunResponse? response12 = await client.Test1_2Async(changedAddress, cancellationToken);
 
 		await Assert.That(response12).IsNotNull();
-		await Assert.That(response12!.Remote.Address).IsEqualTo(changedAddress.Address);
+		await Assert.That(response12.Remote.Address).IsEqualTo(changedAddress.Address);
 		await Assert.That(response12.Remote.Port).IsEqualTo(changedAddress.Port);
 	}
 
 	[Test]
-	[Skip("FullCone")]
 	public async Task Test2Async(CancellationToken cancellationToken)
 	{
+		Skip.Unless(TestEnvironment.IsFullCone, "FullCone");
 		IPAddress ip = await _dnsClient.QueryAsync(Server, cancellationToken);
 		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
 		StunResponse? response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, cancellationToken);
 
 		await Assert.That(response2).IsNotNull();
 
-		await Assert.That(response2!.Remote.Address).IsEqualTo(ip);
+		await Assert.That(response2.Remote.Address).IsEqualTo(ip);
 		await Assert.That(response2.Remote.Port).IsEqualTo(Port);
 	}
 
 	[Test]
-	[Skip("FullCone")]
 	public async Task Test3Async(CancellationToken cancellationToken)
 	{
+		Skip.Unless(TestEnvironment.IsFullCone, "FullCone");
 		IPAddress ip = await _dnsClient.QueryAsync(Server, cancellationToken);
 		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
 		StunResponse? response = await client.Test3Async(cancellationToken);
 
 		await Assert.That(response).IsNotNull();
-		await Assert.That(response!.Remote.Address).IsEqualTo(ip);
+		await Assert.That(response.Remote.Address).IsEqualTo(ip);
 		await Assert.That(response.Remote.Port).IsNotEqualTo(Port);
 	}
 }

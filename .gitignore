@@ -364,6 +364,3 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
-
-# TUnit test results
-TestResults/
