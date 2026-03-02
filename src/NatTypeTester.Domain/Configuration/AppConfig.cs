@@ -18,4 +18,11 @@ public record AppConfig
 
 	public string? StunServerListUri { get; set; }
 
+	public bool AutoCheckUpdate { get; set; } = true;
+
+	public TimeSpan CheckUpdateInterval { get; set; } = TimeSpan.FromHours(1);
+
+	public bool IncludePreRelease { get; set; }
+
+	public DateTimeOffset? LastUpdateCheckTime { get; set; }
 }

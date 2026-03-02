@@ -8,9 +8,11 @@
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.12" />
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
     <PackageVersion Include="FluentIcons.Avalonia" Version="2.0.319" />
+    <PackageVersion Include="HMBSbige.UpdateChecker" Version="10.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     <PackageVersion Include="MinVer" Version="7.0.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="NuGet.Versioning" Version="7.3.0" />
     <PackageVersion Include="ReactiveUI" Version="23.1.8" />
     <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="11.4.7" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.1" />

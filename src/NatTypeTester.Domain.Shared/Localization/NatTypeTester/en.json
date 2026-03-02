@@ -31,6 +31,17 @@
     "StunServerList": "STUN Server List",
     "LoadStunServerList": "Load STUN server list from URL or file path",
     "StunServerListLoaded": "Loaded {0} STUN servers",
-    "StunServerListEmpty": "No valid STUN servers found"
+    "StunServerListEmpty": "No valid STUN servers found",
+    "Update": "Update",
+    "CheckUpdate": "Check for Updates",
+    "AutoCheckUpdate": "Auto check for updates on startup",
+    "CheckUpdateInterval": "Check interval (hours)",
+    "IncludePreRelease": "Include pre-release updates",
+    "CurrentVersion": "Current version: {0}",
+    "LatestVersion": "Latest version: {0}",
+    "NewVersionAvailable": "New version {0} is available!",
+    "AlreadyLatestVersion": "You are using the latest version.",
+    "CheckUpdateFailed": "Failed to check for updates.",
+    "OpenHomepage": "Open Homepage"
   }
 }

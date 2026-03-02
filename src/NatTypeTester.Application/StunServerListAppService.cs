@@ -11,7 +11,8 @@ public class StunServerListAppService : ApplicationService, IStunServerListAppSe
 
 		if (Uri.TryCreate(input.Uri, UriKind.Absolute, out Uri? uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
 		{
-			using HttpClient httpClient = CreateHttpClient(input);
+			HttpProxyOptions proxyOptions = new(input.ProxyType, input.ProxyServer, input.ProxyUser, input.ProxyPassword);
+			using HttpClient httpClient = AppHttpClientFactory.Create(HttpClientFactory, proxyOptions);
 			string content = await httpClient.GetStringAsync(uri, cancellationToken);
 			lines = content.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 		}
@@ -31,26 +32,5 @@ public class StunServerListAppService : ApplicationService, IStunServerListAppSe
 		}
 
 		return validServers;
-	}
-
-	private HttpClient CreateHttpClient(LoadStunServerListInput input)
-	{
-		if (input.ProxyType is ProxyType.Socks5
-			&& !string.IsNullOrWhiteSpace(input.ProxyServer)
-			&& HostnameEndpoint.TryParse(input.ProxyServer, out HostnameEndpoint? proxyEndpoint, 1080))
-		{
-			SocketsHttpHandler handler = new();
-			WebProxy proxy = new($"socks5://{proxyEndpoint.Hostname}:{proxyEndpoint.Port}");
-
-			if (!string.IsNullOrWhiteSpace(input.ProxyUser))
-			{
-				proxy.Credentials = new NetworkCredential(input.ProxyUser, input.ProxyPassword);
-			}
-
-			handler.Proxy = proxy;
-			return new HttpClient(handler, true);
-		}
-
-		return HttpClientFactory.CreateClient();
 	}
 }
