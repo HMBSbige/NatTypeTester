@@ -131,7 +131,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 			.DistinctUntilChanged()
 			.Select
 			(value => Observable.FromAsync
-				(ct => AppConfigManager.UpdateAsync(cfg => updateAction(cfg, value), ct).AsTask())
+					(ct => AppConfigManager.UpdateAsync(cfg => updateAction(cfg, value), ct).AsTask())
 				.Catch<Unit, Exception>
 				(ex =>
 					{
@@ -151,8 +151,18 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		await CheckForUpdateCoreAsync(false, cancellationToken);
 	}
 
-	internal async Task CheckForUpdateOnStartupAsync(AppConfig config, CancellationToken cancellationToken = default)
+	internal async Task CheckForUpdateOnStartupAsync(CancellationToken cancellationToken = default)
 	{
+		AppConfig config = await AppConfigManager.GetAsync(cancellationToken);
+
+#if DEBUG
+		NotificationService.Show
+		(
+			L["Update"],
+			"[DEBUG] Checking for updates on startup."
+		);
+#endif
+
 		if (!config.AutoCheckUpdate)
 		{
 			return;

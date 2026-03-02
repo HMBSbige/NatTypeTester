@@ -1,7 +1,9 @@
 namespace NatTypeTester.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
+public partial class MainWindowViewModel : ViewModelBase, IActivatableViewModel, ISingletonDependency
 {
+	public ViewModelActivator Activator { get; } = new();
+
 	public RFC3489ViewModel RFC3489ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC3489ViewModel>();
 
 	public RFC5780ViewModel RFC5780ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC5780ViewModel>();
@@ -27,6 +29,22 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 			.Bind(out _stunServers)
 			.Subscribe()
 			.DisposeWith(Disposables);
+
+		this.WhenActivated
+		(disposables =>
+			{
+				Observable.FromAsync(cancellationToken => SettingsViewModel.CheckForUpdateOnStartupAsync(cancellationToken))
+					.Catch<Unit, Exception>
+					(ex =>
+						{
+							RxState.DefaultExceptionHandler.OnNext(ex);
+							return Observable.Empty<Unit>();
+						}
+					)
+					.Subscribe()
+					.DisposeWith(disposables);
+			}
+		);
 	}
 
 	[ReactiveCommand]
@@ -129,7 +147,5 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 			.Switch()
 			.Subscribe()
 			.DisposeWith(Disposables);
-
-		_ = Task.Run(() => SettingsViewModel.CheckForUpdateOnStartupAsync(config, cancellationToken), cancellationToken);
 	}
 }

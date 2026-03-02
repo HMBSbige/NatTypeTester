@@ -8,7 +8,7 @@
     xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
-    d:DesignWidth="600" d:DesignHeight="500"
+    d:DesignWidth="600" d:DesignHeight="400"
     x:Class="NatTypeTester.Views.Views.SettingsView"
     x:DataType="vm:SettingsViewModel">
     <Design.DataContext>
@@ -16,87 +16,121 @@
     </Design.DataContext>
 
     <ScrollViewer>
-        <StackPanel Margin="10" Spacing="20">
+        <StackPanel Margin="10" Spacing="15">
             <!-- Update Settings -->
-            <StackPanel Spacing="10">
-                <TextBlock x:Name="UpdateLabel" FontWeight="Bold" FontSize="16" />
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock x:Name="CurrentVersionLabel" VerticalAlignment="Center"
-                               Text="{Binding CurrentVersionDisplay}" />
-                    <TextBlock VerticalAlignment="Center"
-                               Text="{Binding LatestVersionDisplay}"
-                               IsVisible="{Binding LatestVersionDisplay, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <Button x:Name="CheckUpdateButton" Command="{Binding CheckUpdateCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <ic:FluentIcon Icon="ArrowSync" IconVariant="Regular" />
-                            <TextBlock x:Name="CheckUpdateButtonText" VerticalAlignment="Center" />
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="UpdateLabel" FontWeight="Bold" FontSize="16" />
+
+                    <!-- Version Info and Action Buttons -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
+                        <!-- Version Info (Left) -->
+                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock x:Name="CurrentVersionLabel"
+                                       Text="{Binding CurrentVersionDisplay}" />
+                            <TextBlock Text="{Binding LatestVersionDisplay}"
+                                       IsVisible="{Binding LatestVersionDisplay, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                         </StackPanel>
-                    </Button>
-                    <Button x:Name="OpenHomepageButton" Command="{Binding OpenHomepageCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <ic:FluentIcon Icon="Open" IconVariant="Regular" />
-                            <TextBlock x:Name="OpenHomepageButtonText" VerticalAlignment="Center" />
+
+                        <!-- Action Buttons (Right) -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="CheckUpdateButton" Command="{Binding CheckUpdateCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <ic:FluentIcon Icon="ArrowSync" IconVariant="Regular" />
+                                    <TextBlock x:Name="CheckUpdateButtonText" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="OpenHomepageButton" Command="{Binding OpenHomepageCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <ic:FluentIcon Icon="Open" IconVariant="Regular" />
+                                    <TextBlock x:Name="OpenHomepageButtonText" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                    </Button>
+                    </Grid>
+
+                    <!-- Include PreRelease -->
+                    <CheckBox x:Name="IncludePreReleaseCheckBox" IsChecked="{Binding IncludePreRelease}" />
+
+                    <!-- Auto Check Update -->
+                    <CheckBox x:Name="AutoCheckUpdateCheckBox" IsChecked="{Binding AutoCheckUpdate}" />
+
+                    <!-- Check Interval (indented as sub-option) -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="24,0,0,0"
+                                IsEnabled="{Binding #AutoCheckUpdateCheckBox.IsChecked}">
+                        <TextBlock x:Name="CheckUpdateIntervalLabel" VerticalAlignment="Center" />
+                        <NumericUpDown Value="{Binding CheckUpdateIntervalHours}" Minimum="0.1" Maximum="720"
+                                       Increment="1" FormatString="0.#" Width="90"
+                                       ShowButtonSpinner="False" />
+                    </StackPanel>
                 </StackPanel>
-                <CheckBox x:Name="AutoCheckUpdateCheckBox" IsChecked="{Binding AutoCheckUpdate}" />
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock x:Name="CheckUpdateIntervalLabel" VerticalAlignment="Center" />
-                    <NumericUpDown Value="{Binding CheckUpdateIntervalHours}" Minimum="0.1" Maximum="720"
-                                   Increment="1" FormatString="0.#" Width="120" />
-                </StackPanel>
-                <CheckBox x:Name="IncludePreReleaseCheckBox" IsChecked="{Binding IncludePreRelease}" />
-            </StackPanel>
+            </Border>
 
             <!-- Proxy Settings -->
-            <StackPanel Spacing="10">
-                <TextBlock x:Name="ProxyLabel" FontWeight="Bold" FontSize="16" />
-                <StackPanel Orientation="Horizontal" Spacing="20">
-                    <RadioButton x:Name="NoProxyRadioButton" GroupName="ProxyType"
-                                 IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
-                    <RadioButton x:Name="Socks5ProxyRadioButton" GroupName="ProxyType"
-                                 IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
-                </StackPanel>
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="ProxyLabel" FontWeight="Bold" FontSize="16" />
+                    <StackPanel Orientation="Horizontal" Spacing="20">
+                        <RadioButton x:Name="NoProxyRadioButton" GroupName="ProxyType"
+                                     IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
+                        <RadioButton x:Name="Socks5ProxyRadioButton" GroupName="ProxyType"
+                                     IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
+                    </StackPanel>
 
-                <!-- Proxy Config Grid -->
-                <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
-                    <StackPanel>
-                        <TextBlock x:Name="ProxyServerLabel" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding ProxyServer}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock x:Name="ProxyUsernameLabel" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding ProxyUser}" />
-                    </StackPanel>
-                    <StackPanel>
-                        <TextBlock x:Name="ProxyPasswordLabel" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding ProxyPassword}" PasswordChar="•" />
+                    <!-- Proxy Config Grid -->
+                    <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
+                        <StackPanel>
+                            <TextBlock x:Name="ProxyServerLabel" Margin="0,0,0,5" />
+                            <TextBox Text="{Binding ProxyServer}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock x:Name="ProxyUsernameLabel" Margin="0,0,0,5" />
+                            <TextBox Text="{Binding ProxyUser}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock x:Name="ProxyPasswordLabel" Margin="0,0,0,5" />
+                            <TextBox Text="{Binding ProxyPassword}" PasswordChar="•" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </StackPanel>
-
-            <!-- Language Settings -->
-            <StackPanel Spacing="10">
-                <TextBlock x:Name="LanguageLabel" FontWeight="Bold" FontSize="16" />
-                <ComboBox ItemsSource="{Binding Languages}"
-                          SelectedItem="{Binding SelectedLanguage}"
-                          DisplayMemberBinding="{Binding DisplayName}"
-                          MinWidth="150" />
-            </StackPanel>
+            </Border>
 
             <!-- STUN Server List Source -->
-            <StackPanel Spacing="10">
-                <TextBlock x:Name="StunServerListLabel" FontWeight="Bold" FontSize="16" />
-                <Grid ColumnDefinitions="*,Auto">
-                    <TextBox Grid.Column="0" Text="{Binding StunServerListUri}" />
-                    <Button x:Name="LoadStunServerListButton" Grid.Column="1"
-                            Command="{Binding LoadStunServerListCommand}" Margin="5,0,0,0">
-                        <ic:FluentIcon Icon="ArrowDownload" IconVariant="Regular" />
-                    </Button>
-                </Grid>
-            </StackPanel>
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="StunServerListLabel" FontWeight="Bold" FontSize="16" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding StunServerListUri}" />
+                        <Button x:Name="LoadStunServerListButton" Grid.Column="1"
+                                Command="{Binding LoadStunServerListCommand}" Margin="5,0,0,0">
+                            <ic:FluentIcon Icon="ArrowDownload" IconVariant="Regular" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Language Settings -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="LanguageLabel" FontWeight="Bold" FontSize="16" />
+                    <ComboBox ItemsSource="{Binding Languages}"
+                              SelectedItem="{Binding SelectedLanguage}"
+                              DisplayMemberBinding="{Binding DisplayName}"
+                              MinWidth="150" />
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 
