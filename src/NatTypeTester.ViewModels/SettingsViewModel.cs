@@ -183,7 +183,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		await CheckForUpdateCoreAsync(true, cancellationToken);
 	}
 
-	private async Task CheckForUpdateCoreAsync(bool silent, CancellationToken cancellationToken = default)
+	private async Task CheckForUpdateCoreAsync(bool silentOnSuccess, CancellationToken cancellationToken = default)
 	{
 		UpdateCheckResult result = await UpdateAppService.CheckForUpdateAsync(IncludePreRelease, cancellationToken);
 
@@ -199,7 +199,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 				string.Format(L["NewVersionAvailable"], result.LatestVersion)
 			);
 		}
-		else if (!silent)
+		else if (!silentOnSuccess)
 		{
 			NotificationService.Show
 			(
