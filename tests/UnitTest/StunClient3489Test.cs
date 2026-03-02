@@ -1,6 +1,5 @@
 using Dns.Net.Clients;
 using Moq;
-using Shouldly;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Messages;
@@ -28,20 +27,20 @@ public class StunClient3489Test : TestBase
 
 	private static readonly StunMessage5389 DefaultStunMessage = new();
 
-	[Fact]
-	public async Task UdpBlockedTestAsync()
+	[Test]
+	public async Task UdpBlockedTestAsync(CancellationToken cancellationToken)
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!, true);
 		StunClient3489 client = mock.Object;
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.UdpBlocked);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.UdpBlocked);
 	}
 
-	[Fact]
-	public async Task UnsupportedServerTestAsync()
+	[Test]
+	public async Task UnsupportedServerTestAsync(CancellationToken cancellationToken)
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!, true);
 		StunClient3489 client = mock.Object;
@@ -71,13 +70,13 @@ public class StunClient3489Test : TestBase
 
 		async Task TestAsync()
 		{
-			await client.QueryAsync(CancellationToken);
-			client.State.NatType.ShouldBe(NatType.UnsupportedServer);
+			await client.QueryAsync(cancellationToken);
+			await Assert.That(client.State.NatType).IsEqualTo(NatType.UnsupportedServer);
 		}
 	}
 
-	[Fact]
-	public async Task NoNatTestAsync()
+	[Test]
+	public async Task NoNatTestAsync(CancellationToken cancellationToken)
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!, true);
 		StunClient3489 client = mock.Object;
@@ -97,18 +96,18 @@ public class StunClient3489Test : TestBase
 		mock.Setup(x => x.LocalEndPoint).Returns(MappedAddress1);
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test2Response);
 
-		client.State.NatType.ShouldBe(NatType.Unknown);
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.OpenInternet);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.Unknown);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.OpenInternet);
 
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.SymmetricUdpFirewall);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.SymmetricUdpFirewall);
 	}
 
-	[Fact]
-	public async Task FullConeTestAsync()
+	[Test]
+	public async Task FullConeTestAsync(CancellationToken cancellationToken)
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!, true);
 		StunClient3489 client = mock.Object;
@@ -143,9 +142,9 @@ public class StunClient3489Test : TestBase
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(fullConeResponse);
 
-		client.State.NatType.ShouldBe(NatType.Unknown);
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.FullCone);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.Unknown);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.FullCone);
 
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(unsupportedResponse1);
 		await TestUnsupportedServerAsync();
@@ -160,13 +159,13 @@ public class StunClient3489Test : TestBase
 
 		async Task TestUnsupportedServerAsync()
 		{
-			await client.QueryAsync(CancellationToken);
-			client.State.NatType.ShouldBe(NatType.UnsupportedServer);
+			await client.QueryAsync(cancellationToken);
+			await Assert.That(client.State.NatType).IsEqualTo(NatType.UnsupportedServer);
 		}
 	}
 
-	[Fact]
-	public async Task SymmetricTestAsync()
+	[Test]
+	public async Task SymmetricTestAsync(CancellationToken cancellationToken)
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!, true);
 		StunClient3489 client = mock.Object;
@@ -186,18 +185,18 @@ public class StunClient3489Test : TestBase
 		mock.Setup(x => x.Test2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 		mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
 
-		client.State.NatType.ShouldBe(NatType.Unknown);
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.Unknown);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.Unknown);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.Unknown);
 
 		mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test12Response);
 
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.Symmetric);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.Symmetric);
 	}
 
-	[Fact]
-	public async Task RestrictedConeTestAsync()
+	[Test]
+	public async Task RestrictedConeTestAsync(CancellationToken cancellationToken)
 	{
 		Mock<StunClient3489> mock = new(Any, Any, default!, true);
 		StunClient3489 client = mock.Object;
@@ -223,72 +222,74 @@ public class StunClient3489Test : TestBase
 		mock.Setup(x => x.Test1_2Async(It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>())).ReturnsAsync(test1Response);
 
 		mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3Response);
-		client.State.NatType.ShouldBe(NatType.Unknown);
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.RestrictedCone);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.Unknown);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.RestrictedCone);
 
 		mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(test3ErrorResponse);
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.PortRestrictedCone);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.PortRestrictedCone);
 
 		mock.Setup(x => x.Test3Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
-		await client.QueryAsync(CancellationToken);
-		client.State.NatType.ShouldBe(NatType.PortRestrictedCone);
+		await client.QueryAsync(cancellationToken);
+		await Assert.That(client.State.NatType).IsEqualTo(NatType.PortRestrictedCone);
 	}
 
-	[Fact]
-	public async Task Test1Async()
+	[Test]
+	public async Task Test1Async(CancellationToken cancellationToken)
 	{
-		IPAddress ip = await _dnsClient.QueryAsync(Server, CancellationToken);
+		IPAddress ip = await _dnsClient.QueryAsync(Server, cancellationToken);
 		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
 
 		// test I
-		StunResponse? response1 = await client.Test1Async(CancellationToken);
+		StunResponse? response1 = await client.Test1Async(cancellationToken);
 
-		response1.ShouldNotBeNull();
-		response1.Remote.Address.ShouldBe(ip);
-		response1.Remote.Port.ShouldBe(Port);
-		client.LocalEndPoint.ShouldNotBe(Any);
+		await Assert.That(response1).IsNotNull();
+		await Assert.That(response1!.Remote.Address).IsEqualTo(ip);
+		await Assert.That(response1.Remote.Port).IsEqualTo(Port);
+		await Assert.That(client.LocalEndPoint).IsNotEqualTo(Any);
 
 		IPEndPoint? mappedAddress = response1.Message.GetMappedAddressAttribute();
 		IPEndPoint? changedAddress = response1.Message.GetChangedAddressAttribute();
 
-		mappedAddress.ShouldNotBeNull();
-		changedAddress.ShouldNotBeNull();
+		await Assert.That(mappedAddress).IsNotNull();
+		await Assert.That(changedAddress).IsNotNull();
 
-		changedAddress.Address.ShouldNotBe(ip);
-		changedAddress.Port.ShouldNotBe(Port);
+		await Assert.That(changedAddress!.Address).IsNotEqualTo(ip);
+		await Assert.That(changedAddress.Port).IsNotEqualTo(Port);
 
 		// Test I(#2)
-		StunResponse? response12 = await client.Test1_2Async(changedAddress, CancellationToken);
+		StunResponse? response12 = await client.Test1_2Async(changedAddress, cancellationToken);
 
-		response12.ShouldNotBeNull();
-		response12.Remote.Address.ShouldBe(changedAddress.Address);
-		response12.Remote.Port.ShouldBe(changedAddress.Port);
+		await Assert.That(response12).IsNotNull();
+		await Assert.That(response12!.Remote.Address).IsEqualTo(changedAddress.Address);
+		await Assert.That(response12.Remote.Port).IsEqualTo(changedAddress.Port);
 	}
 
-	[Fact(Skip = "FullCone", SkipUnless = nameof(TestEnvironment.IsFullCone), SkipType = typeof(TestEnvironment))]
-	public async Task Test2Async()
+	[Test]
+	[Skip("FullCone")]
+	public async Task Test2Async(CancellationToken cancellationToken)
 	{
-		IPAddress ip = await _dnsClient.QueryAsync(Server, CancellationToken);
+		IPAddress ip = await _dnsClient.QueryAsync(Server, cancellationToken);
 		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
-		StunResponse? response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, CancellationToken);
+		StunResponse? response2 = await client.Test2Async(ip.AddressFamily is AddressFamily.InterNetworkV6 ? IPv6Any : Any, cancellationToken);
 
-		response2.ShouldNotBeNull();
+		await Assert.That(response2).IsNotNull();
 
-		response2.Remote.Address.ShouldBe(ip);
-		response2.Remote.Port.ShouldBe(Port);
+		await Assert.That(response2!.Remote.Address).IsEqualTo(ip);
+		await Assert.That(response2.Remote.Port).IsEqualTo(Port);
 	}
 
-	[Fact(Skip = "FullCone", SkipUnless = nameof(TestEnvironment.IsFullCone), SkipType = typeof(TestEnvironment))]
-	public async Task Test3Async()
+	[Test]
+	[Skip("FullCone")]
+	public async Task Test3Async(CancellationToken cancellationToken)
 	{
-		IPAddress ip = await _dnsClient.QueryAsync(Server, CancellationToken);
+		IPAddress ip = await _dnsClient.QueryAsync(Server, cancellationToken);
 		using StunClient3489 client = new(new IPEndPoint(ip, Port), Any);
-		StunResponse? response = await client.Test3Async(CancellationToken);
+		StunResponse? response = await client.Test3Async(cancellationToken);
 
-		response.ShouldNotBeNull();
-		response.Remote.Address.ShouldBe(ip);
-		response.Remote.Port.ShouldNotBe(Port);
+		await Assert.That(response).IsNotNull();
+		await Assert.That(response!.Remote.Address).IsEqualTo(ip);
+		await Assert.That(response.Remote.Port).IsNotEqualTo(Port);
 	}
 }
