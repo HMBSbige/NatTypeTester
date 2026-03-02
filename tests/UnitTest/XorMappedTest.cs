@@ -1,4 +1,3 @@
-using Shouldly;
 using STUN.Enums;
 using STUN.Messages.StunAttributeValues;
 using System.Net;
@@ -29,8 +28,8 @@ public class XorMappedTest
 	/// <summary>
 	/// https://datatracker.ietf.org/doc/html/rfc5769.html
 	/// </summary>
-	[Fact]
-	public void TestXorMapped()
+	[Test]
+	public async Task TestXorMapped()
 	{
 		XorMappedAddressStunAttributeValue t = new(MagicCookieAndTransactionId)
 		{
@@ -38,26 +37,26 @@ public class XorMappedTest
 			Family = IpFamily.IPv4,
 			Address = _ipv4
 		};
-		Span<byte> temp = stackalloc byte[ushort.MaxValue];
+		byte[] temp = new byte[ushort.MaxValue];
 
 		int length4 = t.WriteTo(temp);
-		length4.ShouldNotBe(0);
-		temp[..length4].SequenceEqual(_ipv4Response).ShouldBeTrue();
+		await Assert.That(length4).IsNotEqualTo(0);
+		await Assert.That(temp.AsSpan(0, length4).SequenceEqual(_ipv4Response)).IsTrue();
 
 		t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
-		t.TryParse(_ipv4Response).ShouldBeTrue();
-		t.Port.ShouldBe(Port);
-		t.Family.ShouldBe(IpFamily.IPv4);
-		t.Address.ShouldBe(_ipv4);
+		await Assert.That(t.TryParse(_ipv4Response)).IsTrue();
+		await Assert.That(t.Port).IsEqualTo(Port);
+		await Assert.That(t.Family).IsEqualTo(IpFamily.IPv4);
+		await Assert.That(t.Address).IsEqualTo(_ipv4);
 
 		t = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
-		t.TryParse(_ipv6Response).ShouldBeTrue();
-		t.Port.ShouldBe(Port);
-		t.Family.ShouldBe(IpFamily.IPv6);
-		t.Address.ShouldBe(_ipv6);
+		await Assert.That(t.TryParse(_ipv6Response)).IsTrue();
+		await Assert.That(t.Port).IsEqualTo(Port);
+		await Assert.That(t.Family).IsEqualTo(IpFamily.IPv6);
+		await Assert.That(t.Address).IsEqualTo(_ipv6);
 
 		int length6 = t.WriteTo(temp);
-		length6.ShouldNotBe(0);
-		temp[..length6].SequenceEqual(_ipv6Response).ShouldBeTrue();
+		await Assert.That(length6).IsNotEqualTo(0);
+		await Assert.That(temp.AsSpan(0, length6).SequenceEqual(_ipv6Response)).IsTrue();
 	}
 }

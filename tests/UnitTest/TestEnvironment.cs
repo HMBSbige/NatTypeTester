@@ -2,7 +2,7 @@ namespace UnitTest;
 
 public static class TestEnvironment
 {
-	public static bool IsRunningOnGitHubActions => Environment.GetEnvironmentVariable("GITHUB_ACTIONS") is "true";
+	public static bool IsCI => bool.TryParse(Environment.GetEnvironmentVariable("CI"), out bool isCi) && isCi;
 
-	public static bool IsFullCone => !IsRunningOnGitHubActions && false;
+	public static bool IsFullCone => !IsCI && false;
 }

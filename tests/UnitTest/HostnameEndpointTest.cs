@@ -1,82 +1,81 @@
-using Shouldly;
 using STUN;
 
 namespace UnitTest;
 
 public class HostnameEndpointTest
 {
-	[Theory]
-	[InlineData(@"www.google.com", ushort.MinValue)]
-	[InlineData(@"1.1.1.1", (ushort)1)]
-	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]", (ushort)1919)]
-	public void IsTrue(string host, ushort port)
+	[Test]
+	[Arguments(@"www.google.com", ushort.MinValue)]
+	[Arguments(@"1.1.1.1", (ushort)1)]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]", (ushort)1919)]
+	public async Task IsTrue(string host, ushort port)
 	{
 		string str = $@"{host}:{port}";
-		StunServer.TryParse(str, out StunServer? server).ShouldBeTrue();
-		server.ShouldNotBeNull();
-		server.Hostname.ShouldBe(host);
-		server.Port.ShouldBe(port);
-		server.ToString().ShouldBe(str);
+		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsTrue();
+		await Assert.That(server).IsNotNull();
+		await Assert.That(server.Hostname).IsEqualTo(host);
+		await Assert.That(server.Port).IsEqualTo(port);
+		await Assert.That(server.ToString()).IsEqualTo(str);
 	}
 
-	[Theory]
-	[InlineData(@"")]
-	[InlineData(@"www.google.com:114514")]
-	[InlineData(@"/dw.[/[:114")]
-	[InlineData(@"2001:db8:1234:5678:11:2233:4455:6677:65535")]
-	public void IsFalse(string str)
+	[Test]
+	[Arguments(@"")]
+	[Arguments(@"www.google.com:114514")]
+	[Arguments(@"/dw.[/[:114")]
+	[Arguments(@"2001:db8:1234:5678:11:2233:4455:6677:65535")]
+	public async Task IsFalse(string str)
 	{
-		StunServer.TryParse(str, out StunServer? server).ShouldBeFalse();
-		server.ShouldBeNull();
+		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsFalse();
+		await Assert.That(server).IsNull();
 	}
 
-	[Theory]
-	[InlineData(@"www.google.com")]
-	[InlineData(@"1.1.1.1")]
-	[InlineData(@"2001:db8:1234:5678:11:2233:4455:6677")]
-	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]")]
-	[InlineData(@"2001:db8:1234:5678:11:2233:4455:db8")]
-	public void TestDefaultPort(string str)
+	[Test]
+	[Arguments(@"www.google.com")]
+	[Arguments(@"1.1.1.1")]
+	[Arguments(@"2001:db8:1234:5678:11:2233:4455:6677")]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]")]
+	[Arguments(@"2001:db8:1234:5678:11:2233:4455:db8")]
+	public async Task TestDefaultPort(string str)
 	{
-		StunServer.TryParse(str, out StunServer? server).ShouldBeTrue();
-		server.ShouldNotBeNull();
-		server.Hostname.ShouldBe(str);
-		server.Port.ShouldBe((ushort)3478);
+		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsTrue();
+		await Assert.That(server).IsNotNull();
+		await Assert.That(server.Hostname).IsEqualTo(str);
+		await Assert.That(server.Port).IsEqualTo((ushort)3478);
 	}
 
-	[Theory]
-	[InlineData(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
-	[InlineData(@"stun.syncthing.net:3478", @"stun.syncthing.net")]
-	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
-	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
-	[InlineData(@"1.1.1.1:3478", @"1.1.1.1")]
-	[InlineData(@"1.1.1.1:1919", @"1.1.1.1:1919")]
-	public void TestToString(string str, string expected)
+	[Test]
+	[Arguments(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
+	[Arguments(@"stun.syncthing.net:3478", @"stun.syncthing.net")]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]")]
+	[Arguments(@"1.1.1.1:3478", @"1.1.1.1")]
+	[Arguments(@"1.1.1.1:1919", @"1.1.1.1:1919")]
+	public async Task TestToString(string str, string expected)
 	{
-		StunServer.TryParse(str, out StunServer? server).ShouldBeTrue();
-		server.ShouldNotBeNull();
-		server.ToString().ShouldBe(expected);
+		await Assert.That(StunServer.TryParse(str, out StunServer? server)).IsTrue();
+		await Assert.That(server).IsNotNull();
+		await Assert.That(server.ToString()).IsEqualTo(expected);
 	}
 
-	[Fact]
-	public void DefaultServer()
+	[Test]
+	public async Task DefaultServer()
 	{
 		StunServer server = new();
-		server.Hostname.ShouldBe("stun.syncthing.net");
-		server.Port.ShouldBe((ushort)3478);
+		await Assert.That(server.Hostname).IsEqualTo("stun.syncthing.net");
+		await Assert.That(server.Port).IsEqualTo((ushort)3478);
 	}
 
-	[Theory]
-	[InlineData(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
-	[InlineData(@"stun.syncthing.net:3478", @"stun.syncthing.net:3478")]
-	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
-	[InlineData(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]:3478")]
-	[InlineData(@"1.1.1.1:3478", @"1.1.1.1:3478")]
-	[InlineData(@"1.1.1.1:1919", @"1.1.1.1:1919")]
-	public void HostnameEndpointToString(string str, string expected)
+	[Test]
+	[Arguments(@"stun.syncthing.net:114", @"stun.syncthing.net:114")]
+	[Arguments(@"stun.syncthing.net:3478", @"stun.syncthing.net:3478")]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]", @"[2001:db8:1234:5678:11:2233:4455:6677]:0")]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]:3478", @"[2001:db8:1234:5678:11:2233:4455:6677]:3478")]
+	[Arguments(@"1.1.1.1:3478", @"1.1.1.1:3478")]
+	[Arguments(@"1.1.1.1:1919", @"1.1.1.1:1919")]
+	public async Task HostnameEndpointToString(string str, string expected)
 	{
-		HostnameEndpoint.TryParse(str, out HostnameEndpoint? server).ShouldBeTrue();
-		server.ShouldNotBeNull();
-		server.ToString().ShouldBe(expected);
+		await Assert.That(HostnameEndpoint.TryParse(str, out HostnameEndpoint? server)).IsTrue();
+		await Assert.That(server).IsNotNull();
+		await Assert.That(server.ToString()).IsEqualTo(expected);
 	}
 }
