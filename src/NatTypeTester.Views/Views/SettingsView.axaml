@@ -8,7 +8,7 @@
     xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
-    d:DesignWidth="600" d:DesignHeight="400"
+    d:DesignWidth="600" d:DesignHeight="500"
     x:Class="NatTypeTester.Views.Views.SettingsView"
     x:DataType="vm:SettingsViewModel">
     <Design.DataContext>
@@ -17,6 +17,39 @@
 
     <ScrollViewer>
         <StackPanel Margin="10" Spacing="20">
+            <!-- Update Settings -->
+            <StackPanel Spacing="10">
+                <TextBlock x:Name="UpdateLabel" FontWeight="Bold" FontSize="16" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock x:Name="CurrentVersionLabel" VerticalAlignment="Center"
+                               Text="{Binding CurrentVersionDisplay}" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{Binding LatestVersionDisplay}"
+                               IsVisible="{Binding LatestVersionDisplay, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Button x:Name="CheckUpdateButton" Command="{Binding CheckUpdateCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <ic:FluentIcon Icon="ArrowSync" IconVariant="Regular" />
+                            <TextBlock x:Name="CheckUpdateButtonText" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="OpenHomepageButton" Command="{Binding OpenHomepageCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <ic:FluentIcon Icon="Open" IconVariant="Regular" />
+                            <TextBlock x:Name="OpenHomepageButtonText" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <CheckBox x:Name="AutoCheckUpdateCheckBox" IsChecked="{Binding AutoCheckUpdate}" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock x:Name="CheckUpdateIntervalLabel" VerticalAlignment="Center" />
+                    <NumericUpDown Value="{Binding CheckUpdateIntervalHours}" Minimum="0.1" Maximum="720"
+                                   Increment="1" FormatString="0.#" Width="120" />
+                </StackPanel>
+                <CheckBox x:Name="IncludePreReleaseCheckBox" IsChecked="{Binding IncludePreRelease}" />
+            </StackPanel>
+
             <!-- Proxy Settings -->
             <StackPanel Spacing="10">
                 <TextBlock x:Name="ProxyLabel" FontWeight="Bold" FontSize="16" />

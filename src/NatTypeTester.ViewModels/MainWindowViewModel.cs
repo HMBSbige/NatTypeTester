@@ -129,5 +129,7 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 			.Switch()
 			.Subscribe()
 			.DisposeWith(Disposables);
+
+		_ = Task.Run(() => SettingsViewModel.CheckForUpdateOnStartupAsync(config, cancellationToken), cancellationToken);
 	}
 }

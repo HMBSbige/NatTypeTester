@@ -31,6 +31,17 @@
     "StunServerList": "STUN 服务器列表",
     "LoadStunServerList": "从 URL 或文件路径加载 STUN 服务器列表",
     "StunServerListLoaded": "已加载 {0} 个 STUN 服务器",
-    "StunServerListEmpty": "未找到有效的 STUN 服务器"
+    "StunServerListEmpty": "未找到有效的 STUN 服务器",
+    "Update": "更新",
+    "CheckUpdate": "检查更新",
+    "AutoCheckUpdate": "启动时自动检查更新",
+    "CheckUpdateInterval": "检查间隔（小时）",
+    "IncludePreRelease": "包含预发布版本",
+    "CurrentVersion": "当前版本：{0}",
+    "LatestVersion": "最新版本：{0}",
+    "NewVersionAvailable": "发现新版本 {0}！",
+    "AlreadyLatestVersion": "已是最新版本。",
+    "CheckUpdateFailed": "检查更新失败。",
+    "OpenHomepage": "打开主页"
   }
 }

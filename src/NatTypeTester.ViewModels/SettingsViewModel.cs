@@ -24,15 +24,33 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	[Reactive]
 	public partial string? StunServerListUri { get; set; }
 
+	[Reactive]
+	public partial bool AutoCheckUpdate { get; set; }
+
+	[Reactive]
+	public partial double CheckUpdateIntervalHours { get; set; }
+
+	[Reactive]
+	public partial bool IncludePreRelease { get; set; }
+
+	[Reactive]
+	public partial string? LatestVersionDisplay { get; set; }
+
+	public string CurrentVersionDisplay => string.Format(L["CurrentVersion"], UpdateAppService.CurrentVersion);
+
 	private IAppConfigManager AppConfigManager => TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
 
 	private INotificationService NotificationService => TransientCachedServiceProvider.GetRequiredService<INotificationService>();
 
 	private IStunServerListAppService StunServerListAppService => TransientCachedServiceProvider.GetRequiredService<IStunServerListAppService>();
 
+	private IUpdateAppService UpdateAppService => TransientCachedServiceProvider.GetRequiredService<IUpdateAppService>();
+
 	public SettingsViewModel()
 	{
 		LoadStunServerListCommand.DisposeWith(Disposables);
+		CheckUpdateCommand.DisposeWith(Disposables);
+		OpenHomepageCommand.DisposeWith(Disposables);
 
 		_languages = [];
 
@@ -63,7 +81,13 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		SelectedLanguage = Languages.FirstOrDefault(l => l.CultureName == config.Language) ?? Languages.FirstOrDefault();
 		ApplyCulture(SelectedLanguage?.CultureName);
 
-		this.WhenAnyValue
+		AutoCheckUpdate = config.AutoCheckUpdate;
+		CheckUpdateIntervalHours = config.CheckUpdateInterval.TotalHours;
+		IncludePreRelease = config.IncludePreRelease;
+
+		ObserveAndUpdateConfig
+		(
+			this.WhenAnyValue
 			(
 				x => x.ProxyType,
 				x => x.ProxyServer,
@@ -71,25 +95,43 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 				x => x.ProxyPassword,
 				x => x.SelectedLanguage,
 				x => x.StunServerListUri
-			)
+			),
+			(appConfig, value) =>
+			{
+				appConfig.ProxyType = value.Item1;
+				appConfig.ProxyServer = value.Item2;
+				appConfig.ProxyUser = value.Item3;
+				appConfig.ProxyPassword = value.Item4;
+				appConfig.Language = value.Item5?.CultureName;
+				appConfig.StunServerListUri = value.Item6;
+			}
+		);
+
+		ObserveAndUpdateConfig
+		(
+			this.WhenAnyValue
+			(
+				x => x.AutoCheckUpdate,
+				x => x.CheckUpdateIntervalHours,
+				x => x.IncludePreRelease
+			),
+			(appConfig, value) =>
+			{
+				appConfig.AutoCheckUpdate = value.Item1;
+				appConfig.CheckUpdateInterval = TimeSpan.FromHours(value.Item2);
+				appConfig.IncludePreRelease = value.Item3;
+			}
+		);
+	}
+
+	private void ObserveAndUpdateConfig<T>(IObservable<T> source, Action<AppConfig, T> updateAction)
+	{
+		source
 			.Skip(1)
 			.DistinctUntilChanged()
 			.Select
 			(value => Observable.FromAsync
-				(ct => AppConfigManager.UpdateAsync
-					(
-						appConfig =>
-						{
-							appConfig.ProxyType = value.Item1;
-							appConfig.ProxyServer = value.Item2;
-							appConfig.ProxyUser = value.Item3;
-							appConfig.ProxyPassword = value.Item4;
-							appConfig.Language = value.Item5?.CultureName;
-							appConfig.StunServerListUri = value.Item6;
-						},
-						ct
-					).AsTask()
-				)
+				(ct => AppConfigManager.UpdateAsync(cfg => updateAction(cfg, value), ct).AsTask())
 				.Catch<Unit, Exception>
 				(ex =>
 					{
@@ -101,6 +143,77 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 			.Switch()
 			.Subscribe()
 			.DisposeWith(Disposables);
+	}
+
+	[ReactiveCommand]
+	private async Task CheckUpdateAsync(CancellationToken cancellationToken = default)
+	{
+		await CheckForUpdateCoreAsync(false, cancellationToken);
+	}
+
+	internal async Task CheckForUpdateOnStartupAsync(AppConfig config, CancellationToken cancellationToken = default)
+	{
+		if (!config.AutoCheckUpdate)
+		{
+			return;
+		}
+
+		if (config.LastUpdateCheckTime is { } lastCheck)
+		{
+			TimeSpan elapsed = DateTimeOffset.Now - lastCheck;
+
+			if (elapsed < config.CheckUpdateInterval)
+			{
+				return;
+			}
+		}
+
+		await CheckForUpdateCoreAsync(true, cancellationToken);
+	}
+
+	private async Task CheckForUpdateCoreAsync(bool silent, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			UpdateCheckResult result = await UpdateAppService.CheckForUpdateAsync(IncludePreRelease, cancellationToken);
+
+			await AppConfigManager.UpdateAsync(c => c.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
+
+			LatestVersionDisplay = string.Format(L["LatestVersion"], result.LatestVersion);
+
+			if (result.HasUpdate)
+			{
+				NotificationService.Show
+				(
+					L["Update"],
+					string.Format(L["NewVersionAvailable"], result.LatestVersion)
+				);
+			}
+			else if (!silent)
+			{
+				NotificationService.Show
+				(
+					L["Update"],
+					L["AlreadyLatestVersion"],
+					AppNotificationType.Success
+				);
+			}
+		}
+		catch (Exception ex)
+		{
+			NotificationService.Show
+			(
+				L["Update"],
+				$"{L["CheckUpdateFailed"]}{Environment.NewLine}{ex.Message}",
+				AppNotificationType.Warning
+			);
+		}
+	}
+
+	[ReactiveCommand]
+	private void OpenHomepage()
+	{
+		using Process? _ = Process.Start(new ProcessStartInfo(NatTypeTesterConsts.HomepageUrl) { UseShellExecute = true });
 	}
 
 	[ReactiveCommand]
