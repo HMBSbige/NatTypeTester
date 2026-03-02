@@ -42,6 +42,8 @@
     "NewVersionAvailable": "New version {0} is available!",
     "AlreadyLatestVersion": "You are using the latest version.",
     "CheckUpdateFailed": "Failed to check for updates.",
-    "OpenHomepage": "Open Homepage"
+    "OpenHomepage": "Open Homepage",
+    "OpenConfigDirectory": "Open Config Directory",
+    "ConfigDirectory": "Configuration Directory"
   }
 }

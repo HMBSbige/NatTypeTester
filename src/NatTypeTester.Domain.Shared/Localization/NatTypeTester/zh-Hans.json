@@ -42,6 +42,8 @@
     "NewVersionAvailable": "发现新版本 {0}！",
     "AlreadyLatestVersion": "已是最新版本。",
     "CheckUpdateFailed": "检查更新失败。",
-    "OpenHomepage": "打开主页"
+    "OpenHomepage": "打开主页",
+    "OpenConfigDirectory": "打开配置目录",
+    "ConfigDirectory": "配置目录"
   }
 }

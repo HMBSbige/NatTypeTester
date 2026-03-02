@@ -7,7 +7,6 @@ global using NatTypeTester.Domain.Shared.Configuration;
 global using System.Text.Json;
 global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
-global using System.Threading.Channels;
 global using Volo.Abp.Modularity;
 
 namespace NatTypeTester.Configuration;
@@ -17,12 +16,7 @@ public class NatTypeTesterConfigurationModule : AbpModule
 {
 	public override void ConfigureServices(ServiceConfigurationContext context)
 	{
-		string configPath = Path.Combine
-		(
-			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-			nameof(NatTypeTester),
-			ConfigurationConsts.ConfigFileName
-		);
+		string configPath = ConfigurationConsts.ConfigFilePath;
 
 		IConfigurationRoot configuration = new ConfigurationBuilder()
 			.AddJsonFile

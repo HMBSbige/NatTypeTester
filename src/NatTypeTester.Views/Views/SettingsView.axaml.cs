@@ -9,6 +9,8 @@ public partial class SettingsView : ReactiveUserControl<SettingsViewModel>, ISin
 		this.WhenActivated
 		(d =>
 			{
+				ConfigDirectoryLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("ConfigDirectory")).DisposeWith(d);
+				OpenConfigDirectoryButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("OpenConfigDirectory")).DisposeWith(d);
 				UpdateLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Update")).DisposeWith(d);
 				CurrentVersionLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("CurrentVersion")).DisposeWith(d);
 				LatestVersionLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("LatestVersion")).DisposeWith(d);

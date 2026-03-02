@@ -17,6 +17,23 @@
 
     <ScrollViewer>
         <StackPanel Margin="10" Spacing="15">
+            <!-- Configuration Directory -->
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock x:Name="ConfigDirectoryLabel" FontWeight="Bold" FontSize="16" />
+                    <Button x:Name="OpenConfigDirectoryButton" Command="{Binding OpenConfigDirectoryCommand}"
+                            HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <ic:FluentIcon Icon="Folder" IconVariant="Regular" />
+                            <TextBlock x:Name="OpenConfigDirectoryButtonText" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
             <!-- Update Settings -->
             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
                     BorderThickness="1"
@@ -44,7 +61,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <Button x:Name="CheckUpdateButton" Command="{Binding CheckUpdateCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="5">
-                                    <ic:FluentIcon Icon="ArrowSync" IconVariant="Regular" />
+                                    <ic:FluentIcon Icon="ArrowSync" IconVariant="Color" />
                                     <TextBlock x:Name="CheckUpdateButtonText" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>

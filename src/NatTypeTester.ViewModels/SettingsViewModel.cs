@@ -52,6 +52,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		LoadStunServerListCommand.DisposeWith(Disposables);
 		CheckUpdateCommand.DisposeWith(Disposables);
 		OpenHomepageCommand.DisposeWith(Disposables);
+		OpenConfigDirectoryCommand.DisposeWith(Disposables);
 
 		_languages = [];
 
@@ -214,6 +215,12 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	private void OpenHomepage()
 	{
 		using Process? _ = Process.Start(new ProcessStartInfo(NatTypeTesterConsts.HomepageUrl) { UseShellExecute = true });
+	}
+
+	[ReactiveCommand]
+	private void OpenConfigDirectory()
+	{
+		using Process? _ = Process.Start(new ProcessStartInfo(ConfigurationConsts.ConfigDirectory) { UseShellExecute = true });
 	}
 
 	[ReactiveCommand]
