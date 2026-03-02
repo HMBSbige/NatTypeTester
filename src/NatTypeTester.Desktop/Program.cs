@@ -3,7 +3,6 @@ using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using NatTypeTester.Views;
 using ReactiveUI.Avalonia.Splat;
-using Splat;
 using Volo.Abp;
 
 namespace NatTypeTester.Desktop;
@@ -42,6 +41,10 @@ internal static class Program
 				{
 					IServiceProvider serviceProvider = resolver.GetService<IServiceProvider>()!;
 					resolver.GetService<IAbpApplicationWithExternalServiceProvider>()!.Initialize(serviceProvider);
+				},
+				withReactiveUIBuilder: rxBuilder =>
+				{
+					rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSubject);
 				}
 			)
 			.LogToTrace()

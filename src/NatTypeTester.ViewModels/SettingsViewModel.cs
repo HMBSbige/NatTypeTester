@@ -39,7 +39,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		this.WhenAnyValue(x => x.SelectedLanguage)
 			.Skip(1)
 			.WhereNotNull()
-			.Subscribe(lang => ApplyCulture(lang.CultureName), ex => RxApp.DefaultExceptionHandler.OnNext(ex))
+			.Subscribe(lang => ApplyCulture(lang.CultureName), ex => RxState.DefaultExceptionHandler.OnNext(ex))
 			.DisposeWith(Disposables);
 	}
 
@@ -93,7 +93,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 				.Catch<Unit, Exception>
 				(ex =>
 					{
-						RxApp.DefaultExceptionHandler.OnNext(ex);
+						RxState.DefaultExceptionHandler.OnNext(ex);
 						return Observable.Empty<Unit>();
 					}
 				)

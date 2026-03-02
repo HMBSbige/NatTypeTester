@@ -75,7 +75,7 @@ public class NatTypeTesterViewsModule : AbpModule
 #endif
 			.CreateLogger();
 
-		Locator.CurrentMutable.UseSerilogFullLogger(logger);
+		AppLocator.CurrentMutable.UseSerilogFullLogger(logger);
 
 		context.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(logger, true));
 	}

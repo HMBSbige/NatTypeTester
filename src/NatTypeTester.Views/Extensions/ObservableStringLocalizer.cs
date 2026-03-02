@@ -2,7 +2,7 @@ namespace NatTypeTester.Views.Extensions;
 
 public class ObservableStringLocalizer(string key) : IObservable<string>
 {
-	private static readonly ObservableCultureService Service = Locator.Current.GetService<ObservableCultureService>()!;
+	private static readonly ObservableCultureService Service = AppLocator.Current.GetService<ObservableCultureService>()!;
 
 	public IDisposable Subscribe(IObserver<string> observer)
 	{
