@@ -9,6 +9,14 @@ public partial class SettingsView : ReactiveUserControl<SettingsViewModel>, ISin
 		this.WhenActivated
 		(d =>
 			{
+				UpdateLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Update")).DisposeWith(d);
+				CurrentVersionLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("CurrentVersion")).DisposeWith(d);
+				LatestVersionLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("LatestVersion")).DisposeWith(d);
+				CheckUpdateButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("CheckUpdate")).DisposeWith(d);
+				OpenHomepageButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("OpenHomepage")).DisposeWith(d);
+				AutoCheckUpdateCheckBox.Bind(ContentProperty, new ObservableStringLocalizer("AutoCheckUpdate")).DisposeWith(d);
+				CheckUpdateIntervalLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("CheckUpdateInterval")).DisposeWith(d);
+				IncludePreReleaseCheckBox.Bind(ContentProperty, new ObservableStringLocalizer("IncludePreRelease")).DisposeWith(d);
 				ProxyLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Proxy")).DisposeWith(d);
 				NoProxyRadioButton.Bind(ContentProperty, new ObservableStringLocalizer("NoProxy")).DisposeWith(d);
 				Socks5ProxyRadioButton.Bind(ContentProperty, new ObservableStringLocalizer("SOCKS5Proxy")).DisposeWith(d);

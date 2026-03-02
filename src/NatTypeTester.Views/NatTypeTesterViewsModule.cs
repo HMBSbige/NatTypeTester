@@ -25,6 +25,7 @@ global using Splat.Serilog;
 global using STUN.Enums;
 global using System.Diagnostics;
 global using System.Globalization;
+global using System.Reactive.Disposables;
 global using System.Reactive.Disposables.Fluent;
 global using System.Reactive.Linq;
 global using System.Reactive.Subjects;
