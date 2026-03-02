@@ -10,6 +10,8 @@ public partial class SettingsView : ReactiveUserControl<SettingsViewModel>, ISin
 		(d =>
 			{
 				UpdateLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Update")).DisposeWith(d);
+				CurrentVersionLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("CurrentVersion")).DisposeWith(d);
+				LatestVersionLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("LatestVersion")).DisposeWith(d);
 				CheckUpdateButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("CheckUpdate")).DisposeWith(d);
 				OpenHomepageButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("OpenHomepage")).DisposeWith(d);
 				AutoCheckUpdateCheckBox.Bind(ContentProperty, new ObservableStringLocalizer("AutoCheckUpdate")).DisposeWith(d);

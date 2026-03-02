@@ -29,10 +29,15 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
                         <!-- Version Info (Left) -->
                         <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                            <TextBlock x:Name="CurrentVersionLabel"
-                                       Text="{Binding CurrentVersionDisplay}" />
-                            <TextBlock Text="{Binding LatestVersionDisplay}"
-                                       IsVisible="{Binding LatestVersionDisplay, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock x:Name="CurrentVersionLabel" />
+                                <TextBlock Text="{Binding CurrentVersion}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="4"
+                                        IsVisible="{Binding LatestVersion, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <TextBlock x:Name="LatestVersionLabel" />
+                                <TextBlock Text="{Binding LatestVersion}" />
+                            </StackPanel>
                         </StackPanel>
 
                         <!-- Action Buttons (Right) -->

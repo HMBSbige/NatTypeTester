@@ -34,9 +34,10 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	public partial bool IncludePreRelease { get; set; }
 
 	[Reactive]
-	public partial string? LatestVersionDisplay { get; set; }
+	public partial string? LatestVersion { get; set; }
 
-	public string CurrentVersionDisplay => string.Format(L["CurrentVersion"], UpdateAppService.CurrentVersion);
+	[Reactive]
+	public partial string? CurrentVersion { get; set; }
 
 	private IAppConfigManager AppConfigManager => TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
 
@@ -84,6 +85,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		AutoCheckUpdate = config.AutoCheckUpdate;
 		CheckUpdateIntervalHours = config.CheckUpdateInterval.TotalHours;
 		IncludePreRelease = config.IncludePreRelease;
+		CurrentVersion = UpdateAppService.CurrentVersion;
 
 		ObserveAndUpdateConfig
 		(
@@ -183,39 +185,27 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 
 	private async Task CheckForUpdateCoreAsync(bool silent, CancellationToken cancellationToken = default)
 	{
-		try
-		{
-			UpdateCheckResult result = await UpdateAppService.CheckForUpdateAsync(IncludePreRelease, cancellationToken);
+		UpdateCheckResult result = await UpdateAppService.CheckForUpdateAsync(IncludePreRelease, cancellationToken);
 
-			await AppConfigManager.UpdateAsync(c => c.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
+		await AppConfigManager.UpdateAsync(c => c.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
 
-			LatestVersionDisplay = string.Format(L["LatestVersion"], result.LatestVersion);
+		LatestVersion = result.LatestVersion;
 
-			if (result.HasUpdate)
-			{
-				NotificationService.Show
-				(
-					L["Update"],
-					string.Format(L["NewVersionAvailable"], result.LatestVersion)
-				);
-			}
-			else if (!silent)
-			{
-				NotificationService.Show
-				(
-					L["Update"],
-					L["AlreadyLatestVersion"],
-					AppNotificationType.Success
-				);
-			}
-		}
-		catch (Exception ex)
+		if (result.HasUpdate)
 		{
 			NotificationService.Show
 			(
 				L["Update"],
-				$"{L["CheckUpdateFailed"]}{Environment.NewLine}{ex.Message}",
-				AppNotificationType.Warning
+				string.Format(L["NewVersionAvailable"], result.LatestVersion)
+			);
+		}
+		else if (!silent)
+		{
+			NotificationService.Show
+			(
+				L["Update"],
+				L["AlreadyLatestVersion"],
+				AppNotificationType.Success
 			);
 		}
 	}
