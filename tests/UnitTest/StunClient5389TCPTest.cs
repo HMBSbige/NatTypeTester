@@ -58,7 +58,7 @@ public class StunClient5389TCPTest : TestBase
 	[Skip("Dev test")]
 	public async Task TlsBindingTestSuccessAsync(CancellationToken cancellationToken)
 	{
-		StunServer.TryParse(@"stun.fitauto.ru", out StunServer? stunServer, StunServer.DefaultTlsPort);
+		await Assert.That(StunServer.TryParse(@"stun.fitauto.ru", out StunServer? stunServer, StunServer.DefaultTlsPort)).IsTrue();
 		await Assert.That(stunServer).IsNotNull();
 		IPAddress ip = await _dnsClient.QueryAsync(stunServer!.Hostname, cancellationToken);
 		ITcpProxy tls = new TlsProxy(stunServer.Hostname);

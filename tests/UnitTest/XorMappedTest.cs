@@ -37,7 +37,7 @@ public class XorMappedTest
 			Family = IpFamily.IPv4,
 			Address = _ipv4
 		};
-		byte[] temp = new byte[ushort.MaxValue];
+		byte[] temp = new byte[64];
 
 		int length4 = t.WriteTo(temp);
 		await Assert.That(length4).IsNotEqualTo(0);
