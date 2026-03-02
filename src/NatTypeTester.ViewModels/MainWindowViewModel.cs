@@ -105,7 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 				.Catch<Unit, Exception>
 				(ex =>
 					{
-						RxApp.DefaultExceptionHandler.OnNext(ex);
+						RxState.DefaultExceptionHandler.OnNext(ex);
 						return Observable.Empty<Unit>();
 					}
 				)
@@ -121,7 +121,7 @@ public partial class MainWindowViewModel : ViewModelBase, ISingletonDependency
 				.Catch<Unit, Exception>
 				(ex =>
 					{
-						RxApp.DefaultExceptionHandler.OnNext(ex);
+						RxState.DefaultExceptionHandler.OnNext(ex);
 						return Observable.Empty<Unit>();
 					}
 				)

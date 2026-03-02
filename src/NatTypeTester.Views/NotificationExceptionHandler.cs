@@ -1,18 +1,16 @@
 namespace NatTypeTester.Views;
 
-internal static class NotificationExceptionHandler
+public static class NotificationExceptionHandler
 {
-	private static readonly Subject<Exception> ExceptionSubject = new();
+	public static readonly Subject<Exception> ExceptionSubject = new();
 
 	public static void Install(IServiceProvider serviceProvider)
 	{
-		RxApp.DefaultExceptionHandler = ExceptionSubject;
-
 		INotificationService notificationService = serviceProvider.GetRequiredService<INotificationService>();
 		IStringLocalizer localizer = serviceProvider.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();
 
 		ExceptionSubject
-			.ObserveOn(RxApp.MainThreadScheduler)
+			.ObserveOn(RxSchedulers.MainThreadScheduler)
 			.Subscribe
 			(ex =>
 				{
