@@ -188,8 +188,6 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	{
 		UpdateCheckResult result = await UpdateAppService.CheckForUpdateAsync(IncludePreRelease, cancellationToken);
 
-		await AppConfigManager.UpdateAsync(c => c.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
-
 		LatestVersion = result.LatestVersion;
 
 		if (result.HasUpdate)
@@ -209,6 +207,8 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 				AppNotificationType.Success
 			);
 		}
+
+		await AppConfigManager.UpdateAsync(c => c.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
 	}
 
 	[ReactiveCommand]
