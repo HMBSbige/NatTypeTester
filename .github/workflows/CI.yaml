@@ -24,6 +24,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
+      - run: dotnet workload install android
       - run: dotnet format -v diag --verify-no-changes
 
   test:
@@ -41,7 +42,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
-      - run: dotnet test -c Release
+      - run: dotnet test --project tests/UnitTest/UnitTest.csproj -c Release
 
   build:
     needs: [test, check_format]
@@ -71,6 +72,31 @@ jobs:
         with:
           name: ${{ env.ProjectName }}-${{ matrix.rid }}
           path: src/${{ env.ProjectName }}.Desktop/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
+
+  build_android:
+    needs: [test, check_format]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: tree:0
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.NET_VERSION }}
+
+      - name: Install Android workload
+        run: dotnet workload install android
+
+      - name: Build
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet publish -c Release
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ProjectName }}-android
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/publish/*-Signed.apk
 
   nuget:
     needs: [test, check_format]
@@ -110,7 +136,7 @@ jobs:
           dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
   release:
-    needs: [build, nuget]
+    needs: [build, build_android, nuget]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -124,6 +150,7 @@ jobs:
           for rid in win-x64 linux-x64 linux-arm64 osx-arm64; do
             7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}-${rid}"
           done
+          cp ${{ env.ProjectName }}-android/*-Signed.apk "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-android.apk"
 
       - name: Create a new GitHub release
         uses: ncipollo/release-action@v1

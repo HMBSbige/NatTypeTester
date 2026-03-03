@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>NatTypeTester</AssemblyName>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <PublishSingleFile>false</PublishSingleFile>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NatTypeTester.Views\NatTypeTester.Views.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TrimmerRootAssembly Include="ReactiveUI" RootMode="all" />
+  </ItemGroup>
+</Project>
