@@ -116,7 +116,7 @@ jobs:
       - name: Rename APK
         working-directory: src/${{ env.ProjectName }}.Android
         run: |
-          version=$(dotnet minver)
+          version=$(dotnet msbuild -getProperty:Version)
           apk_dir="bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish"
           mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${version}-${{ matrix.suffix }}.apk"
 
@@ -158,7 +158,7 @@ jobs:
       - name: Rename APK
         working-directory: src/${{ env.ProjectName }}.Android
         run: |
-          version=$(dotnet minver)
+          version=$(dotnet msbuild -getProperty:Version)
           apk_dir="bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish"
           mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${version}-android-universal.apk"
 
