@@ -30,21 +30,7 @@ public partial class MainWindowViewModel : ViewModelBase, IActivatableViewModel,
 			.Subscribe()
 			.DisposeWith(Disposables);
 
-		this.WhenActivated
-		(disposables =>
-			{
-				Observable.FromAsync(cancellationToken => SettingsViewModel.CheckForUpdateOnStartupAsync(cancellationToken))
-					.Catch<Unit, Exception>
-					(ex =>
-						{
-							RxState.DefaultExceptionHandler.OnNext(ex);
-							return Observable.Empty<Unit>();
-						}
-					)
-					.Subscribe()
-					.DisposeWith(disposables);
-			}
-		);
+		this.WhenActivatedAsync(InitializeAsync);
 	}
 
 	[ReactiveCommand]
@@ -103,7 +89,7 @@ public partial class MainWindowViewModel : ViewModelBase, IActivatableViewModel,
 		);
 	}
 
-	public async Task InitializeAsync(CancellationToken cancellationToken = default)
+	private async Task InitializeAsync(CancellationToken cancellationToken = default)
 	{
 		IAppConfigManager configManager = TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
 		AppConfig config = await configManager.GetAsync(cancellationToken);
@@ -120,13 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase, IActivatableViewModel,
 			.DistinctUntilChanged()
 			.Select
 			(value => Observable.FromAsync(ct => configManager.UpdateAsync(cfg => cfg.CurrentStunServer = value, ct).AsTask())
-				.Catch<Unit, Exception>
-				(ex =>
-					{
-						RxState.DefaultExceptionHandler.OnNext(ex);
-						return Observable.Empty<Unit>();
-					}
-				)
+				.CatchDefault()
 			)
 			.Switch()
 			.Subscribe()
@@ -136,16 +116,12 @@ public partial class MainWindowViewModel : ViewModelBase, IActivatableViewModel,
 			.Skip(1)
 			.Select
 			(_ => Observable.FromAsync(ct => configManager.UpdateAsync(cfg => cfg.StunServers = _stunServerSource.Items.ToList(), ct).AsTask())
-				.Catch<Unit, Exception>
-				(ex =>
-					{
-						RxState.DefaultExceptionHandler.OnNext(ex);
-						return Observable.Empty<Unit>();
-					}
-				)
+				.CatchDefault()
 			)
 			.Switch()
 			.Subscribe()
 			.DisposeWith(Disposables);
+
+		await SettingsViewModel.CheckForUpdateOnStartupAsync(cancellationToken);
 	}
 }

@@ -12,11 +12,6 @@
     Width="620" Height="600"
     WindowStartupLocation="CenterScreen">
 
-    <Panel>
-        <views:MainView />
-        <WindowNotificationManager x:Name="NotificationManager"
-                                   Position="TopRight"
-                                   MaxItems="3" />
-    </Panel>
+    <views:MainView />
 
 </Window>

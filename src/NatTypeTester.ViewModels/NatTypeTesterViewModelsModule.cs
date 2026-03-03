@@ -14,7 +14,6 @@ global using STUN;
 global using STUN.Enums;
 global using STUN.StunResult;
 global using System.Collections.ObjectModel;
-global using System.Diagnostics;
 global using System.Globalization;
 global using System.Reactive;
 global using System.Reactive.Disposables;

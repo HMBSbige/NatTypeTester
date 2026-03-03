@@ -1,12 +1,4 @@
-namespace NatTypeTester.ViewModels;
-
-public enum AppNotificationType
-{
-	Information,
-	Success,
-	Warning,
-	Error
-}
+namespace NatTypeTester.Application.Contracts;
 
 public interface INotificationService
 {

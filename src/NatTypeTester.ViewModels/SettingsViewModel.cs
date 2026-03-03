@@ -47,6 +47,8 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 
 	private IUpdateAppService UpdateAppService => TransientCachedServiceProvider.GetRequiredService<IUpdateAppService>();
 
+	private ILauncherService LauncherService => TransientCachedServiceProvider.GetRequiredService<ILauncherService>();
+
 	public SettingsViewModel()
 	{
 		LoadStunServerListCommand.DisposeWith(Disposables);
@@ -135,13 +137,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 			.Select
 			(value => Observable.FromAsync
 					(ct => AppConfigManager.UpdateAsync(cfg => updateAction(cfg, value), ct).AsTask())
-				.Catch<Unit, Exception>
-				(ex =>
-					{
-						RxState.DefaultExceptionHandler.OnNext(ex);
-						return Observable.Empty<Unit>();
-					}
-				)
+				.CatchDefault()
 			)
 			.Switch()
 			.Subscribe()
@@ -212,15 +208,15 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	}
 
 	[ReactiveCommand]
-	private void OpenHomepage()
+	private ValueTask OpenHomepage()
 	{
-		using Process? _ = Process.Start(new ProcessStartInfo(NatTypeTesterConsts.HomepageUrl) { UseShellExecute = true });
+		return LauncherService.LaunchUriAsync(new Uri(NatTypeTesterConsts.HomepageUrl));
 	}
 
 	[ReactiveCommand]
-	private void OpenConfigDirectory()
+	private ValueTask OpenConfigDirectory()
 	{
-		using Process? _ = Process.Start(new ProcessStartInfo(ConfigurationConsts.ConfigDirectory) { UseShellExecute = true });
+		return LauncherService.LaunchUriAsync(new Uri(ConfigurationConsts.ConfigDirectory));
 	}
 
 	[ReactiveCommand]

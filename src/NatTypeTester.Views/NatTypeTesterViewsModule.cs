@@ -9,11 +9,12 @@ global using JetBrains.Annotations;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Localization;
 global using NatTypeTester.Configuration;
+global using NatTypeTester.Application.Contracts;
+global using NatTypeTester.Domain.Shared;
 global using NatTypeTester.Domain.Shared.Localization;
 global using NatTypeTester.ViewModels;
 global using NatTypeTester.Views.Extensions;
 global using NatTypeTester.Views.Views;
-global using Nito.AsyncEx;
 global using ReactiveUI;
 global using ReactiveUI.Avalonia;
 global using Serilog;
@@ -78,11 +79,5 @@ public class NatTypeTesterViewsModule : AbpModule
 		AppLocator.CurrentMutable.UseSerilogFullLogger(logger);
 
 		context.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(logger, true));
-	}
-
-	public override void OnApplicationInitialization(ApplicationInitializationContext context)
-	{
-		MainWindowViewModel mainVm = context.ServiceProvider.GetRequiredService<MainWindowViewModel>();
-		AsyncContext.Run(() => mainVm.InitializeAsync());
 	}
 }

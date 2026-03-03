@@ -46,7 +46,8 @@ public class UpdateAppService : ApplicationService, IUpdateAppService
 
 	private static NuGetVersion? ResolveCurrentVersion()
 	{
-		return TryParseVersion(Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
+		Assembly assembly = Assembly.GetEntryAssembly() ?? typeof(UpdateAppService).Assembly;
+		return TryParseVersion(assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
 	}
 
 	private static NuGetVersion? TryParseVersion(string? value)
