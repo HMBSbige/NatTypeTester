@@ -31,7 +31,7 @@
     <PackageReference Include="MinVer" PrivateAssets="all" />
   </ItemGroup>
 
-  <Target Name="CleanPreviousPublish" BeforeTargets="PrepareForPublish">
+  <Target Name="CleanPreviousPublish" BeforeTargets="PrepareForPublish" Condition="'$(AndroidApplication)' != 'true'">
     <RemoveDir Directories="$(PublishDir)" />
   </Target>
 

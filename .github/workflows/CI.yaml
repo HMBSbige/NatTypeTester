@@ -12,8 +12,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_NOLOGO: 1
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
-  NET_TFM: net10.0
   NET_VERSION: 10.0.x
+  NET_TFM: net10.0
 
 jobs:
   check_format:
@@ -24,6 +24,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
+      - run: dotnet workload install android
       - run: dotnet format -v diag --verify-no-changes
 
   test:
@@ -41,7 +42,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
-      - run: dotnet test -c Release
+      - run: dotnet test --project tests/UnitTest/UnitTest.csproj -c Release
 
   build:
     needs: [test, check_format]
@@ -71,6 +72,98 @@ jobs:
         with:
           name: ${{ env.ProjectName }}-${{ matrix.rid }}
           path: src/${{ env.ProjectName }}.Desktop/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
+
+  build_android:
+    needs: [test, check_format]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid:
+          - android-arm64
+          - android-x64
+        include:
+          - rid: android-arm64
+            suffix: android-arm64
+          - rid: android-x64
+            suffix: android-x64
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: tree:0
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.NET_VERSION }}
+      - run: dotnet workload install android
+
+      - name: Cache Android dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/android-sdk
+            ~/jdk
+          key: android-deps-${{ env.NET_TFM }}-android
+
+      - name: Install Android dependencies
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
+
+      - name: Build
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet publish -r ${{ matrix.rid }}
+
+      - name: Rename APK
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: |
+          apk_dir="bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish"
+          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${{ matrix.suffix }}.apk"
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ProjectName }}-${{ matrix.suffix }}
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish/${{ env.ProjectName }}-${{ matrix.suffix }}.apk
+
+  build_android_universal:
+    needs: [test, check_format]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: tree:0
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.NET_VERSION }}
+      - run: dotnet workload install android
+
+      - name: Cache Android dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/android-sdk
+            ~/jdk
+          key: android-deps-${{ env.NET_TFM }}-android
+
+      - name: Install Android dependencies
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
+
+      - name: Build
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet publish
+
+      - name: Rename APK
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: |
+          apk_dir="bin/Release/${{ env.NET_TFM }}-android/publish"
+          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-android-universal.apk"
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ProjectName }}-android-universal
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/publish/${{ env.ProjectName }}-android-universal.apk
 
   nuget:
     needs: [test, check_format]
@@ -110,7 +203,7 @@ jobs:
           dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
   release:
-    needs: [build, nuget]
+    needs: [build, build_android, build_android_universal, nuget]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -123,6 +216,9 @@ jobs:
           mkdir -p builtfiles
           for rid in win-x64 linux-x64 linux-arm64 osx-arm64; do
             7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}-${rid}"
+          done
+          for variant in android-arm64 android-x64 android-universal; do
+            cp "${{ env.ProjectName }}-${variant}/${{ env.ProjectName }}-${variant}.apk" "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${variant}.apk"
           done
 
       - name: Create a new GitHub release
