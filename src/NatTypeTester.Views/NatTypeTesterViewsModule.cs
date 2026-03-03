@@ -8,12 +8,13 @@ global using Avalonia.Markup.Xaml;
 global using JetBrains.Annotations;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Localization;
-global using NatTypeTester.Configuration;
 global using NatTypeTester.Application.Contracts;
+global using NatTypeTester.Configuration;
 global using NatTypeTester.Domain.Shared;
 global using NatTypeTester.Domain.Shared.Localization;
 global using NatTypeTester.ViewModels;
 global using NatTypeTester.Views.Extensions;
+global using NatTypeTester.Views.Services;
 global using NatTypeTester.Views.Views;
 global using ReactiveUI;
 global using ReactiveUI.Avalonia;
@@ -34,7 +35,6 @@ global using Volo.Abp.Autofac;
 global using Volo.Abp.DependencyInjection;
 global using Volo.Abp.Modularity;
 global using Volo.Abp.Validation;
-global using NatTypeTester.Views.Services;
 
 namespace NatTypeTester.Views;
 
