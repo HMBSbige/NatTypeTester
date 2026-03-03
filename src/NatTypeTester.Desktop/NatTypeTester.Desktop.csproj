@@ -17,10 +17,11 @@
     <TrimmerRootAssembly Include="ReactiveUI" />
   </ItemGroup>
 
-  <Target Name="ExcludeXmlDocFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
+  <Target Name="ExcludeFilesFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.RelativePath)' == 'av_libglesv2.dll'" />
       <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.xml'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb'" />
     </ItemGroup>
   </Target>
 
