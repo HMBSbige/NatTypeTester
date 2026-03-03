@@ -12,8 +12,9 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_NOLOGO: 1
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
-  NET_TFM: net10.0
   NET_VERSION: 10.0.x
+  NET_TFM: net10.0
+  ANDROID_SDK: 36.1
 
 jobs:
   check_format:
@@ -84,9 +85,19 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
+      - run: dotnet workload install android
 
-      - name: Install Android workload
-        run: dotnet workload install android
+      - name: Cache Android dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/android-sdk
+            ~/jdk
+          key: android-deps-${{ hashFiles('src/NatTypeTester.Android/NatTypeTester.Android.csproj') }}
+
+      - name: Install Android dependencies
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
 
       - name: Build
         working-directory: src/${{ env.ProjectName }}.Android
@@ -96,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-android
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/publish/*-Signed.apk
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish/*-Signed.apk
 
   nuget:
     needs: [test, check_format]

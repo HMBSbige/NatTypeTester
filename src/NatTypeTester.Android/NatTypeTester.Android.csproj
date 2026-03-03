@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0-android</TargetFramework>
+    <TargetFramework>net10.0-android36.1</TargetFramework>
     <OutputType>Exe</OutputType>
     <AssemblyName>NatTypeTester</AssemblyName>
-    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
     <PublishSingleFile>false</PublishSingleFile>
-    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +15,4 @@
     <ProjectReference Include="..\NatTypeTester.Views\NatTypeTester.Views.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <TrimmerRootAssembly Include="ReactiveUI" RootMode="all" />
-  </ItemGroup>
 </Project>
