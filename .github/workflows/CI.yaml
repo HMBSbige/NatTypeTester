@@ -14,7 +14,6 @@ env:
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
   NET_VERSION: 10.0.x
   NET_TFM: net10.0
-  ANDROID_SDK: 36.1
 
 jobs:
   check_format:
@@ -103,7 +102,7 @@ jobs:
           path: |
             ~/android-sdk
             ~/jdk
-          key: android-deps-${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}
+          key: android-deps-${{ env.NET_TFM }}-android
 
       - name: Install Android dependencies
         working-directory: src/${{ env.ProjectName }}.Android
@@ -116,14 +115,14 @@ jobs:
       - name: Rename APK
         working-directory: src/${{ env.ProjectName }}.Android
         run: |
-          apk_dir="bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish"
+          apk_dir="bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish"
           mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${{ matrix.suffix }}.apk"
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-${{ matrix.suffix }}
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish/${{ env.ProjectName }}-${{ matrix.suffix }}.apk
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish/${{ env.ProjectName }}-${{ matrix.suffix }}.apk
 
   build_android_universal:
     needs: [test, check_format]
@@ -144,7 +143,7 @@ jobs:
           path: |
             ~/android-sdk
             ~/jdk
-          key: android-deps-${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}
+          key: android-deps-${{ env.NET_TFM }}-android
 
       - name: Install Android dependencies
         working-directory: src/${{ env.ProjectName }}.Android
@@ -157,14 +156,14 @@ jobs:
       - name: Rename APK
         working-directory: src/${{ env.ProjectName }}.Android
         run: |
-          apk_dir="bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish"
+          apk_dir="bin/Release/${{ env.NET_TFM }}-android/publish"
           mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-android-universal.apk"
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-android-universal
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish/${{ env.ProjectName }}-android-universal.apk
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/publish/${{ env.ProjectName }}-android-universal.apk
 
   nuget:
     needs: [test, check_format]
