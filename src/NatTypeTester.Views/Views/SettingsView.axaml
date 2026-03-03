@@ -21,7 +21,8 @@
             <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Padding="15">
+                    Padding="15"
+                    IsVisible="{Binding CanOpenConfigDirectory,Mode=OneTime}">
                 <StackPanel Spacing="10">
                     <TextBlock x:Name="ConfigDirectoryLabel" FontWeight="Bold" FontSize="16" />
                     <Button x:Name="OpenConfigDirectoryButton" Command="{Binding OpenConfigDirectoryCommand}"

@@ -13,8 +13,6 @@ public class App : Avalonia.Application
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			NotificationExceptionHandler.Install(serviceProvider);
-
 			desktop.Exit += (_, _) =>
 			{
 				using IAbpApplication app = serviceProvider.GetRequiredService<IAbpApplication>();

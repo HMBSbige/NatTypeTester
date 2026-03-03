@@ -1,4 +1,4 @@
-namespace NatTypeTester.Views;
+namespace NatTypeTester.Views.Services;
 
 public static class NotificationExceptionHandler
 {

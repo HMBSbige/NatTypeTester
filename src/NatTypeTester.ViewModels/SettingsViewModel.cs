@@ -39,6 +39,8 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	[Reactive]
 	public partial string? CurrentVersion { get; set; }
 
+	public static bool CanOpenConfigDirectory => OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS();
+
 	private IAppConfigManager AppConfigManager => TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
 
 	private INotificationService NotificationService => TransientCachedServiceProvider.GetRequiredService<INotificationService>();
@@ -216,7 +218,18 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	[ReactiveCommand]
 	private ValueTask OpenConfigDirectory()
 	{
-		return LauncherService.LaunchUriAsync(new Uri(ConfigurationConsts.ConfigDirectory));
+		if (!CanOpenConfigDirectory)
+		{
+			return ValueTask.CompletedTask;
+		}
+
+		UriBuilder uriBuilder = new()
+		{
+			Scheme = Uri.UriSchemeFile,
+			Host = string.Empty,
+			Path = ConfigurationConsts.ConfigDirectory
+		};
+		return LauncherService.LaunchUriAsync(uriBuilder.Uri);
 	}
 
 	[ReactiveCommand]

@@ -34,6 +34,7 @@ global using Volo.Abp.Autofac;
 global using Volo.Abp.DependencyInjection;
 global using Volo.Abp.Modularity;
 global using Volo.Abp.Validation;
+global using NatTypeTester.Views.Services;
 
 namespace NatTypeTester.Views;
 
@@ -79,5 +80,10 @@ public class NatTypeTesterViewsModule : AbpModule
 		AppLocator.CurrentMutable.UseSerilogFullLogger(logger);
 
 		context.Services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(logger, true));
+	}
+
+	public override void OnApplicationInitialization(ApplicationInitializationContext context)
+	{
+		NotificationExceptionHandler.Install(context.ServiceProvider);
 	}
 }
