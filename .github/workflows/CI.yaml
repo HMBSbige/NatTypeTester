@@ -77,6 +77,51 @@ jobs:
   build_android:
     needs: [test, check_format]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid:
+          - android-arm64
+          - android-x64
+        include:
+          - rid: android-arm64
+            suffix: android-arm64
+          - rid: android-x64
+            suffix: android-x64
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: tree:0
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.NET_VERSION }}
+      - run: dotnet workload install android
+
+      - name: Cache Android dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/android-sdk
+            ~/jdk
+          key: android-deps-${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}
+
+      - name: Install Android dependencies
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
+
+      - name: Build
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: dotnet publish -r ${{ matrix.rid }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ProjectName }}-${{ matrix.suffix }}
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish/*-Signed.apk
+
+  build_android_universal:
+    needs: [test, check_format]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
@@ -106,7 +151,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.ProjectName }}-android
+          name: ${{ env.ProjectName }}-android-universal
           path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish/*-Signed.apk
 
   nuget:
@@ -147,7 +192,7 @@ jobs:
           dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
   release:
-    needs: [build, build_android, nuget]
+    needs: [build, build_android, build_android_universal, nuget]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -161,7 +206,9 @@ jobs:
           for rid in win-x64 linux-x64 linux-arm64 osx-arm64; do
             7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}-${rid}"
           done
-          cp ${{ env.ProjectName }}-android/*-Signed.apk "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-android.apk"
+          for variant in android-arm64 android-x64 android-universal; do
+            cp ${{ env.ProjectName }}-${variant}/*-Signed.apk "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${variant}.apk"
+          done
 
       - name: Create a new GitHub release
         uses: ncipollo/release-action@v1

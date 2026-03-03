@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <Target Name="CleanPreviousPublish" BeforeTargets="PrepareForPublish">
-    <RemoveDir Directories="$(PublishDir)" />
+    <RemoveDir Directories="$(PublishDir)" Condition="Exists('$(PublishDir)')" />
   </Target>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
