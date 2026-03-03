@@ -1,4 +1,3 @@
-using Android.App;
 using Android.Content.PM;
 using Autofac.Extensions.DependencyInjection;
 using Avalonia;

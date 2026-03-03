@@ -93,7 +93,7 @@ jobs:
           path: |
             ~/android-sdk
             ~/jdk
-          key: android-deps-${{ hashFiles('src/NatTypeTester.Android/NatTypeTester.Android.csproj') }}
+          key: android-deps-${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}
 
       - name: Install Android dependencies
         working-directory: src/${{ env.ProjectName }}.Android
@@ -101,7 +101,7 @@ jobs:
 
       - name: Build
         working-directory: src/${{ env.ProjectName }}.Android
-        run: dotnet publish -c Release
+        run: dotnet publish
 
       - name: Upload
         uses: actions/upload-artifact@v7
