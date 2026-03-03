@@ -113,11 +113,18 @@ jobs:
         working-directory: src/${{ env.ProjectName }}.Android
         run: dotnet publish -r ${{ matrix.rid }}
 
+      - name: Rename APK
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: |
+          version=$(dotnet minver)
+          apk_dir="bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish"
+          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${version}-${{ matrix.suffix }}.apk"
+
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-${{ matrix.suffix }}
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish/*-Signed.apk
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/${{ matrix.rid }}/publish/${{ env.ProjectName }}-*-${{ matrix.suffix }}.apk
 
   build_android_universal:
     needs: [test, check_format]
@@ -148,11 +155,18 @@ jobs:
         working-directory: src/${{ env.ProjectName }}.Android
         run: dotnet publish
 
+      - name: Rename APK
+        working-directory: src/${{ env.ProjectName }}.Android
+        run: |
+          version=$(dotnet minver)
+          apk_dir="bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish"
+          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${version}-android-universal.apk"
+
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-android-universal
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish/*-Signed.apk
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android${{ env.ANDROID_SDK }}/publish/${{ env.ProjectName }}-*-android-universal.apk
 
   nuget:
     needs: [test, check_format]
@@ -207,7 +221,7 @@ jobs:
             7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}-${rid}"
           done
           for variant in android-arm64 android-x64 android-universal; do
-            cp ${{ env.ProjectName }}-${variant}/*-Signed.apk "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${variant}.apk"
+            cp ${{ env.ProjectName }}-${variant}/*.apk builtfiles/
           done
 
       - name: Create a new GitHub release
