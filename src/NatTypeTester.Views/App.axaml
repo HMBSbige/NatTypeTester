@@ -22,20 +22,20 @@
                     <SolidColorBrush x:Key="GlassCardBorderBrush" Color="#8AFFFFFF" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="SplitPaneLeftBackgroundBrush" Color="#CC202020" />
+                    <SolidColorBrush x:Key="SplitPaneLeftBackgroundBrush" Color="#F0202020" />
                     <LinearGradientBrush x:Key="SplitPaneContentBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#54151617" Offset="0" />
-                        <GradientStop Color="#3F101112" Offset="1" />
+                        <GradientStop Color="#DE151617" Offset="0" />
+                        <GradientStop Color="#CA101112" Offset="1" />
                     </LinearGradientBrush>
                     <LinearGradientBrush x:Key="SplitPaneContentOverlayBrush" StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#01FFFFFF" Offset="0" />
+                        <GradientStop Color="#06FFFFFF" Offset="0" />
                         <GradientStop Color="#00FFFFFF" Offset="1" />
                     </LinearGradientBrush>
                     <SolidColorBrush x:Key="NavPaneItemForegroundBrush" Color="#E5EEF8FF" />
                     <SolidColorBrush x:Key="NavPaneItemHoverBackgroundBrush" Color="#3AFFFFFF" />
                     <SolidColorBrush x:Key="NavPaneItemSelectedBackgroundBrush" Color="#58FFFFFF" />
-                    <SolidColorBrush x:Key="GlassCardBackgroundBrush" Color="#10000000" />
-                    <SolidColorBrush x:Key="GlassCardBorderBrush" Color="#1BFFFFFF" />
+                    <SolidColorBrush x:Key="GlassCardBackgroundBrush" Color="#4A000000" />
+                    <SolidColorBrush x:Key="GlassCardBorderBrush" Color="#40FFFFFF" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
