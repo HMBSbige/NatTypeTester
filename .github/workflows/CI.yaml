@@ -111,7 +111,7 @@ jobs:
         run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
 
       - name: Decode keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.keystore
 
       - name: Build
@@ -164,7 +164,7 @@ jobs:
         run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
 
       - name: Decode keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.keystore
 
       - name: Build
