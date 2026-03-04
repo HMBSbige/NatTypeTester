@@ -83,11 +83,6 @@ jobs:
         rid:
           - android-arm64
           - android-x64
-        include:
-          - rid: android-arm64
-            suffix: android-arm64
-          - rid: android-x64
-            suffix: android-x64
     steps:
       - uses: actions/checkout@v6
         with:
@@ -129,13 +124,13 @@ jobs:
         working-directory: src/${{ env.ProjectName }}.Android
         run: |
           apk_dir="bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish"
-          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${{ matrix.suffix }}.apk"
+          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${{ matrix.rid }}.apk"
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.ProjectName }}-${{ matrix.suffix }}
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish/${{ env.ProjectName }}-${{ matrix.suffix }}.apk
+          name: ${{ env.ProjectName }}-${{ matrix.rid }}
+          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish/${{ env.ProjectName }}-${{ matrix.rid }}.apk
 
   build_android_universal:
     name: Build Android (universal)
