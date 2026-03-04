@@ -110,6 +110,9 @@ jobs:
         working-directory: src/${{ env.ProjectName }}.Android
         run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
 
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=$HOME/jdk" >> "$GITHUB_ENV"
+
       - name: Decode keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.keystore
 
@@ -161,6 +164,9 @@ jobs:
       - name: Install Android dependencies
         working-directory: src/${{ env.ProjectName }}.Android
         run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
+
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=$HOME/jdk" >> "$GITHUB_ENV"
 
       - name: Decode keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.keystore
