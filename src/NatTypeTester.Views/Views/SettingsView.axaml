@@ -8,23 +8,36 @@
     xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
-    d:DesignWidth="600" d:DesignHeight="400"
+    d:DesignWidth="380" d:DesignHeight="600"
     x:Class="NatTypeTester.Views.Views.SettingsView"
     x:DataType="vm:SettingsViewModel">
     <Design.DataContext>
         <designViewModels:DesignSettingsViewModel />
     </Design.DataContext>
 
+    <UserControl.Styles>
+        <Style Selector="Border.settings-card">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="10" />
+        </Style>
+        <Style Selector="Border.settings-card > StackPanel">
+            <Setter Property="Spacing" Value="8" />
+        </Style>
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </UserControl.Styles>
+
     <ScrollViewer>
-        <StackPanel Margin="10" Spacing="15">
+        <StackPanel Margin="8" Spacing="10">
             <!-- Configuration Directory -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="15"
+            <Border Classes="settings-card"
                     IsVisible="{Binding CanOpenConfigDirectory,Mode=OneTime}">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="ConfigDirectoryLabel" FontWeight="Bold" FontSize="16" />
+                <StackPanel>
+                    <TextBlock x:Name="ConfigDirectoryLabel" Classes="section-title" />
                     <Button x:Name="OpenConfigDirectoryButton" Command="{Binding OpenConfigDirectoryCommand}"
                             HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" Spacing="5">
@@ -36,17 +49,14 @@
             </Border>
 
             <!-- Update Settings -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="15">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="UpdateLabel" FontWeight="Bold" FontSize="16" />
+            <Border Classes="settings-card">
+                <StackPanel>
+                    <TextBlock x:Name="UpdateLabel" Classes="section-title" />
 
                     <!-- Version Info and Action Buttons -->
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
-                        <!-- Version Info (Left) -->
-                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                    <StackPanel Spacing="8">
+                        <!-- Version Info -->
+                        <StackPanel Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <TextBlock x:Name="CurrentVersionLabel" />
                                 <TextBlock Text="{Binding CurrentVersion}" />
@@ -58,8 +68,8 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Action Buttons (Right) -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <!-- Action Buttons -->
+                        <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button x:Name="CheckUpdateButton" Command="{Binding CheckUpdateCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="5">
                                     <ic:FluentIcon Icon="ArrowSync" IconVariant="Color" />
@@ -73,7 +83,7 @@
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
 
                     <!-- Include PreRelease -->
                     <CheckBox x:Name="IncludePreReleaseCheckBox" IsChecked="{Binding IncludePreRelease}" />
@@ -93,12 +103,9 @@
             </Border>
 
             <!-- Proxy Settings -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="15">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="ProxyLabel" FontWeight="Bold" FontSize="16" />
+            <Border Classes="settings-card">
+                <StackPanel>
+                    <TextBlock x:Name="ProxyLabel" Classes="section-title" />
                     <StackPanel Orientation="Horizontal" Spacing="20">
                         <RadioButton x:Name="NoProxyRadioButton" GroupName="ProxyType"
                                      IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
@@ -107,34 +114,30 @@
                     </StackPanel>
 
                     <!-- Proxy Config Grid -->
-                    <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="10">
-                        <StackPanel>
-                            <TextBlock x:Name="ProxyServerLabel" Margin="0,0,0,5" />
+                    <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="8">
+                        <StackPanel Classes="form-field">
+                            <TextBlock x:Name="ProxyServerLabel" />
                             <TextBox Text="{Binding ProxyServer}" />
                         </StackPanel>
-                        <StackPanel>
-                            <TextBlock x:Name="ProxyUsernameLabel" Margin="0,0,0,5" />
+                        <StackPanel Classes="form-field">
+                            <TextBlock x:Name="ProxyUsernameLabel" />
                             <TextBox Text="{Binding ProxyUser}" />
                         </StackPanel>
-                        <StackPanel>
-                            <TextBlock x:Name="ProxyPasswordLabel" Margin="0,0,0,5" />
+                        <StackPanel Classes="form-field">
+                            <TextBlock x:Name="ProxyPasswordLabel" />
                             <TextBox Text="{Binding ProxyPassword}" PasswordChar="•" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <!-- STUN Server List Source -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="15">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="StunServerListLabel" FontWeight="Bold" FontSize="16" />
-                    <Grid ColumnDefinitions="*,Auto">
+            <Border Classes="settings-card">
+                <StackPanel>
+                    <TextBlock x:Name="StunServerListLabel" Classes="section-title" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
                         <TextBox Grid.Column="0" Text="{Binding StunServerListUri}" />
                         <Button x:Name="LoadStunServerListButton" Grid.Column="1"
-                                Command="{Binding LoadStunServerListCommand}" Margin="5,0,0,0">
+                                Command="{Binding LoadStunServerListCommand}">
                             <ic:FluentIcon Icon="ArrowDownload" IconVariant="Regular" />
                         </Button>
                     </Grid>
@@ -142,12 +145,9 @@
             </Border>
 
             <!-- Language Settings -->
-            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="15">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="LanguageLabel" FontWeight="Bold" FontSize="16" />
+            <Border Classes="settings-card">
+                <StackPanel>
+                    <TextBlock x:Name="LanguageLabel" Classes="section-title" />
                     <ComboBox ItemsSource="{Binding Languages}"
                               SelectedItem="{Binding SelectedLanguage}"
                               DisplayMemberBinding="{Binding DisplayName}"

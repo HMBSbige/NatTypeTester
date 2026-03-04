@@ -7,53 +7,55 @@
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
-    d:DesignWidth="600" d:DesignHeight="400"
+    d:DesignWidth="380" d:DesignHeight="500"
     x:Class="NatTypeTester.Views.Views.RFC3489View"
     x:DataType="vm:RFC3489ViewModel">
     <Design.DataContext>
         <designViewModels:DesignRFC3489ViewModel />
     </Design.DataContext>
 
-    <Grid Margin="10" RowDefinitions="Auto,*">
-        <StackPanel Spacing="10">
-            <!-- Warning Info Bar -->
-            <Border Background="#FFF4CE" BorderBrush="#FFE699" BorderThickness="1" CornerRadius="4" Padding="10">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <ic:FluentIcon Icon="Warning" IconVariant="Color" />
-                    <TextBlock x:Name="Rfc3489WarningText" TextWrapping="Wrap" Foreground="#744210" />
+    <DockPanel>
+        <Border Classes="test-action-container" DockPanel.Dock="Bottom">
+            <Button x:Name="TestButton"
+                    Classes="accent test-action-button"
+                    Command="{Binding TestClassicNatTypeCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <ic:FluentIcon Icon="Play" IconVariant="Regular" />
+                    <TextBlock x:Name="TestButtonText" VerticalAlignment="Center" />
                 </StackPanel>
-            </Border>
+            </Button>
+        </Border>
 
-            <!-- NAT Type -->
-            <StackPanel>
-                <TextBlock x:Name="NatTypeLabel" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding NatType, Mode=OneWay}" />
+        <ScrollViewer>
+            <StackPanel Margin="8" Spacing="8">
+                <Border Background="#FFF4CE" BorderBrush="#FFE699" BorderThickness="1" CornerRadius="8" Padding="10">
+                    <DockPanel>
+                        <ic:FluentIcon Icon="Warning" IconVariant="Color" DockPanel.Dock="Left" Margin="0,0,8,0" VerticalAlignment="Top" />
+                        <TextBlock x:Name="Rfc3489WarningText" TextWrapping="Wrap" Foreground="#744210" />
+                    </DockPanel>
+                </Border>
+
+                <StackPanel Classes="form-field">
+                    <TextBlock x:Name="NatTypeLabel" />
+                    <TextBox IsReadOnly="True" Text="{Binding NatType, Mode=OneWay}" />
+                </StackPanel>
+
+                <StackPanel Classes="form-field" IsEnabled="{Binding !IsTesting}">
+                    <TextBlock x:Name="LocalEndLabel" />
+                    <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
+                              Text="{Binding LocalEnd}"
+                              HorizontalAlignment="Stretch">
+                        <ComboBoxItem Content="0.0.0.0:0" />
+                        <ComboBoxItem Content="[::]:0" />
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Classes="form-field">
+                    <TextBlock x:Name="PublicEndLabel" />
+                    <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
+                </StackPanel>
             </StackPanel>
-
-            <!-- Local End -->
-            <StackPanel IsEnabled="{Binding !IsTesting}">
-                <TextBlock x:Name="LocalEndLabel" Margin="0,0,0,5" />
-                <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
-                          Text="{Binding LocalEnd}"
-                          HorizontalAlignment="Stretch">
-                    <ComboBoxItem Content="0.0.0.0:0" />
-                    <ComboBoxItem Content="[::]:0" />
-                </ComboBox>
-            </StackPanel>
-
-            <!-- Public End -->
-            <StackPanel>
-                <TextBlock x:Name="PublicEndLabel" Margin="0,0,0,5" />
-                <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
-            </StackPanel>
-        </StackPanel>
-
-        <!-- Test Button -->
-        <Button x:Name="TestButton" Grid.Row="1"
-                Command="{Binding TestClassicNatTypeCommand}"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Margin="0,10,0,0" />
-    </Grid>
+        </ScrollViewer>
+    </DockPanel>
 
 </UserControl>

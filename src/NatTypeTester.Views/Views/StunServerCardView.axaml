@@ -1,0 +1,38 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
+    xmlns:ic="using:FluentIcons.Avalonia"
+    mc:Ignorable="d"
+    d:DesignWidth="380" d:DesignHeight="84"
+    x:Class="NatTypeTester.Views.Views.StunServerCardView"
+    x:DataType="vm:MainWindowViewModel">
+    <Border Margin="8,8,8,4"
+            Padding="10"
+            Background="{DynamicResource GlassCardBackgroundBrush}"
+            BorderBrush="{DynamicResource GlassCardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            BoxShadow="0 8 22 0 #20000000">
+        <StackPanel Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <ic:FluentIcon Icon="Server" IconVariant="Regular" />
+                <TextBlock x:Name="StunServerLabel" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" />
+            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">
+                <ComboBox Grid.Column="0" IsEditable="True"
+                          ItemsSource="{Binding StunServers}"
+                          Text="{Binding CurrentStunServer}"
+                          HorizontalAlignment="Stretch" />
+                <Button x:Name="AddStunServerButton" Grid.Column="1" Command="{Binding AddStunServerCommand}">
+                    <ic:FluentIcon Icon="Add" IconVariant="Regular" />
+                </Button>
+                <Button x:Name="DeleteStunServerButton" Grid.Column="2" Command="{Binding DeleteStunServerCommand}">
+                    <ic:FluentIcon Icon="Delete" IconVariant="Regular" />
+                </Button>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

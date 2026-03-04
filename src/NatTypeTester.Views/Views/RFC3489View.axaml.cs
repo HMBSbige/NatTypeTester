@@ -14,7 +14,7 @@ public partial class RFC3489View : ReactiveUserControl<RFC3489ViewModel>, ISingl
 				LocalEndLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("LocalEnd")).DisposeWith(d);
 				LocalEndComboBox.Bind(ComboBox.PlaceholderTextProperty, new ObservableStringLocalizer("LocalEndPlaceholder")).DisposeWith(d);
 				PublicEndLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("PublicEnd")).DisposeWith(d);
-				TestButton.Bind(ContentProperty, new ObservableStringLocalizer("Test")).DisposeWith(d);
+				TestButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Test")).DisposeWith(d);
 			}
 		);
 	}

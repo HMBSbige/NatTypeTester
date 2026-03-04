@@ -5,12 +5,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:NatTypeTester.Views.Views"
     mc:Ignorable="d"
-    d:DesignWidth="800" d:DesignHeight="600"
+    d:DesignWidth="420" d:DesignHeight="535"
     x:Class="NatTypeTester.Views.Views.MainWindow"
     Icon="/Assets/icon.ico"
     Title="NatTypeTester"
-    Width="620" Height="600"
-    WindowStartupLocation="CenterScreen">
+    Width="420" Height="535"
+    MinWidth="420" MinHeight="535"
+    WindowStartupLocation="CenterScreen"
+    TransparencyLevelHint="AcrylicBlur"
+    Background="Transparent">
 
     <views:MainView />
 

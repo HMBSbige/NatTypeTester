@@ -8,61 +8,128 @@
     xmlns:ic="using:FluentIcons.Avalonia"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     mc:Ignorable="d"
-    d:DesignWidth="620" d:DesignHeight="600"
+    d:DesignWidth="420" d:DesignHeight="535"
     x:Class="NatTypeTester.Views.Views.MainView"
     x:DataType="vm:MainWindowViewModel">
     <Design.DataContext>
         <designViewModels:DesignMainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*">
-        <!-- STUN Server ComboBox -->
-        <StackPanel Grid.Row="0" Margin="10">
-            <TextBlock x:Name="StunServerLabel" Margin="0,0,0,5" />
-            <Grid ColumnDefinitions="*,Auto,Auto">
-                <ComboBox Grid.Column="0" IsEditable="True"
-                          ItemsSource="{Binding StunServers}"
-                          Text="{Binding CurrentStunServer}"
-                          HorizontalAlignment="Stretch" />
-                <Button x:Name="AddStunServerButton" Grid.Column="1" Command="{Binding AddStunServerCommand}" Margin="5,0,0,0">
-                    <ic:FluentIcon Icon="Add" IconVariant="Regular" />
-                </Button>
-                <Button x:Name="DeleteStunServerButton" Grid.Column="2" Command="{Binding DeleteStunServerCommand}" Margin="5,0,0,0">
-                    <ic:FluentIcon Icon="Delete" IconVariant="Regular" />
-                </Button>
-            </Grid>
-        </StackPanel>
+    <UserControl.Styles>
+        <Style Selector="ToggleButton#PaneToggleButton">
+            <Setter Property="Foreground" Value="{DynamicResource NavPaneItemForegroundBrush}" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+        <Style Selector="ToggleButton#PaneToggleButton:pointerover">
+            <Setter Property="Background" Value="{DynamicResource NavPaneItemHoverBackgroundBrush}" />
+        </Style>
+        <Style Selector="ToggleButton#PaneToggleButton:pressed">
+            <Setter Property="Background" Value="{DynamicResource NavPaneItemSelectedBackgroundBrush}" />
+        </Style>
+        <Style Selector="ListBox.nav-list">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="ListBox.nav-list ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Margin" Value="2,1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource NavPaneItemForegroundBrush}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ListBox.nav-list ListBoxItem:pointerover">
+            <Setter Property="Background" Value="{DynamicResource NavPaneItemHoverBackgroundBrush}" />
+        </Style>
+        <Style Selector="ListBox.nav-list ListBoxItem:selected">
+            <Setter Property="Background" Value="{DynamicResource NavPaneItemSelectedBackgroundBrush}" />
+        </Style>
+        <Style Selector="ListBox.nav-list > ListBoxItem > Grid > TextBlock">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ListBox.nav-list.open > ListBoxItem > Grid > TextBlock">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="IsHitTestVisible" Value="True" />
+        </Style>
+        <Style Selector="ListBox.nav-list > ListBoxItem > Grid > ic|FluentIcon">
+            <Setter Property="FontSize" Value="25" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Styles>
 
-        <!-- Tab Control for different views -->
-        <TabControl Grid.Row="1" Margin="10,0,10,10">
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <ic:FluentIcon Icon="NetworkCheck" IconVariant="Regular" />
-                        <TextBlock x:Name="Rfc5780TabLabel" />
-                    </StackPanel>
-                </TabItem.Header>
-                <views:RFC5780View DataContext="{Binding RFC5780ViewModel}" />
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <ic:FluentIcon Icon="Globe" IconVariant="Color" />
-                        <TextBlock x:Name="Rfc3489TabLabel" />
-                    </StackPanel>
-                </TabItem.Header>
-                <views:RFC3489View DataContext="{Binding RFC3489ViewModel}" />
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <ic:FluentIcon Icon="Settings" IconVariant="Color" />
-                        <TextBlock x:Name="SettingsTabLabel" />
-                    </StackPanel>
-                </TabItem.Header>
-                <views:SettingsView DataContext="{Binding SettingsViewModel}" />
-            </TabItem>
-        </TabControl>
-    </Grid>
+    <SplitView x:Name="NavSplitView"
+               DisplayMode="CompactOverlay"
+               IsPaneOpen="False"
+               OpenPaneLength="150"
+               CompactPaneLength="40"
+               PaneBackground="Transparent"
+               PanePlacement="Left">
+        <SplitView.Pane>
+            <Grid Background="{DynamicResource SplitPaneLeftBackgroundBrush}" RowDefinitions="Auto,*">
+                <ToggleButton x:Name="PaneToggleButton" Grid.Row="0"
+                              Width="40" Height="36"
+                              IsChecked="{Binding #NavSplitView.IsPaneOpen}"
+                              Background="Transparent" BorderThickness="0"
+                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <ic:FluentIcon Icon="Navigation" IconVariant="Regular" />
+                </ToggleButton>
+                <ListBox x:Name="NavListBox" Grid.Row="1"
+                         Classes="nav-list"
+                         Classes.open="{Binding #NavSplitView.IsPaneOpen}"
+                         SelectedIndex="0"
+                         Margin="0,4,0,4">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <DockPanel LastChildFill="False" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBoxItem DockPanel.Dock="Top">
+                        <Grid ColumnDefinitions="36,*">
+                            <ic:FluentIcon Grid.Column="0" Icon="NetworkCheck" IconVariant="Regular" />
+                            <TextBlock x:Name="Rfc5780NavLabel" Grid.Column="1" />
+                        </Grid>
+                    </ListBoxItem>
+                    <ListBoxItem DockPanel.Dock="Top">
+                        <Grid ColumnDefinitions="36,*">
+                            <ic:FluentIcon Grid.Column="0" Icon="Globe" IconVariant="Color" />
+                            <TextBlock x:Name="Rfc3489NavLabel" Grid.Column="1" />
+                        </Grid>
+                    </ListBoxItem>
+                    <ListBoxItem DockPanel.Dock="Bottom">
+                        <Grid ColumnDefinitions="36,*">
+                            <ic:FluentIcon Grid.Column="0" Icon="Settings" IconVariant="Color" />
+                            <TextBlock x:Name="SettingsNavLabel" Grid.Column="1" />
+                        </Grid>
+                    </ListBoxItem>
+                </ListBox>
+            </Grid>
+        </SplitView.Pane>
+
+        <SplitView.Content>
+            <Grid Background="{DynamicResource SplitPaneContentBackgroundBrush}">
+                <Border Background="{DynamicResource SplitPaneContentOverlayBrush}" IsHitTestVisible="False" />
+                <Carousel SelectedIndex="{Binding #NavListBox.SelectedIndex}">
+                    <Carousel.PageTransition>
+                        <CrossFade Duration="0:0:0.3" />
+                    </Carousel.PageTransition>
+                    <DockPanel>
+                        <views:StunServerCardView DockPanel.Dock="Top" />
+                        <views:RFC5780View DataContext="{Binding RFC5780ViewModel}" />
+                    </DockPanel>
+                    <DockPanel>
+                        <views:StunServerCardView DockPanel.Dock="Top" />
+                        <views:RFC3489View DataContext="{Binding RFC3489ViewModel}" />
+                    </DockPanel>
+                    <views:SettingsView DataContext="{Binding SettingsViewModel}" />
+                </Carousel>
+            </Grid>
+        </SplitView.Content>
+    </SplitView>
 
 </UserControl>

@@ -2,8 +2,59 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="NatTypeTester.Views.App"
              RequestedThemeVariant="Default">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SplitPaneLeftBackgroundBrush" Color="#F3F7FCFF" />
+                    <LinearGradientBrush x:Key="SplitPaneContentBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#F7FFFFFF" Offset="0" />
+                        <GradientStop Color="#EEFFFFFF" Offset="1" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush x:Key="SplitPaneContentOverlayBrush" StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#2EFFFFFF" Offset="0" />
+                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="NavPaneItemForegroundBrush" Color="#233346" />
+                    <SolidColorBrush x:Key="NavPaneItemHoverBackgroundBrush" Color="#88FFFFFF" />
+                    <SolidColorBrush x:Key="NavPaneItemSelectedBackgroundBrush" Color="#C2FFFFFF" />
+                    <SolidColorBrush x:Key="GlassCardBackgroundBrush" Color="#75FFFFFF" />
+                    <SolidColorBrush x:Key="GlassCardBorderBrush" Color="#8AFFFFFF" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SplitPaneLeftBackgroundBrush" Color="#CC202020" />
+                    <LinearGradientBrush x:Key="SplitPaneContentBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#54151617" Offset="0" />
+                        <GradientStop Color="#3F101112" Offset="1" />
+                    </LinearGradientBrush>
+                    <LinearGradientBrush x:Key="SplitPaneContentOverlayBrush" StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#01FFFFFF" Offset="0" />
+                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="NavPaneItemForegroundBrush" Color="#E5EEF8FF" />
+                    <SolidColorBrush x:Key="NavPaneItemHoverBackgroundBrush" Color="#3AFFFFFF" />
+                    <SolidColorBrush x:Key="NavPaneItemSelectedBackgroundBrush" Color="#58FFFFFF" />
+                    <SolidColorBrush x:Key="GlassCardBackgroundBrush" Color="#10000000" />
+                    <SolidColorBrush x:Key="GlassCardBorderBrush" Color="#1BFFFFFF" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="StackPanel.form-field > TextBlock">
+            <Setter Property="Margin" Value="0,0,0,3" />
+        </Style>
+        <Style Selector="Border.test-action-container">
+            <Setter Property="Margin" Value="8,4,8,8" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BoxShadow" Value="0 2 6 0 #30000000" />
+        </Style>
+        <Style Selector="Button.test-action-button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
     </Application.Styles>
 </Application>

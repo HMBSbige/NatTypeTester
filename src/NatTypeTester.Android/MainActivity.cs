@@ -22,6 +22,11 @@ namespace NatTypeTester.Android;
 )]
 public class MainActivity : AvaloniaMainActivity<App>
 {
+	public override void OnBackPressed()
+	{
+		MoveTaskToBack(true);
+	}
+
 	protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
 	{
 		return base.CustomizeAppBuilder(builder)

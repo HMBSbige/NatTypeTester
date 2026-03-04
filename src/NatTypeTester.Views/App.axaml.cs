@@ -13,17 +13,20 @@ public class App : Avalonia.Application
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			desktop.Exit += (_, _) =>
-			{
-				using IAbpApplication app = serviceProvider.GetRequiredService<IAbpApplication>();
-				app.Shutdown();
-			};
-
 			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
 		}
 		else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
 		{
 			singleViewPlatform.MainView = serviceProvider.GetRequiredService<MainView>();
+		}
+
+		if (ApplicationLifetime is IControlledApplicationLifetime lifetime)
+		{
+			lifetime.Exit += (_, _) =>
+			{
+				using IAbpApplication app = serviceProvider.GetRequiredService<IAbpApplication>();
+				app.Shutdown();
+			};
 		}
 
 		base.OnFrameworkInitializationCompleted();
