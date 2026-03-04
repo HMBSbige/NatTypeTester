@@ -56,6 +56,6 @@
 
   <ItemGroup>
     <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="TUnit" Version="1.18.9" />
+    <PackageVersion Include="TUnit" Version="1.18.21" />
   </ItemGroup>
 </Project>
