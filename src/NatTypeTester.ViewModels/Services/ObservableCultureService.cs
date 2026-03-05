@@ -1,4 +1,4 @@
-namespace NatTypeTester.ViewModels;
+namespace NatTypeTester.ViewModels.Services;
 
 [UsedImplicitly]
 public sealed class ObservableCultureService : ISingletonDependency, IDisposable

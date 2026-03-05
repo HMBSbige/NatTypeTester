@@ -1,4 +1,4 @@
-namespace NatTypeTester.ViewModels;
+namespace NatTypeTester.ViewModels.Extensions;
 
 public static class ObservableExtensions
 {

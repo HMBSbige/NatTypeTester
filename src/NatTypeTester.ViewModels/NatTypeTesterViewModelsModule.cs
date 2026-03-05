@@ -8,6 +8,8 @@ global using NatTypeTester.Domain.Configuration;
 global using NatTypeTester.Domain.Shared;
 global using NatTypeTester.Domain.Shared.Configuration;
 global using NatTypeTester.Domain.Shared.Localization;
+global using NatTypeTester.ViewModels.Extensions;
+global using NatTypeTester.ViewModels.Services;
 global using ReactiveUI;
 global using ReactiveUI.SourceGenerators;
 global using STUN;

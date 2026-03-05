@@ -3,7 +3,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="Avalonia.Android" Version="11.3.12" />
     <PackageVersion Include="Avalonia.Desktop" Version="11.3.12" />
@@ -11,20 +10,17 @@
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.12" />
     <PackageVersion Include="FluentIcons.Avalonia" Version="2.0.320" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.HarfBuzz" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="ReactiveUI" Version="23.1.8" />
     <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="11.4.7" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.1" />
     <PackageVersion Include="Splat.Serilog" Version="19.3.1" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="Volo.Abp.Autofac" Version="10.1.1" />
     <PackageVersion Include="Volo.Abp.Core" Version="10.1.1" />
@@ -33,19 +29,16 @@
     <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.1.1" />
     <PackageVersion Include="Volo.Abp.Localization" Version="10.1.1" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="Serilog" Version="4.3.1" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
     <PackageVersion Include="HMBSbige.UpdateChecker" Version="10.0.0" />
@@ -53,7 +46,6 @@
     <PackageVersion Include="NuGet.Versioning" Version="7.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="TUnit" Version="1.18.21" />
