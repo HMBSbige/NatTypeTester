@@ -3,6 +3,7 @@ using Moq;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Messages;
+using STUN.Proxy;
 using System.Net;
 using System.Net.Sockets;
 using static STUN.Utils.AttributeExtensions;
@@ -30,7 +31,7 @@ public class StunClient3489Test
 	[Test]
 	public async Task UdpBlockedTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default!, true);
+		Mock<StunClient3489> mock = new(Any, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient3489 client = mock.Object;
 
 		mock.Setup(x => x.Test1Async(It.IsAny<CancellationToken>())).ReturnsAsync(default(StunResponse?));
@@ -42,7 +43,7 @@ public class StunClient3489Test
 	[Test]
 	public async Task UnsupportedServerTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default!, true);
+		Mock<StunClient3489> mock = new(Any, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient3489 client = mock.Object;
 
 		mock.Setup(x => x.LocalEndPoint).Returns(LocalAddress1);
@@ -78,7 +79,7 @@ public class StunClient3489Test
 	[Test]
 	public async Task NoNatTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default!, true);
+		Mock<StunClient3489> mock = new(Any, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient3489 client = mock.Object;
 
 		StunResponse openInternetTest1Response = new(
@@ -109,7 +110,7 @@ public class StunClient3489Test
 	[Test]
 	public async Task FullConeTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default!, true);
+		Mock<StunClient3489> mock = new(Any, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
@@ -167,7 +168,7 @@ public class StunClient3489Test
 	[Test]
 	public async Task SymmetricTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default!, true);
+		Mock<StunClient3489> mock = new(Any, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(
@@ -198,7 +199,7 @@ public class StunClient3489Test
 	[Test]
 	public async Task RestrictedConeTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient3489> mock = new(Any, Any, default!, true);
+		Mock<StunClient3489> mock = new(Any, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient3489 client = mock.Object;
 
 		StunResponse test1Response = new(

@@ -1,4 +1,3 @@
-using Microsoft;
 using Pipelines.Extensions;
 using System.IO.Pipelines;
 using System.Net;
@@ -6,13 +5,13 @@ using System.Net.Sockets;
 
 namespace STUN.Proxy;
 
-public class DirectTcpProxy : ITcpProxy, IDisposableObservable
+public class DirectTcpProxy : ITcpProxy
 {
 	public IPEndPoint? CurrentLocalEndPoint
 	{
 		get
 		{
-			Verify.NotDisposed(this);
+			ObjectDisposedException.ThrowIf(IsDisposed, this);
 			return TcpClient?.Client.LocalEndPoint as IPEndPoint;
 		}
 	}
@@ -21,9 +20,9 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
-		Verify.NotDisposed(this);
-		Requires.NotNull(local);
-		Requires.NotNull(dst);
+		ObjectDisposedException.ThrowIf(IsDisposed, this);
+		ArgumentNullException.ThrowIfNull(local);
+		ArgumentNullException.ThrowIfNull(dst);
 
 		await CloseAsync(cancellationToken);
 
@@ -35,7 +34,7 @@ public class DirectTcpProxy : ITcpProxy, IDisposableObservable
 
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
-		Verify.NotDisposed(this);
+		ObjectDisposedException.ThrowIf(IsDisposed, this);
 
 		CloseClient();
 

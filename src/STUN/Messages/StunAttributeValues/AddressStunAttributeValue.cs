@@ -1,4 +1,3 @@
-using Microsoft;
 using STUN.Enums;
 using System.Buffers.Binary;
 using System.Net;
@@ -19,14 +18,17 @@ public abstract class AddressStunAttributeValue : IStunAttributeValue
 
 	public virtual int WriteTo(Span<byte> buffer)
 	{
-		Verify.Operation(Address is not null, @"You should set Address info!");
+		IPAddress address = Address ?? throw new InvalidOperationException(@"You should set Address info!");
 
-		Requires.Range(buffer.Length >= 4 + 4, nameof(buffer));
+		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, 4 + 4, nameof(buffer));
 
 		buffer[0] = 0;
 		buffer[1] = (byte)Family;
 		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Port);
-		Requires.Range(Address.TryWriteBytes(buffer[4..], out int bytesWritten), nameof(buffer));
+		if (!address.TryWriteBytes(buffer[4..], out int bytesWritten))
+		{
+			throw new ArgumentException(@"Buffer is too small.", nameof(buffer));
+		}
 
 		return 4 + bytesWritten;
 	}

@@ -25,7 +25,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 		{
 			if (transportType is TransportType.Udp)
 			{
-				using IUdpProxy proxy = ProxyFactory.CreateProxy(input.ProxyType, localEndPoint, socks5CreateOption!);
+				using IUdpProxy proxy = ProxyFactory.CreateProxy(input.ProxyType, localEndPoint, socks5CreateOption);
 				using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 				_client = client;
@@ -36,7 +36,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 			}
 			else
 			{
-				using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption!, server.Hostname);
+				using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname);
 				using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 				_client = client;

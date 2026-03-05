@@ -1,5 +1,3 @@
-using Microsoft;
-
 namespace STUN.Messages.StunAttributeValues;
 
 /// <summary>
@@ -13,7 +11,7 @@ public class ChangeRequestStunAttributeValue : IStunAttributeValue
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		Requires.Range(buffer.Length >= 4, nameof(buffer));
+		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, 4, nameof(buffer));
 
 		buffer[0] = buffer[1] = buffer[2] = 0;
 

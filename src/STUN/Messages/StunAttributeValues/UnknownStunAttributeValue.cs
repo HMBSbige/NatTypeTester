@@ -1,4 +1,3 @@
-using Microsoft;
 using STUN.Enums;
 using System.Buffers.Binary;
 
@@ -14,7 +13,7 @@ public class UnknownStunAttributeValue : IStunAttributeValue
 	public int WriteTo(Span<byte> buffer)
 	{
 		int size = Types.Count << 1;
-		Requires.Range(buffer.Length >= size, nameof(buffer));
+		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, size, nameof(buffer));
 
 		foreach (AttributeType attributeType in Types)
 		{

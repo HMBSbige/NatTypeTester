@@ -1,4 +1,3 @@
-using Microsoft;
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
@@ -31,8 +30,8 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	public StunClient5389UDP(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = default, bool ownedProxy = true)
 	{
-		Requires.NotNull(server);
-		Requires.NotNull(local);
+		ArgumentNullException.ThrowIfNull(server);
+		ArgumentNullException.ThrowIfNull(local);
 
 		_proxy = proxy ?? new NoneUdpProxy(local);
 		_ownedProxy = ownedProxy;
@@ -159,9 +158,9 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	private async ValueTask<StunResult5389> MappingBehaviorTestBase2Async(CancellationToken cancellationToken)
 	{
-		Verify.Operation(State.OtherEndPoint is not null, @"OTHER-ADDRESS is not returned");
+		IPEndPoint otherEndPoint = State.OtherEndPoint ?? throw new InvalidOperationException(@"OTHER-ADDRESS is not returned");
 
-		StunResult5389 result2 = await BindingTestBaseAsync(new IPEndPoint(State.OtherEndPoint.Address, _remoteEndPoint.Port), cancellationToken);
+		StunResult5389 result2 = await BindingTestBaseAsync(new IPEndPoint(otherEndPoint.Address, _remoteEndPoint.Port), cancellationToken);
 
 		if (result2.BindingTestResult is not BindingTestResult.Success)
 		{
@@ -177,9 +176,9 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	private async ValueTask MappingBehaviorTestBase3Async(StunResult5389 result2, CancellationToken cancellationToken)
 	{
-		Verify.Operation(State.OtherEndPoint is not null, @"OTHER-ADDRESS is not returned");
+		IPEndPoint otherEndPoint = State.OtherEndPoint ?? throw new InvalidOperationException(@"OTHER-ADDRESS is not returned");
 
-		StunResult5389 result3 = await BindingTestBaseAsync(State.OtherEndPoint, cancellationToken);
+		StunResult5389 result3 = await BindingTestBaseAsync(otherEndPoint, cancellationToken);
 		if (result3.BindingTestResult is not BindingTestResult.Success)
 		{
 			State.MappingBehavior = MappingBehavior.Fail;
@@ -239,24 +238,27 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 
 	internal virtual async ValueTask<StunResponse?> FilteringBehaviorTest2Async(CancellationToken cancellationToken = default)
 	{
-		Assumes.NotNull(State.OtherEndPoint);
+		IPEndPoint otherEndPoint = State.OtherEndPoint ?? throw new InvalidOperationException(@"OTHER-ADDRESS is not returned");
 
 		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
-			Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
+			Attributes = [AttributeExtensions.BuildChangeRequest(true, true)]
 		};
-		return await RequestAsync(message, _remoteEndPoint, State.OtherEndPoint, cancellationToken);
+		return await RequestAsync(message, _remoteEndPoint, otherEndPoint, cancellationToken);
 	}
 
 	internal virtual async ValueTask<StunResponse?> FilteringBehaviorTest3Async(CancellationToken cancellationToken = default)
 	{
-		Assumes.NotNull(State.OtherEndPoint);
+		if (State.OtherEndPoint is null)
+		{
+			throw new InvalidOperationException(@"OTHER-ADDRESS is not returned");
+		}
 
 		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
-			Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
+			Attributes = [AttributeExtensions.BuildChangeRequest(false, true)]
 		};
 		return await RequestAsync(message, _remoteEndPoint, _remoteEndPoint, cancellationToken);
 	}
@@ -284,7 +286,7 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 			StunMessage5389 message = new();
 			if (message.TryParse(buffer[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
-				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, ((IPEndPoint)_proxy.Client.LocalEndPoint!).Port));
+				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, GetClientLocalEndPoint().Port));
 			}
 		}
 		catch (OperationCanceledException ex)
@@ -292,6 +294,12 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 			Debug.WriteLine(ex);
 		}
 		return default;
+	}
+
+	private IPEndPoint GetClientLocalEndPoint()
+	{
+		return _proxy.Client.LocalEndPoint as IPEndPoint
+			?? throw new InvalidOperationException(@"UDP client local endpoint is unavailable.");
 	}
 
 	public void Dispose()

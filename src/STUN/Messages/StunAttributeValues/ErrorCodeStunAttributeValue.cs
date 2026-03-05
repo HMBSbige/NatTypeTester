@@ -1,4 +1,3 @@
-using Microsoft;
 using System.Text;
 
 namespace STUN.Messages.StunAttributeValues;
@@ -18,7 +17,7 @@ public class ErrorCodeStunAttributeValue : IStunAttributeValue
 
 	public int WriteTo(Span<byte> buffer)
 	{
-		Requires.Range(buffer.Length >= 4, nameof(buffer));
+		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, 4, nameof(buffer));
 
 		buffer[0] = buffer[1] = 0;
 		buffer[2] = Class;

@@ -40,8 +40,8 @@ internal static class Program
 				},
 				withResolver: resolver =>
 				{
-					IServiceProvider serviceProvider = resolver.GetService<IServiceProvider>()!;
-					resolver.GetService<IAbpApplicationWithExternalServiceProvider>()!.Initialize(serviceProvider);
+					IServiceProvider serviceProvider = resolver.GetRequiredService<IServiceProvider>();
+					resolver.GetRequiredService<IAbpApplicationWithExternalServiceProvider>().Initialize(serviceProvider);
 				},
 				withReactiveUIBuilder: rxBuilder =>
 				{

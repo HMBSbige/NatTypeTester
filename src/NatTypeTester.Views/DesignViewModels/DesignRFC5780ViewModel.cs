@@ -9,6 +9,6 @@ public class DesignRFC5780ViewModel : RFC5780ViewModel
 			throw new InvalidOperationException();
 		}
 
-		TransientCachedServiceProvider = AppLocator.Current.GetService<ITransientCachedServiceProvider>()!;
+		TransientCachedServiceProvider = AppLocator.Current.GetRequiredService<ITransientCachedServiceProvider>();
 	}
 }

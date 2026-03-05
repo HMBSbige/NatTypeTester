@@ -4,6 +4,7 @@ using STUN;
 using STUN.Client;
 using STUN.Enums;
 using STUN.Messages;
+using STUN.Proxy;
 using STUN.StunResult;
 using System.Net;
 
@@ -59,7 +60,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTestFailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -79,7 +80,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTestUnsupportedServerAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -128,7 +129,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTestDirectAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 response = new()
@@ -154,7 +155,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTestEndpointIndependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -178,7 +179,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTest2FailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -205,7 +206,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTestAddressDependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -246,7 +247,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTestAddressAndPortDependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -287,7 +288,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task MappingBehaviorTest3FailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -322,7 +323,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTestFailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -342,7 +343,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTestUnsupportedServerAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -391,7 +392,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTestEndpointIndependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -418,7 +419,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTest2UnsupportedServerAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -445,7 +446,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTestAddressAndPortDependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -472,7 +473,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTestAddressDependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -500,7 +501,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task FilteringBehaviorTest3UnsupportedServerAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -528,7 +529,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task QueryFailTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -548,7 +549,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task QueryUnsupportedServerTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -572,7 +573,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task QueryMappingBehaviorDirectTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -599,7 +600,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task QueryMappingBehaviorEndpointIndependentTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -626,7 +627,7 @@ public class StunClien5389UDPTest
 	[Test]
 	public async Task QueryMappingBehaviorAddressAndPortDependentTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389UDP> mock = new(ServerAddress, Any, Mock.Of<IUdpProxy>(), true);
 		StunClient5389UDP client = mock.Object;
 
 		StunResult5389 r1 = new()

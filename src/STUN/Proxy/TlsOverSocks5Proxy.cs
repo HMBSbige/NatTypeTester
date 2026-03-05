@@ -6,16 +6,9 @@ using System.Net.Security;
 
 namespace STUN.Proxy;
 
-public class TlsOverSocks5Proxy : Socks5TcpProxy
+public class TlsOverSocks5Proxy(Socks5CreateOption socks5Options, string targetHost) : Socks5TcpProxy(socks5Options)
 {
 	private SslStream? _tlsStream;
-
-	private readonly string _targetHost;
-
-	public TlsOverSocks5Proxy(Socks5CreateOption socks5Options, string targetHost) : base(socks5Options)
-	{
-		_targetHost = targetHost;
-	}
 
 	public override async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
@@ -23,7 +16,7 @@ public class TlsOverSocks5Proxy : Socks5TcpProxy
 
 		_tlsStream = new SslStream(pipe.AsStream(true));
 
-		await _tlsStream.AuthenticateAsClientAsync(_targetHost);
+		await _tlsStream.AuthenticateAsClientAsync(targetHost);
 
 		return _tlsStream.AsDuplexPipe();
 	}

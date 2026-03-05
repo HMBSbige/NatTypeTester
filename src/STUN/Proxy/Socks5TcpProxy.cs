@@ -1,4 +1,3 @@
-using Microsoft;
 using Socks5.Clients;
 using Socks5.Models;
 using System.IO.Pipelines;
@@ -6,13 +5,13 @@ using System.Net;
 
 namespace STUN.Proxy;
 
-public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
+public class Socks5TcpProxy : ITcpProxy
 {
 	public IPEndPoint? CurrentLocalEndPoint
 	{
 		get
 		{
-			Verify.NotDisposed(this);
+			ObjectDisposedException.ThrowIf(IsDisposed, this);
 			return Socks5Client?.TcpClient.Client.LocalEndPoint as IPEndPoint;
 		}
 	}
@@ -23,17 +22,17 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 	public Socks5TcpProxy(Socks5CreateOption socks5Options)
 	{
-		Requires.NotNull(socks5Options);
-		Requires.Argument(socks5Options.Address is not null, nameof(socks5Options), @"SOCKS5 address is null");
+		ArgumentNullException.ThrowIfNull(socks5Options);
+		ArgumentNullException.ThrowIfNull(socks5Options.Address, nameof(socks5Options.Address));
 
 		Socks5Options = socks5Options;
 	}
 
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
-		Verify.NotDisposed(this);
-		Requires.NotNull(local);
-		Requires.NotNull(dst);
+		ObjectDisposedException.ThrowIf(IsDisposed, this);
+		ArgumentNullException.ThrowIfNull(local);
+		ArgumentNullException.ThrowIfNull(dst);
 
 		await CloseAsync(cancellationToken);
 
@@ -48,7 +47,7 @@ public class Socks5TcpProxy : ITcpProxy, IDisposableObservable
 
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
-		Verify.NotDisposed(this);
+		ObjectDisposedException.ThrowIf(IsDisposed, this);
 
 		CloseClient();
 

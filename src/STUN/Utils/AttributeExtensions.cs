@@ -67,7 +67,7 @@ public static class AttributeExtensions
 		}
 
 		MappedAddressStunAttributeValue mapped = (MappedAddressStunAttributeValue)mappedAddressAttribute.Value;
-		return new IPEndPoint(mapped.Address!, mapped.Port);
+		return ToEndPoint(mapped);
 	}
 
 	public static IPEndPoint? GetChangedAddressAttribute(this StunMessage5389 response)
@@ -80,7 +80,7 @@ public static class AttributeExtensions
 		}
 
 		ChangedAddressStunAttributeValue address = (ChangedAddressStunAttributeValue)changedAddressAttribute.Value;
-		return new IPEndPoint(address.Address!, address.Port);
+		return ToEndPoint(address);
 	}
 
 	public static IPEndPoint? GetXorMappedAddressAttribute(this StunMessage5389 response)
@@ -95,7 +95,7 @@ public static class AttributeExtensions
 		}
 
 		AddressStunAttributeValue mapped = (AddressStunAttributeValue)mappedAddressAttribute.Value;
-		return new IPEndPoint(mapped.Address!, mapped.Port);
+		return ToEndPoint(mapped);
 	}
 
 	public static IPEndPoint? GetOtherAddressAttribute(this StunMessage5389 response)
@@ -110,6 +110,13 @@ public static class AttributeExtensions
 		}
 
 		AddressStunAttributeValue address = (AddressStunAttributeValue)addressAttribute.Value;
-		return new IPEndPoint(address.Address!, address.Port);
+		return ToEndPoint(address);
+	}
+
+	private static IPEndPoint ToEndPoint(AddressStunAttributeValue value)
+	{
+		return value.Address is IPAddress address
+			? new IPEndPoint(address, value.Port)
+			: throw new InvalidOperationException(@"STUN address attribute is missing IP address.");
 	}
 }

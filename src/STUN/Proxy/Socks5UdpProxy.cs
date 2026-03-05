@@ -1,4 +1,3 @@
-using Microsoft;
 using Socks5.Clients;
 using Socks5.Enums;
 using Socks5.Models;
@@ -17,8 +16,13 @@ public class Socks5UdpProxy : IUdpProxy
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		get
 		{
-			Verify.Operation(_socks5Client?.UdpClient is not null, @"Socks5 is not established.");
-			return _socks5Client.UdpClient;
+			Socks5Client? socks5Client = _socks5Client;
+			if (socks5Client?.UdpClient is null)
+			{
+				throw new InvalidOperationException(@"Socks5 is not established.");
+			}
+
+			return socks5Client.UdpClient;
 		}
 	}
 
@@ -30,9 +34,9 @@ public class Socks5UdpProxy : IUdpProxy
 
 	public Socks5UdpProxy(IPEndPoint localEndPoint, Socks5CreateOption socks5Options)
 	{
-		Requires.NotNull(localEndPoint);
-		Requires.NotNull(socks5Options);
-		Requires.Argument(socks5Options.Address is not null, nameof(socks5Options), @"SOCKS5 address is null");
+		ArgumentNullException.ThrowIfNull(localEndPoint);
+		ArgumentNullException.ThrowIfNull(socks5Options);
+		ArgumentNullException.ThrowIfNull(socks5Options.Address, nameof(socks5Options.Address));
 
 		_localEndPoint = localEndPoint;
 		_socks5Options = socks5Options;
@@ -40,7 +44,11 @@ public class Socks5UdpProxy : IUdpProxy
 
 	public async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
 	{
-		Verify.Operation(_socks5Client?.Status is not Status.Established, @"SOCKS5 client has been connected");
+		if (_socks5Client?.Status is Status.Established)
+		{
+			throw new InvalidOperationException(@"SOCKS5 client has been connected");
+		}
+
 		_socks5Client?.Dispose();
 
 		_socks5Client = new Socks5Client(_socks5Options);
@@ -56,23 +64,28 @@ public class Socks5UdpProxy : IUdpProxy
 
 	public async ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
 	{
-		Verify.Operation(_socks5Client?.Status is Status.Established && _socks5Client.UdpClient is not null, @"Socks5 is not established.");
+		Socks5Client? socks5Client = _socks5Client;
+		Socket? udpClient = socks5Client?.UdpClient;
+		if (socks5Client?.Status is not Status.Established || udpClient is null)
+		{
+			throw new InvalidOperationException(@"Socks5 is not established.");
+		}
 
 		byte[] t = ArrayPool<byte>.Shared.Rent(buffer.Length);
 		try
 		{
-			if (_udpServerBound.Type is AddressType.Domain)
+			if (_udpServerBound.Type is AddressType.Domain || _udpServerBound.Address is not IPAddress udpServerAddress)
 			{
 				ThrowErrorAddressType();
 			}
 
-			IPEndPoint remote = new(_udpServerBound.Address!, _udpServerBound.Port);
-			SocketReceiveMessageFromResult r = await _socks5Client.UdpClient.ReceiveMessageFromAsync(t, socketFlags, remote, cancellationToken);
+			IPEndPoint remote = new(udpServerAddress, _udpServerBound.Port);
+			SocketReceiveMessageFromResult r = await udpClient.ReceiveMessageFromAsync(t, socketFlags, remote, cancellationToken);
 			Socks5UdpReceivePacket u = Unpack.Udp(t.AsMemory(0, r.ReceivedBytes));
 
 			u.Data.CopyTo(buffer);
 
-			if (u.Type is AddressType.Domain)
+			if (u.Type is AddressType.Domain || u.Address is not IPAddress remoteAddress)
 			{
 				ThrowErrorAddressType();
 			}
@@ -81,7 +94,7 @@ public class Socks5UdpProxy : IUdpProxy
 			{
 				ReceivedBytes = u.Data.Length,
 				SocketFlags = r.SocketFlags,
-				RemoteEndPoint = new IPEndPoint(u.Address!, u.Port),
+				RemoteEndPoint = new IPEndPoint(remoteAddress, u.Port),
 				PacketInformation = r.PacketInformation
 			};
 		}
@@ -98,14 +111,14 @@ public class Socks5UdpProxy : IUdpProxy
 
 	public async ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 	{
-		Verify.Operation(_socks5Client is not null, @"SOCKS5 client is not connected");
+		Socks5Client socks5Client = _socks5Client ?? throw new InvalidOperationException(@"SOCKS5 client is not connected");
 
 		if (remoteEP is not IPEndPoint remote)
 		{
 			ThrowNotSupportedException();
 		}
 
-		return await _socks5Client.SendUdpAsync(buffer, remote.Address, (ushort)remote.Port, cancellationToken);
+		return await socks5Client.SendUdpAsync(buffer, remote.Address, (ushort)remote.Port, cancellationToken);
 
 		static void ThrowNotSupportedException()
 		{

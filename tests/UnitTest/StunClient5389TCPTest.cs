@@ -148,7 +148,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTestFailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 fail = new() { BindingTestResult = BindingTestResult.Fail };
@@ -168,7 +168,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTestUnsupportedServerAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -217,7 +217,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTestDirectAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 response = new()
@@ -243,7 +243,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTestEndpointIndependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -267,7 +267,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTest2FailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -294,7 +294,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTestAddressDependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -336,7 +336,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTestAddressAndPortDependentAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -378,7 +378,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task MappingBehaviorTest3FailAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		StunResult5389 r1 = new()
@@ -414,7 +414,7 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task FilteringBehaviorTestAsync(CancellationToken cancellationToken)
 	{
-		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, default!, true);
+		Mock<StunClient5389TCP> mock = new(ServerAddress, Any, Mock.Of<ITcpProxy>(), true);
 		IStunClient5389 client = mock.Object;
 
 		await Assert.That(async () => await client.FilteringBehaviorTestAsync(cancellationToken)).Throws<NotSupportedException>();

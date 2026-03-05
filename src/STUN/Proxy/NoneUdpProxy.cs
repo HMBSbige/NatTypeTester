@@ -1,4 +1,3 @@
-using Microsoft;
 using System.Net;
 using System.Net.Sockets;
 
@@ -10,7 +9,7 @@ public class NoneUdpProxy : IUdpProxy
 
 	public NoneUdpProxy(IPEndPoint localEndPoint)
 	{
-		Requires.NotNull(localEndPoint);
+		ArgumentNullException.ThrowIfNull(localEndPoint);
 
 		Client = new Socket(localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
 		Client.Bind(localEndPoint);

@@ -9,7 +9,7 @@ public class App : Avalonia.Application
 
 	public override void OnFrameworkInitializationCompleted()
 	{
-		IServiceProvider serviceProvider = AppLocator.Current.GetService<IServiceProvider>()!;
+		IServiceProvider serviceProvider = AppLocator.Current.GetRequiredService<IServiceProvider>();
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{

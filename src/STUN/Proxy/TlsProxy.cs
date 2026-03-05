@@ -1,4 +1,3 @@
-using Microsoft;
 using Pipelines.Extensions;
 using System.IO.Pipelines;
 using System.Net;
@@ -7,22 +6,15 @@ using System.Net.Sockets;
 
 namespace STUN.Proxy;
 
-public class TlsProxy : DirectTcpProxy
+public class TlsProxy(string targetHost) : DirectTcpProxy
 {
 	private SslStream? _tlsStream;
 
-	private readonly string _targetHost;
-
-	public TlsProxy(string targetHost)
-	{
-		_targetHost = targetHost;
-	}
-
 	public override async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
-		Verify.NotDisposed(this);
-		Requires.NotNull(local);
-		Requires.NotNull(dst);
+		ObjectDisposedException.ThrowIf(IsDisposed, this);
+		ArgumentNullException.ThrowIfNull(local);
+		ArgumentNullException.ThrowIfNull(dst);
 
 		await CloseAsync(cancellationToken);
 
@@ -31,7 +23,7 @@ public class TlsProxy : DirectTcpProxy
 
 		_tlsStream = new SslStream(TcpClient.GetStream(), true);
 
-		await _tlsStream.AuthenticateAsClientAsync(_targetHost);
+		await _tlsStream.AuthenticateAsClientAsync(targetHost);
 
 		return _tlsStream.AsDuplexPipe();
 	}

@@ -1,52 +1,38 @@
-using Microsoft;
 using Socks5.Models;
 using STUN.Enums;
+using System.Diagnostics;
 using System.Net;
 
 namespace STUN.Proxy;
 
 public static class ProxyFactory
 {
-	public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint local, Socks5CreateOption option)
+	public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint local, Socks5CreateOption? option)
 	{
 		return type switch
 		{
 			ProxyType.Plain => new NoneUdpProxy(local),
-			ProxyType.Socks5 => CreateSocks5UdpProxy(local, option),
-			_ => throw Assumes.NotReachable()
+			ProxyType.Socks5 => new Socks5UdpProxy(local, GetSocks5Option(option)),
+			_ => throw new UnreachableException()
 		};
-
-		static Socks5UdpProxy CreateSocks5UdpProxy(IPEndPoint local, Socks5CreateOption option)
-		{
-			Requires.NotNull(option);
-			Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
-			return new Socks5UdpProxy(local, option);
-		}
 	}
 
-	public static ITcpProxy CreateProxy(TransportType transport, ProxyType type, Socks5CreateOption option, string targetHost)
+	public static ITcpProxy CreateProxy(TransportType transport, ProxyType type, Socks5CreateOption? option, string targetHost)
 	{
 		return (transport, type) switch
 		{
 			(TransportType.Tcp, ProxyType.Plain) => new DirectTcpProxy(),
-			(TransportType.Tcp, ProxyType.Socks5) => CreateSocks5TcpProxy(option),
+			(TransportType.Tcp, ProxyType.Socks5) => new Socks5TcpProxy(GetSocks5Option(option)),
 			(TransportType.Tls, ProxyType.Plain) => new TlsProxy(targetHost),
-			(TransportType.Tls, ProxyType.Socks5) => CreateTlsOverSocks5Proxy(option, targetHost),
+			(TransportType.Tls, ProxyType.Socks5) => new TlsOverSocks5Proxy(GetSocks5Option(option), targetHost),
 			_ => throw new NotSupportedException()
 		};
+	}
 
-		static Socks5TcpProxy CreateSocks5TcpProxy(Socks5CreateOption option)
-		{
-			Requires.NotNull(option);
-			Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
-			return new Socks5TcpProxy(option);
-		}
-
-		static TlsOverSocks5Proxy CreateTlsOverSocks5Proxy(Socks5CreateOption option, string targetHost)
-		{
-			Requires.NotNull(option);
-			Requires.Argument(option.Address is not null, nameof(option), @"Proxy server is null");
-			return new TlsOverSocks5Proxy(option, targetHost);
-		}
+	private static Socks5CreateOption GetSocks5Option(Socks5CreateOption? option)
+	{
+		ArgumentNullException.ThrowIfNull(option);
+		ArgumentNullException.ThrowIfNull(option.Address, nameof(option.Address));
+		return option;
 	}
 }

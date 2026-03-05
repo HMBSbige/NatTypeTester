@@ -9,6 +9,6 @@ public class DesignSettingsViewModel : SettingsViewModel
 			throw new InvalidOperationException();
 		}
 
-		TransientCachedServiceProvider = AppLocator.Current.GetService<ITransientCachedServiceProvider>()!;
+		TransientCachedServiceProvider = AppLocator.Current.GetRequiredService<ITransientCachedServiceProvider>();
 	}
 }

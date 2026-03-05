@@ -1,4 +1,3 @@
-using Microsoft;
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
@@ -16,7 +15,7 @@ namespace STUN.Client;
 /// </summary>
 public class StunClient3489 : IUdpStunClient
 {
-	internal virtual IPEndPoint LocalEndPoint => (IPEndPoint)_proxy.Client.LocalEndPoint!;
+	internal virtual IPEndPoint LocalEndPoint => GetClientLocalEndPoint();
 
 	public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
@@ -29,8 +28,8 @@ public class StunClient3489 : IUdpStunClient
 
 	public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null, bool ownedProxy = true)
 	{
-		Requires.NotNull(server);
-		Requires.NotNull(local);
+		ArgumentNullException.ThrowIfNull(server);
+		ArgumentNullException.ThrowIfNull(local);
 
 		_proxy = proxy ?? new NoneUdpProxy(local);
 		_ownedProxy = ownedProxy;
@@ -174,7 +173,7 @@ public class StunClient3489 : IUdpStunClient
 			StunMessage5389 message = new();
 			if (message.TryParse(buffer[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
 			{
-				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, ((IPEndPoint)_proxy.Client.LocalEndPoint!).Port));
+				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, LocalEndPoint.Port));
 			}
 		}
 		catch (OperationCanceledException ex)
@@ -200,7 +199,7 @@ public class StunClient3489 : IUdpStunClient
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			MagicCookie = 0,
-			Attributes = new[] { AttributeExtensions.BuildChangeRequest(true, true) }
+			Attributes = [AttributeExtensions.BuildChangeRequest(true, true)]
 		};
 		return await RequestAsync(message, _remoteEndPoint, other, cancellationToken);
 	}
@@ -221,9 +220,15 @@ public class StunClient3489 : IUdpStunClient
 		{
 			StunMessageType = StunMessageType.BindingRequest,
 			MagicCookie = 0,
-			Attributes = new[] { AttributeExtensions.BuildChangeRequest(false, true) }
+			Attributes = [AttributeExtensions.BuildChangeRequest(false, true)]
 		};
 		return await RequestAsync(message, _remoteEndPoint, _remoteEndPoint, cancellationToken);
+	}
+
+	private IPEndPoint GetClientLocalEndPoint()
+	{
+		return _proxy.Client.LocalEndPoint as IPEndPoint
+			?? throw new InvalidOperationException(@"UDP client local endpoint is unavailable.");
 	}
 
 	public void Dispose()

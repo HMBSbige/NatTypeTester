@@ -1,4 +1,3 @@
-using Microsoft;
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
@@ -26,8 +25,8 @@ public class StunClient5389TCP : IStunClient5389
 
 	public StunClient5389TCP(IPEndPoint server, IPEndPoint local, ITcpProxy? proxy = default, bool ownedProxy = true)
 	{
-		Requires.NotNull(server);
-		Requires.NotNull(local);
+		ArgumentNullException.ThrowIfNull(server);
+		ArgumentNullException.ThrowIfNull(local);
 
 		_proxy = proxy ?? new DirectTcpProxy();
 		_ownedProxy = ownedProxy;

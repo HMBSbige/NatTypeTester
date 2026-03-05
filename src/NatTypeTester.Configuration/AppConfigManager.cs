@@ -2,7 +2,7 @@ namespace NatTypeTester.Configuration;
 
 public sealed class AppConfigManager(IOptions<AppConfig> options, string configPath) : IAppConfigManager, IDisposable
 {
-	private static readonly JsonNode DefaultNode = JsonSerializer.SerializeToNode(new AppConfig(), AppConfigJsonContext.Default.AppConfig)!;
+	private static readonly JsonObject DefaultNode = SerializeToJsonObject(new AppConfig());
 
 	private readonly SemaphoreSlim _saveLock = new(1, 1);
 
@@ -60,7 +60,7 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 			Directory.CreateDirectory(directory);
 		}
 
-		JsonObject node = JsonSerializer.SerializeToNode(config, AppConfigJsonContext.Default.AppConfig)!.AsObject();
+		JsonObject node = SerializeToJsonObject(config);
 
 		foreach ((string key, JsonNode? value) in node.ToArray())
 		{
@@ -93,5 +93,11 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 		{
 			return node?.GetValueKind() is JsonValueKind.String && string.IsNullOrEmpty(node.GetValue<string>()) ? null : node;
 		}
+	}
+
+	private static JsonObject SerializeToJsonObject(AppConfig config)
+	{
+		return JsonSerializer.SerializeToNode(config, AppConfigJsonContext.Default.AppConfig) as JsonObject
+			?? throw new InvalidOperationException(@"Serialized app config is not a JSON object.");
 	}
 }

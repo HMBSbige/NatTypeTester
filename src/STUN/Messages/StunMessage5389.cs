@@ -1,4 +1,3 @@
-using Microsoft;
 using STUN.Enums;
 using System.Buffers;
 using System.Buffers.Binary;
@@ -46,7 +45,7 @@ public class StunMessage5389
 	{
 		ushort messageLength = MessageLength;
 		int length = Length;
-		Requires.Range(buffer.Length >= length, nameof(buffer));
+		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, length, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)StunMessageType);
 		BinaryPrimitives.WriteUInt16BigEndian(buffer[SizeOfMessageType..], messageLength);
@@ -80,7 +79,7 @@ public class StunMessage5389
 
 		if (!reader.TryReadBigEndian(out short typeValue))
 		{
-			throw Assumes.NotReachable();
+			throw new UnreachableException();
 		}
 
 		StunMessageType type = (StunMessageType)(ushort)(typeValue & 0b0011_1111_1111_1111);
@@ -94,7 +93,7 @@ public class StunMessage5389
 
 		if (!reader.TryReadBigEndian(out short lengthValue))
 		{
-			throw Assumes.NotReachable();
+			throw new UnreachableException();
 		}
 
 		ushort length = (ushort)lengthValue;
@@ -106,7 +105,7 @@ public class StunMessage5389
 
 		if (!reader.TryReadBigEndian(out int magicCookie))
 		{
-			throw Assumes.NotReachable();
+			throw new UnreachableException();
 		}
 
 		MagicCookie = (uint)magicCookie;

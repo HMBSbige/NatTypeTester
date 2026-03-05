@@ -42,8 +42,8 @@ public class MainActivity : AvaloniaMainActivity<App>
 				},
 				withResolver: resolver =>
 				{
-					IServiceProvider serviceProvider = resolver.GetService<IServiceProvider>()!;
-					resolver.GetService<IAbpApplicationWithExternalServiceProvider>()!.Initialize(serviceProvider);
+					IServiceProvider serviceProvider = resolver.GetRequiredService<IServiceProvider>();
+					resolver.GetRequiredService<IAbpApplicationWithExternalServiceProvider>().Initialize(serviceProvider);
 				},
 				withReactiveUIBuilder: rxBuilder =>
 				{
