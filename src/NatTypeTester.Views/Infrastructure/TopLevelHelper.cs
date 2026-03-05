@@ -1,4 +1,4 @@
-namespace NatTypeTester.Views.Services;
+namespace NatTypeTester.Views.Infrastructure;
 
 internal static class TopLevelHelper
 {

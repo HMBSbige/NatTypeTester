@@ -7,7 +7,8 @@
   <PropertyGroup>
     <PublishSingleFile>false</PublishSingleFile>
     <ApplicationId>io.github.hmbsbige.nattypetester</ApplicationId>
-    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <AndroidPackageFormats>apk</AndroidPackageFormats>
+    <AndroidUseApkSigner>true</AndroidUseApkSigner>
   </PropertyGroup>
 
   <!-- versionName = MinVer version, versionCode = git commit count (auto-increments with every commit) -->

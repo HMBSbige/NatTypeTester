@@ -113,7 +113,6 @@ jobs:
         run: >
           dotnet publish
           -r ${{ matrix.rid }}
-          -p:AndroidUseApkSigner=true
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore=$GITHUB_WORKSPACE/release.keystore
           -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -165,7 +164,6 @@ jobs:
         working-directory: src/${{ env.ProjectName }}.Android
         run: >
           dotnet publish
-          -p:AndroidUseApkSigner=true
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore=$GITHUB_WORKSPACE/release.keystore
           -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}

@@ -5,7 +5,7 @@ using Avalonia.Android;
 using Avalonia.Media;
 using Microsoft.Extensions.DependencyInjection;
 using NatTypeTester.Views;
-using NatTypeTester.Views.Services;
+using NatTypeTester.Views.Infrastructure;
 using ReactiveUI.Avalonia.Splat;
 using SkiaSharp;
 using Volo.Abp;

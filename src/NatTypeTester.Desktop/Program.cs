@@ -2,7 +2,7 @@ using Autofac.Extensions.DependencyInjection;
 using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using NatTypeTester.Views;
-using NatTypeTester.Views.Services;
+using NatTypeTester.Views.Infrastructure;
 using ReactiveUI.Avalonia.Splat;
 using Volo.Abp;
 
