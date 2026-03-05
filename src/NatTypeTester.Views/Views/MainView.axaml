@@ -10,21 +10,22 @@
     mc:Ignorable="d"
     d:DesignWidth="420" d:DesignHeight="535"
     x:Class="NatTypeTester.Views.Views.MainView"
-    x:DataType="vm:MainWindowViewModel">
+    x:DataType="vm:MainWindowViewModel"
+    Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
     <Design.DataContext>
         <designViewModels:DesignMainWindowViewModel />
     </Design.DataContext>
 
     <UserControl.Styles>
         <Style Selector="ToggleButton#PaneToggleButton">
-            <Setter Property="Foreground" Value="{DynamicResource NavPaneItemForegroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
             <Setter Property="CornerRadius" Value="8" />
         </Style>
         <Style Selector="ToggleButton#PaneToggleButton:pointerover">
-            <Setter Property="Background" Value="{DynamicResource NavPaneItemHoverBackgroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumLowBrush}" />
         </Style>
         <Style Selector="ToggleButton#PaneToggleButton:pressed">
-            <Setter Property="Background" Value="{DynamicResource NavPaneItemSelectedBackgroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumBrush}" />
         </Style>
         <Style Selector="ListBox.nav-list">
             <Setter Property="Background" Value="Transparent" />
@@ -37,15 +38,15 @@
             <Setter Property="Margin" Value="2,1" />
             <Setter Property="CornerRadius" Value="6" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource NavPaneItemForegroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style Selector="ListBox.nav-list ListBoxItem:pointerover">
-            <Setter Property="Background" Value="{DynamicResource NavPaneItemHoverBackgroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumLowBrush}" />
         </Style>
         <Style Selector="ListBox.nav-list ListBoxItem:selected">
-            <Setter Property="Background" Value="{DynamicResource NavPaneItemSelectedBackgroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltMediumBrush}" />
         </Style>
         <Style Selector="ListBox.nav-list > ListBoxItem > Grid > TextBlock">
             <Setter Property="Opacity" Value="0" />
@@ -71,7 +72,11 @@
                PaneBackground="Transparent"
                PanePlacement="Left">
         <SplitView.Pane>
-            <Grid Background="{DynamicResource SplitPaneLeftBackgroundBrush}" RowDefinitions="Auto,*">
+            <Grid Background="Transparent" RowDefinitions="Auto,*">
+                <Border Grid.RowSpan="2"
+                        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}"
+                        Opacity="0.88"
+                        IsHitTestVisible="False" />
                 <ToggleButton x:Name="PaneToggleButton" Grid.Row="0"
                               Width="40" Height="36"
                               IsChecked="{Binding #NavSplitView.IsPaneOpen}"
@@ -112,8 +117,7 @@
         </SplitView.Pane>
 
         <SplitView.Content>
-            <Grid Background="{DynamicResource SplitPaneContentBackgroundBrush}">
-                <Border Background="{DynamicResource SplitPaneContentOverlayBrush}" IsHitTestVisible="False" />
+            <Grid Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}">
                 <Carousel SelectedIndex="{Binding #NavListBox.SelectedIndex}">
                     <Carousel.PageTransition>
                         <CrossFade Duration="0:0:0.3" />

@@ -115,15 +115,15 @@
 
                     <!-- Proxy Config Grid -->
                     <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="8">
-                        <StackPanel Classes="form-field">
+                        <StackPanel Spacing="3">
                             <TextBlock x:Name="ProxyServerLabel" />
                             <TextBox Text="{Binding ProxyServer}" />
                         </StackPanel>
-                        <StackPanel Classes="form-field">
+                        <StackPanel Spacing="3">
                             <TextBlock x:Name="ProxyUsernameLabel" />
                             <TextBox Text="{Binding ProxyUser}" />
                         </StackPanel>
-                        <StackPanel Classes="form-field">
+                        <StackPanel Spacing="3">
                             <TextBlock x:Name="ProxyPasswordLabel" />
                             <TextBox Text="{Binding ProxyPassword}" PasswordChar="•" />
                         </StackPanel>

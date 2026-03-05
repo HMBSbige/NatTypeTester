@@ -15,9 +15,14 @@
     </Design.DataContext>
 
     <DockPanel>
-        <Border Classes="test-action-container" DockPanel.Dock="Bottom">
+        <Border DockPanel.Dock="Bottom"
+                Margin="8,4,8,8"
+                CornerRadius="4">
             <Button x:Name="TestButton"
-                    Classes="accent test-action-button"
+                    Classes="accent"
+                    HorizontalAlignment="Stretch"
+                    Padding="8"
+                    HorizontalContentAlignment="Center"
                     Command="{Binding TestClassicNatTypeCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <ic:FluentIcon Icon="Play" IconVariant="Regular" />
@@ -28,19 +33,23 @@
 
         <ScrollViewer>
             <StackPanel Margin="8" Spacing="8">
-                <Border Background="#FFF4CE" BorderBrush="#FFE699" BorderThickness="1" CornerRadius="8" Padding="10">
+                <Border Background="{DynamicResource NotificationCardWarningBackgroundBrush}"
+                        BorderBrush="{DynamicResource SystemControlTransientBorderBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="10">
                     <DockPanel>
                         <ic:FluentIcon Icon="Warning" IconVariant="Color" DockPanel.Dock="Left" Margin="0,0,8,0" VerticalAlignment="Top" />
-                        <TextBlock x:Name="Rfc3489WarningText" TextWrapping="Wrap" Foreground="#744210" />
+                        <TextBlock x:Name="Rfc3489WarningText"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SystemControlPageTextBaseHighBrush}" />
                     </DockPanel>
                 </Border>
 
-                <StackPanel Classes="form-field">
-                    <TextBlock x:Name="NatTypeLabel" />
+                <StackPanel Spacing="3">
+                    <TextBlock x:Name="NatTypeLabel"/>
                     <TextBox IsReadOnly="True" Text="{Binding NatType, Mode=OneWay}" />
                 </StackPanel>
 
-                <StackPanel Classes="form-field" IsEnabled="{Binding !IsTesting}">
+                <StackPanel Spacing="3" IsEnabled="{Binding !IsTesting}">
                     <TextBlock x:Name="LocalEndLabel" />
                     <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
                               Text="{Binding LocalEnd}"
@@ -50,7 +59,7 @@
                     </ComboBox>
                 </StackPanel>
 
-                <StackPanel Classes="form-field">
+                <StackPanel Spacing="3">
                     <TextBlock x:Name="PublicEndLabel" />
                     <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
                 </StackPanel>

@@ -16,9 +16,14 @@
     </Design.DataContext>
 
     <DockPanel>
-        <Border Classes="test-action-container" DockPanel.Dock="Bottom">
+        <Border DockPanel.Dock="Bottom"
+                Margin="8,4,8,8"
+                CornerRadius="4">
             <Button x:Name="TestButton"
-                    Classes="accent test-action-button"
+                    Classes="accent"
+                    HorizontalAlignment="Stretch"
+                    Padding="8"
+                    HorizontalContentAlignment="Center"
                     Command="{Binding DiscoveryNatTypeCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <ic:FluentIcon Icon="Play" IconVariant="Regular" />
@@ -38,23 +43,23 @@
                                  IsChecked="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.TlsConverter}}" />
                 </StackPanel>
 
-                <StackPanel Classes="form-field">
+                <StackPanel Spacing="3">
                     <TextBlock x:Name="BindingTestLabel" />
                     <TextBox IsReadOnly="True" Text="{Binding BindingTestResult, Mode=OneWay}" />
                 </StackPanel>
 
-                <StackPanel Classes="form-field">
+                <StackPanel Spacing="3">
                     <TextBlock x:Name="MappingBehaviorLabel" />
                     <TextBox IsReadOnly="True" Text="{Binding MappingBehavior, Mode=OneWay}" />
                 </StackPanel>
 
-                <StackPanel Classes="form-field"
+                <StackPanel Spacing="3"
                             IsVisible="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.UdpConverter}}">
                     <TextBlock x:Name="FilteringBehaviorLabel" />
                     <TextBox IsReadOnly="True" Text="{Binding FilteringBehavior, Mode=OneWay}" />
                 </StackPanel>
 
-                <StackPanel Classes="form-field" IsEnabled="{Binding !IsTesting}">
+                <StackPanel Spacing="3" IsEnabled="{Binding !IsTesting}">
                     <TextBlock x:Name="LocalEndLabel" />
                     <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
                               Text="{Binding LocalEnd}"
@@ -64,7 +69,7 @@
                     </ComboBox>
                 </StackPanel>
 
-                <StackPanel Classes="form-field">
+                <StackPanel Spacing="3">
                     <TextBlock x:Name="PublicEndLabel" />
                     <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
                 </StackPanel>
