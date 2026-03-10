@@ -36,8 +36,8 @@
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.4" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
