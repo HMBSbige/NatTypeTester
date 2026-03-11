@@ -14,6 +14,8 @@ public sealed class StunTestInput : EntityDto, IValidatableObject
 
 	public string? LocalEndPoint { get; init; }
 
+	public bool SkipCertificateValidation { get; init; }
+
 	public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
 	{
 		IStringLocalizer<NatTypeTesterResource> l = validationContext.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();

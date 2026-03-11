@@ -50,7 +50,8 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 					ProxyServer = settings.ProxyServer,
 					ProxyUser = settings.ProxyUser,
 					ProxyPassword = settings.ProxyPassword,
-					LocalEndPoint = LocalEnd
+					LocalEndPoint = LocalEnd,
+					SkipCertificateValidation = settings.SkipCertificateValidation
 				},
 				cancellationToken
 			);

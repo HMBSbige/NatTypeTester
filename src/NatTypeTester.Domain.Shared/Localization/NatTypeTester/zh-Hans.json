@@ -14,7 +14,7 @@
     "NatType": "NAT 类型",
     "RFC3489Warning": "该协议已过时，可能不适用于现代路由器或 NAT。",
     "Test": "测试",
-    "Proxy": "代理设置",
+    "Proxy": "网络设置",
     "NoProxy": "不使用代理",
     "SOCKS5Proxy": "SOCKS5 代理",
     "ProxyServer": "服务器",
@@ -44,6 +44,7 @@
     "CheckUpdateFailed": "检查更新失败。",
     "OpenHomepage": "打开主页",
     "OpenConfigDirectory": "打开配置目录",
-    "ConfigDirectory": "配置目录"
+    "ConfigDirectory": "配置目录",
+    "SkipCertificateValidation": "跳过 TLS/DTLS 证书校验"
   }
 }

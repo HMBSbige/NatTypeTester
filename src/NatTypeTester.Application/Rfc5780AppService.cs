@@ -27,7 +27,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 			{
 				case TransportType.Dtls:
 				{
-					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname);
+					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 					_client = client;
@@ -48,7 +48,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 				}
 				case TransportType.Udp:
 				{
-					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname);
+					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 					_client = client;
@@ -59,7 +59,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 				}
 				default:
 				{
-					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname);
+					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					using StunClient5389TCP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 					_client = client;

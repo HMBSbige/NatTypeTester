@@ -34,6 +34,9 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 	public partial bool IncludePreRelease { get; set; }
 
 	[Reactive]
+	public partial bool SkipCertificateValidation { get; set; }
+
+	[Reactive]
 	public partial string? LatestVersion { get; set; }
 
 	[Reactive]
@@ -90,6 +93,7 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 		AutoCheckUpdate = config.AutoCheckUpdate;
 		CheckUpdateIntervalHours = config.CheckUpdateInterval.TotalHours;
 		IncludePreRelease = config.IncludePreRelease;
+		SkipCertificateValidation = config.SkipCertificateValidation;
 		CurrentVersion = UpdateAppService.CurrentVersion;
 
 		ObserveAndUpdateConfig
@@ -120,13 +124,15 @@ public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
 			(
 				x => x.AutoCheckUpdate,
 				x => x.CheckUpdateIntervalHours,
-				x => x.IncludePreRelease
+				x => x.IncludePreRelease,
+				x => x.SkipCertificateValidation
 			),
 			(appConfig, value) =>
 			{
 				appConfig.AutoCheckUpdate = value.Item1;
 				appConfig.CheckUpdateInterval = TimeSpan.FromHours(value.Item2);
 				appConfig.IncludePreRelease = value.Item3;
+				appConfig.SkipCertificateValidation = value.Item4;
 			}
 		);
 	}

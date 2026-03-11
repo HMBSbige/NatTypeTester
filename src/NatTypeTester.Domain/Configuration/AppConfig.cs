@@ -25,4 +25,6 @@ public record AppConfig
 	public bool IncludePreRelease { get; set; }
 
 	public DateTimeOffset? LastUpdateCheckTime { get; set; }
+
+	public bool SkipCertificateValidation { get; set; }
 }

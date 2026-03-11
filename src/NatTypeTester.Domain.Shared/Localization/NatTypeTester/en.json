@@ -14,7 +14,7 @@
     "NatType": "NAT type",
     "RFC3489Warning": "This protocol is obsoleted and may not be suitable for modern routers or NAT.",
     "Test": "Test",
-    "Proxy": "Proxy",
+    "Proxy": "Network",
     "NoProxy": "Don't use Proxy",
     "SOCKS5Proxy": "SOCKS5",
     "ProxyServer": "Server",
@@ -44,6 +44,7 @@
     "CheckUpdateFailed": "Failed to check for updates.",
     "OpenHomepage": "Open Homepage",
     "OpenConfigDirectory": "Open Config Directory",
-    "ConfigDirectory": "Configuration Directory"
+    "ConfigDirectory": "Configuration Directory",
+    "SkipCertificateValidation": "Skip TLS/DTLS certificate validation"
   }
 }

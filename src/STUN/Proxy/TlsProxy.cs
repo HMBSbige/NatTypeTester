@@ -3,10 +3,11 @@ using System.IO.Pipelines;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 
 namespace STUN.Proxy;
 
-public class TlsProxy(string targetHost) : DirectTcpProxy
+public class TlsProxy(string targetHost, bool skipCertificateValidation = false) : DirectTcpProxy
 {
 	private SslStream? _tlsStream;
 
@@ -23,7 +24,19 @@ public class TlsProxy(string targetHost) : DirectTcpProxy
 
 		_tlsStream = new SslStream(TcpClient.GetStream(), true);
 
-		await _tlsStream.AuthenticateAsClientAsync(targetHost);
+		SslClientAuthenticationOptions sslOptions = new()
+		{
+			TargetHost = targetHost,
+			RemoteCertificateValidationCallback = skipCertificateValidation
+				? static (_, _, chain, _) =>
+				{
+					DisposeChainContents(chain);
+					return true;
+				}
+			: default
+		};
+
+		await _tlsStream.AuthenticateAsClientAsync(sslOptions, cancellationToken);
 
 		return _tlsStream.AsDuplexPipe();
 	}
@@ -32,5 +45,23 @@ public class TlsProxy(string targetHost) : DirectTcpProxy
 	{
 		_tlsStream?.Dispose();
 		base.CloseClient();
+	}
+
+	private static void DisposeChainContents(X509Chain? chain)
+	{
+		if (chain is null)
+		{
+			return;
+		}
+
+		foreach (X509Certificate2 extraCert in chain.ChainPolicy.ExtraStore)
+		{
+			extraCert.Dispose();
+		}
+
+		foreach (X509ChainElement element in chain.ChainElements)
+		{
+			element.Certificate.Dispose();
+		}
 	}
 }

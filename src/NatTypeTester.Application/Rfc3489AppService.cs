@@ -16,7 +16,7 @@ public class Rfc3489AppService : ApplicationService, IRfc3489AppService
 
 		(IPAddress serverIp, IPEndPoint localEndPoint) = await Resolver.ResolveServerIpAndLocalEndPointAsync(server, input.LocalEndPoint, cancellationToken);
 
-		await using IUdpProxy proxy = ProxyFactory.CreateProxy(TransportType.Udp, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname);
+		await using IUdpProxy proxy = ProxyFactory.CreateProxy(TransportType.Udp, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 		await using StunClient3489 client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 		_client = client;
