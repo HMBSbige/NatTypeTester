@@ -11,8 +11,6 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 {
 	private DtlsTransport? _dtlsTransport;
 
-	private static readonly Lazy<X509Certificate2Collection> AndroidRootCertificates = new(LoadAndroidRootCertificates);
-
 	public Socket Client => innerProxy.Client;
 
 	public ValueTask ConnectAsync(CancellationToken cancellationToken = default)
@@ -35,9 +33,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 						DisposeChainContents(chain);
 						return true;
 					}
-				: OperatingSystem.IsAndroid()
-						? ValidateCertificateOnAndroid
-						: null
+				: default
 			};
 
 			_dtlsTransport = await DtlsTransport.CreateClientAsync(datagram, options);
@@ -98,62 +94,6 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 		GC.SuppressFinalize(this);
 	}
 
-	private static bool ValidateCertificateOnAndroid(X509Certificate2? cert, X509Chain? chain, SslPolicyErrors errors)
-	{
-		// https://github.com/dotnet/runtime/issues/84202
-		// workaround
-		try
-		{
-			if (cert is null)
-			{
-				return false;
-			}
-
-			if (errors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors))
-			{
-				errors &= ~SslPolicyErrors.RemoteCertificateChainErrors;
-
-				X509Chain androidChain = new();
-
-				try
-				{
-					androidChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-					androidChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-					androidChain.ChainPolicy.CustomTrustStore.AddRange(AndroidRootCertificates.Value);
-
-					if (chain is not null)
-					{
-						foreach (X509Certificate2 extraCert in chain.ChainPolicy.ExtraStore)
-						{
-							androidChain.ChainPolicy.ExtraStore.Add(extraCert);
-						}
-					}
-
-					if (!androidChain.Build(cert))
-					{
-						errors |= SslPolicyErrors.RemoteCertificateChainErrors;
-					}
-				}
-				finally
-				{
-					foreach (X509ChainElement element in androidChain.ChainElements)
-					{
-						element.Certificate.Dispose();
-					}
-
-					androidChain.Dispose();
-				}
-			}
-
-			return errors is SslPolicyErrors.None;
-		}
-		finally
-		{
-			// DTLS 库在有回调时不释放 chain 内容，由回调方负责
-			DisposeChainContents(chain);
-		}
-	}
-
 	private static void DisposeChainContents(X509Chain? chain)
 	{
 		if (chain is null)
@@ -170,41 +110,6 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 		{
 			element.Certificate.Dispose();
 		}
-	}
-
-	private static X509Certificate2Collection LoadAndroidRootCertificates()
-	{
-		X509Certificate2Collection certs = [];
-
-		ReadOnlySpan<string> caDirs =
-		[
-			"/apex/com.android.conscrypt/cacerts",
-			"/system/etc/security/cacerts"
-		];
-
-		foreach (string dir in caDirs)
-		{
-			if (!Directory.Exists(dir))
-			{
-				continue;
-			}
-
-			foreach (string file in Directory.GetFiles(dir))
-			{
-				try
-				{
-					certs.Add(X509CertificateLoader.LoadCertificateFromFile(file));
-				}
-				catch
-				{
-					// Skip invalid cert files
-				}
-			}
-
-			break;
-		}
-
-		return certs;
 	}
 
 	private sealed class UdpProxyDatagramTransport(IUdpProxy proxy, IPEndPoint peerEndPoint) : IDatagramTransport
