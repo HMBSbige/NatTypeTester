@@ -14,7 +14,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 		StunServer server = StunTestInputResolver.ParseStunServer
 		(
 			input.StunServer,
-			transportType is TransportType.Tls ? StunServer.DefaultTlsPort : StunServer.DefaultPort
+			transportType is TransportType.Tls or TransportType.Dtls ? StunServer.DefaultTlsPort : StunServer.DefaultPort
 		);
 
 		Socks5CreateOption? socks5CreateOption = await Resolver.ResolveSocks5OptionAsync(input, cancellationToken);
@@ -23,27 +23,51 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 
 		try
 		{
-			if (transportType is TransportType.Udp)
+			switch (transportType)
 			{
-				using IUdpProxy proxy = ProxyFactory.CreateProxy(input.ProxyType, localEndPoint, socks5CreateOption);
-				using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
+				case TransportType.Dtls:
+				{
+					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname);
+					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
-				_client = client;
+					_client = client;
 
-				await StunTestInputResolver.QueryWithProxyAsync(client, cancellationToken);
+					await client.ConnectProxyAsync(cancellationToken);
 
-				return client.State;
-			}
-			else
-			{
-				using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname);
-				using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
+					try
+					{
+						// 当前没有服务端支持测试 filtering behavior
+						await client.MappingBehaviorTestAsync(cancellationToken);
+					}
+					finally
+					{
+						await client.CloseProxyAsync(cancellationToken);
+					}
 
-				_client = client;
+					return client.State;
+				}
+				case TransportType.Udp:
+				{
+					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname);
+					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
-				await client.QueryAsync(cancellationToken);
+					_client = client;
 
-				return client.State;
+					await StunTestInputResolver.QueryWithProxyAsync(client, cancellationToken);
+
+					return client.State;
+				}
+				default:
+				{
+					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname);
+					using StunClient5389TCP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
+
+					_client = client;
+
+					await client.QueryAsync(cancellationToken);
+
+					return client.State;
+				}
 			}
 		}
 		finally

@@ -1,19 +1,20 @@
 using Socks5.Models;
 using STUN.Enums;
-using System.Diagnostics;
 using System.Net;
 
 namespace STUN.Proxy;
 
 public static class ProxyFactory
 {
-	public static IUdpProxy CreateProxy(ProxyType type, IPEndPoint local, Socks5CreateOption? option)
+	public static IUdpProxy CreateProxy(TransportType transport, ProxyType type, IPEndPoint local, Socks5CreateOption? option, string targetHost)
 	{
-		return type switch
+		return (transport, type) switch
 		{
-			ProxyType.Plain => new NoneUdpProxy(local),
-			ProxyType.Socks5 => new Socks5UdpProxy(local, GetSocks5Option(option)),
-			_ => throw new UnreachableException()
+			(TransportType.Udp, ProxyType.Plain) => new NoneUdpProxy(local),
+			(TransportType.Udp, ProxyType.Socks5) => new Socks5UdpProxy(local, GetSocks5Option(option)),
+			(TransportType.Dtls, ProxyType.Plain) => new DtlsProxy(new NoneUdpProxy(local), targetHost),
+			(TransportType.Dtls, ProxyType.Socks5) => new DtlsProxy(new Socks5UdpProxy(local, GetSocks5Option(option)), targetHost),
+			_ => throw new NotSupportedException()
 		};
 	}
 

@@ -31,7 +31,7 @@ public sealed class StunTestInput : EntityDto, IValidatableObject
 			}
 		}
 
-		if (LocalEndPoint is not null && !IPEndPoint.TryParse(LocalEndPoint, out _))
+		if (!string.IsNullOrEmpty(LocalEndPoint) && !IPEndPoint.TryParse(LocalEndPoint, out _))
 		{
 			yield return new ValidationResult(l["InvalidLocalEndPoint"], [nameof(LocalEndPoint)]);
 		}

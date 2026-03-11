@@ -115,7 +115,7 @@ public static class AttributeExtensions
 
 	private static IPEndPoint ToEndPoint(AddressStunAttributeValue value)
 	{
-		return value.Address is IPAddress address
+		return value.Address is { } address
 			? new IPEndPoint(address, value.Port)
 			: throw new InvalidOperationException(@"STUN address attribute is missing IP address.");
 	}

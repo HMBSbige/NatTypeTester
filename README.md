@@ -21,7 +21,7 @@
 - [x] UDP
 - [x] TCP
 - [x] TLS-over-TCP
-- [ ] DTLS-over-UDP
+- [x] DTLS-over-UDP
 
 ## RFC3489
 

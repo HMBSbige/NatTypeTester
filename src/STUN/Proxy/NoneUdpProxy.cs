@@ -35,6 +35,13 @@ public class NoneUdpProxy : IUdpProxy
 		return Client.SendToAsync(buffer, socketFlags, remoteEP, cancellationToken);
 	}
 
+	public ValueTask DisposeAsync()
+	{
+		Dispose();
+		GC.SuppressFinalize(this);
+		return default;
+	}
+
 	public void Dispose()
 	{
 		Client.Dispose();

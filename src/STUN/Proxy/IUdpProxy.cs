@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace STUN.Proxy;
 
-public interface IUdpProxy : IDisposable
+public interface IUdpProxy : IDisposable, IAsyncDisposable
 {
 	Socket Client { get; }
 	ValueTask ConnectAsync(CancellationToken cancellationToken = default);

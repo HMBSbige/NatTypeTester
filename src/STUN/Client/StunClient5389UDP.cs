@@ -16,7 +16,7 @@ namespace STUN.Client;
 /// https://tools.ietf.org/html/rfc5389#section-7.2.1
 /// https://tools.ietf.org/html/rfc5780#section-4.2
 /// </summary>
-public class StunClient5389UDP : IStunClient5389, IUdpStunClient
+public class StunClient5389UDP : IStunClient5389, IUdpStunClient, IAsyncDisposable
 {
 	public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
@@ -300,6 +300,16 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient
 	{
 		return _proxy.Client.LocalEndPoint as IPEndPoint
 			?? throw new InvalidOperationException(@"UDP client local endpoint is unavailable.");
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_ownedProxy)
+		{
+			await _proxy.DisposeAsync();
+		}
+
+		GC.SuppressFinalize(this);
 	}
 
 	public void Dispose()

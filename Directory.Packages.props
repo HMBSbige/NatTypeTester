@@ -40,6 +40,7 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.4" />
   </ItemGroup>
   <ItemGroup>
+    <PackageVersion Include="DTLS" Version="0.3.3" />
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
     <PackageVersion Include="HMBSbige.UpdateChecker" Version="10.0.0" />
     <PackageVersion Include="MinVer" Version="7.0.0" />

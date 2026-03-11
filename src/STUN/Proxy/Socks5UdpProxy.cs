@@ -74,7 +74,7 @@ public class Socks5UdpProxy : IUdpProxy
 		byte[] t = ArrayPool<byte>.Shared.Rent(buffer.Length);
 		try
 		{
-			if (_udpServerBound.Type is AddressType.Domain || _udpServerBound.Address is not IPAddress udpServerAddress)
+			if (_udpServerBound.Type is AddressType.Domain || _udpServerBound.Address is not { } udpServerAddress)
 			{
 				ThrowErrorAddressType();
 			}
@@ -85,7 +85,7 @@ public class Socks5UdpProxy : IUdpProxy
 
 			u.Data.CopyTo(buffer);
 
-			if (u.Type is AddressType.Domain || u.Address is not IPAddress remoteAddress)
+			if (u.Type is AddressType.Domain || u.Address is not { } remoteAddress)
 			{
 				ThrowErrorAddressType();
 			}
@@ -124,6 +124,13 @@ public class Socks5UdpProxy : IUdpProxy
 		{
 			throw new NotSupportedException();
 		}
+	}
+
+	public ValueTask DisposeAsync()
+	{
+		Dispose();
+		GC.SuppressFinalize(this);
+		return default;
 	}
 
 	public void Dispose()
