@@ -9,7 +9,71 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 
 	public StunResult5389? State => _client?.State;
 
-	public async Task<StunResult5389> TestAsync(StunTestInput input, TransportType transportType, CancellationToken cancellationToken = default)
+	public Task<StunResult5389> BindingTestAsync(StunTestInput input, TransportType transportType, CancellationToken cancellationToken = default)
+	{
+		return RunTestAsync(input, transportType, static (client, ct) => client.BindingTestAsync(ct), cancellationToken);
+	}
+
+	public Task<StunResult5389> MappingBehaviorTestAsync(StunTestInput input, TransportType transportType, CancellationToken cancellationToken = default)
+	{
+		return RunTestAsync
+		(
+			input,
+			transportType,
+			static async (client, ct) =>
+			{
+				await client.MappingBehaviorTestAsync(ct);
+				return client.State;
+			},
+			cancellationToken
+		);
+	}
+
+	public Task<StunResult5389> FilteringBehaviorTestAsync(StunTestInput input, TransportType transportType, CancellationToken cancellationToken = default)
+	{
+		return RunTestAsync
+		(
+			input,
+			transportType,
+			static async (client, ct) =>
+			{
+				await client.FilteringBehaviorTestAsync(ct);
+				return client.State;
+			},
+			cancellationToken
+		);
+	}
+
+	public Task<StunResult5389> TestAsync(StunTestInput input, TransportType transportType, CancellationToken cancellationToken = default)
+	{
+		// DTLS: 当前没有服务端支持测试 filtering behavior，仅测试 mapping behavior
+		return RunTestAsync
+		(
+			input,
+			transportType,
+			transportType switch
+			{
+				TransportType.Dtls => static async (client, ct) =>
+				{
+					await client.MappingBehaviorTestAsync(ct);
+					return client.State;
+				}
+				,
+				_ => static async (client, ct) =>
+				{
+					await client.QueryAsync(ct);
+					return client.State;
+				}
+			},
+			cancellationToken
+		);
+	}
+
+	private async Task<StunResult5389> RunTestAsync(
+		StunTestInput input,
+		TransportType transportType,
+		Func<IStunClient5389, CancellationToken, ValueTask<StunResult5389>> testAction,
+		CancellationToken cancellationToken)
 	{
 		StunServer server = StunTestInputResolver.ParseStunServer
 		(
@@ -26,6 +90,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 			switch (transportType)
 			{
 				case TransportType.Dtls:
+				case TransportType.Udp:
 				{
 					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
@@ -36,27 +101,15 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 
 					try
 					{
-						// 当前没有服务端支持测试 filtering behavior
-						await client.MappingBehaviorTestAsync(cancellationToken);
+						return await testAction(client, cancellationToken);
 					}
 					finally
 					{
 						await client.CloseProxyAsync(cancellationToken);
 					}
-
-					return client.State;
 				}
-				case TransportType.Udp:
-				{
-					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
-					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
-
-					_client = client;
-
-					await StunTestInputResolver.QueryWithProxyAsync(client, cancellationToken);
-
-					return client.State;
-				}
+				case TransportType.Tcp:
+				case TransportType.Tls:
 				default:
 				{
 					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
@@ -64,9 +117,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 
 					_client = client;
 
-					await client.QueryAsync(cancellationToken);
-
-					return client.State;
+					return await testAction(client, cancellationToken);
 				}
 			}
 		}

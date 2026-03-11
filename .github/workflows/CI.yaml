@@ -45,11 +45,14 @@ jobs:
       - run: dotnet test --project tests/UnitTest/UnitTest.csproj -c Release
 
   build:
-    name: Build Desktop (${{ matrix.rid }})
+    name: Build ${{ matrix.project }} (${{ matrix.rid }})
     needs: [test, check_format]
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        project:
+          - Desktop
+          - Console
         rid:
           - win-x64
           - linux-x64
@@ -65,14 +68,14 @@ jobs:
           dotnet-version: ${{ env.NET_VERSION }}
 
       - name: Build
-        working-directory: src/${{ env.ProjectName }}.Desktop
+        working-directory: src/${{ env.ProjectName }}.${{ matrix.project }}
         run: dotnet publish -r ${{ matrix.rid }}
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.ProjectName }}-${{ matrix.rid }}
-          path: src/${{ env.ProjectName }}.Desktop/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
+          name: ${{ env.ProjectName }}.${{ matrix.project }}-${{ matrix.rid }}
+          path: src/${{ env.ProjectName }}.${{ matrix.project }}/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
 
   build_android:
     name: Build Android (${{ matrix.rid }})
@@ -234,7 +237,8 @@ jobs:
         run: |
           mkdir -p builtfiles
           for rid in win-x64 linux-x64 linux-arm64 osx-arm64; do
-            7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}-${rid}"
+            7z a -mx9 "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}.Desktop-${rid}"
+            7z a -mx9 "builtfiles/${{ env.ProjectName }}.Console-${{ github.ref_name }}-${rid}.7z" "${{ env.ProjectName }}.Console-${rid}"
           done
           for variant in android-arm64 android-x64 android-universal; do
             cp "${{ env.ProjectName }}-${variant}/${{ env.ProjectName }}-${variant}.apk" "builtfiles/${{ env.ProjectName }}-${{ github.ref_name }}-${variant}.apk"

@@ -15,6 +15,7 @@
     <Project Path="src\NatTypeTester.Application\NatTypeTester.Application.csproj" />
     <Project Path="src\NatTypeTester.Configuration\NatTypeTester.Configuration.csproj" />
     <Project Path="src\NatTypeTester.Android\NatTypeTester.Android.csproj" />
+    <Project Path="src\NatTypeTester.Console\NatTypeTester.Console.csproj" />
     <Project Path="src\NatTypeTester.Desktop\NatTypeTester.Desktop.csproj" />
     <Project Path="src\NatTypeTester.Domain.Shared\NatTypeTester.Domain.Shared.csproj" />
     <Project Path="src\NatTypeTester.Domain\NatTypeTester.Domain.csproj" />

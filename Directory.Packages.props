@@ -46,6 +46,7 @@
     <PackageVersion Include="MinVer" Version="7.0.0" />
     <PackageVersion Include="NuGet.Versioning" Version="7.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.4" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Moq" Version="4.20.72" />
