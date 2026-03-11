@@ -1,77 +1,95 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using NatTypeTester.Application.Contracts;
 using NatTypeTester.Console;
+using NatTypeTester.Domain.Shared.Localization;
+using Spectre.Console;
 using STUN.Enums;
 using STUN.StunResult;
 using System.CommandLine;
 using Volo.Abp;
+
+using IAbpApplicationWithInternalServiceProvider application = await AbpApplicationFactory.CreateAsync<NatTypeTesterConsoleModule>(options => options.UseAutofac());
+await application.InitializeAsync();
+
+IServiceProvider sp = application.ServiceProvider;
+IStringLocalizer localizer = sp.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();
 
 // Common options
 Option<string> serverOption = new("--server", "-s")
 {
 	Required = true,
 	Recursive = true,
-	Description = "STUN server address"
+	Description = localizer["StunServer"]
 };
 Option<string?> localOption = new("--local", "-l")
 {
 	Recursive = true,
-	Description = "Local bind address"
+	Description = localizer["LocalEnd"]
 };
 Option<string?> proxyOption = new("--proxy")
 {
 	Recursive = true,
-	Description = "SOCKS5 proxy address"
+	Description = localizer["SOCKS5Proxy"]
 };
 Option<string?> proxyUserOption = new("--proxy-user")
 {
 	Recursive = true,
-	Description = "SOCKS5 proxy username"
+	Description = localizer["ProxyUsername"]
 };
 Option<string?> proxyPasswordOption = new("--proxy-password")
 {
 	Recursive = true,
-	Description = "SOCKS5 proxy password"
+	Description = localizer["ProxyPassword"]
 };
 
 // RFC 5780 specific options
 Option<bool> skipCertOption = new("--skip-cert")
 {
-	Description = "Disable TLS/DTLS certificate validation",
+	Description = localizer["SkipCertificateValidation"],
 	DefaultValueFactory = _ => false
 };
 Option<TransportType> transportOption = new("--transport", "-t")
 {
-	Description = "Transport protocol: Udp, Tcp, Tls, Dtls",
+	Description = localizer["TransportProtocol"],
 	DefaultValueFactory = _ => TransportType.Udp
 };
 Option<StunTestType> testTypeOption = new("--test-type")
 {
-	Description = "Test type: Combining, Binding, Filtering, Mapping",
+	Description = localizer["TestType"],
 	DefaultValueFactory = _ => StunTestType.Combining
 };
 
 // rfc3489 subcommand
-Command rfc3489Command = new("rfc3489", "Test NAT type using RFC 3489 (Classic STUN)");
+Command rfc3489Command = new("rfc3489", localizer["RFC3489Description"]);
 
 rfc3489Command.SetAction
 (async (result, cancellationToken) =>
 	{
 		StunTestInput input = BuildStunTestInput(result);
 
-		await RunWithAbpAsync(result, async (sp, output) =>
-		{
-			ClassicStunResult result3489 = await sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken);
+		ClassicStunResult result3489 = await AnsiConsole.Status()
+			.StartAsync(localizer["Testing"], _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
 
-			await output.WriteLineAsync($"NAT Type: {result3489.NatType}");
-			await output.WriteLineAsync($"Public EndPoint: {result3489.PublicEndPoint}");
-			await output.WriteLineAsync($"Local EndPoint: {result3489.LocalEndPoint}");
-		});
+		if (cancellationToken.IsCancellationRequested)
+		{
+			AnsiConsole.MarkupLine($"[yellow]{localizer["Cancelled"].Value.EscapeMarkup()}[/]");
+			return;
+		}
+
+		ShowResultTable
+		(
+			[
+				(localizer["NatType"], result3489.NatType, "cyan"),
+				(localizer["PublicEnd"], result3489.PublicEndPoint, "green"),
+				(localizer["LocalEnd"], result3489.LocalEndPoint, "yellow")
+			]
+		);
 	}
 );
 
 // rfc5780 subcommand
-Command rfc5780Command = new("rfc5780", "Test NAT type using RFC 5780")
+Command rfc5780Command = new("rfc5780", localizer["RFC5780Description"])
 {
 	skipCertOption,
 	transportOption,
@@ -85,37 +103,56 @@ rfc5780Command.SetAction
 		TransportType transport = result.GetValue(transportOption);
 		StunTestType testType = result.GetValue(testTypeOption);
 
-		await RunWithAbpAsync(result, async (sp, output) =>
+		IRfc5780AppService service = sp.GetRequiredService<IRfc5780AppService>();
+
+		StunResult5389 result5780 = await AnsiConsole.Status()
+			.StartAsync
+			(
+				localizer["Testing"],
+				_ => testType switch
+				{
+					StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
+					StunTestType.Mapping => service.MappingBehaviorTestAsync(input, transport, cancellationToken),
+					StunTestType.Filtering => service.FilteringBehaviorTestAsync(input, transport, cancellationToken),
+					_ => service.TestAsync(input, transport, cancellationToken)
+				}
+			);
+
+		if (cancellationToken.IsCancellationRequested)
 		{
-			IRfc5780AppService service = sp.GetRequiredService<IRfc5780AppService>();
+			AnsiConsole.MarkupLine($"[yellow]{localizer["Cancelled"].Value.EscapeMarkup()}[/]");
+			return;
+		}
 
-			StunResult5389 result5780 = testType switch
-			{
-				StunTestType.Binding => await service.BindingTestAsync(input, transport, cancellationToken),
-				StunTestType.Mapping => await service.MappingBehaviorTestAsync(input, transport, cancellationToken),
-				StunTestType.Filtering => await service.FilteringBehaviorTestAsync(input, transport, cancellationToken),
-				_ => await service.TestAsync(input, transport, cancellationToken)
-			};
+		ShowResultTable(GetRows());
+		return;
 
+		IEnumerable<(string, object?, string)> GetRows()
+		{
 			if (testType is StunTestType.Combining or StunTestType.Binding)
 			{
-				await output.WriteLineAsync($"Binding Test: {result5780.BindingTestResult}");
+				yield return (localizer["BindingTest"], result5780.BindingTestResult, "cyan");
 			}
+
 			if (testType is StunTestType.Combining or StunTestType.Mapping)
 			{
-				await output.WriteLineAsync($"Mapping Behavior: {result5780.MappingBehavior}");
+				yield return (localizer["MappingBehavior"], result5780.MappingBehavior, "magenta");
 			}
-			if (testType is StunTestType.Combining or StunTestType.Filtering)
+
+			if (testType is StunTestType.Filtering
+				|| testType is StunTestType.Combining && transport is TransportType.Udp
+				)
 			{
-				await output.WriteLineAsync($"Filtering Behavior: {result5780.FilteringBehavior}");
+				yield return (localizer["FilteringBehavior"], result5780.FilteringBehavior, "blue");
 			}
-			await output.WriteLineAsync($"Public EndPoint: {result5780.PublicEndPoint}");
-			await output.WriteLineAsync($"Local EndPoint: {result5780.LocalEndPoint}");
-		});
+
+			yield return (localizer["PublicEnd"], result5780.PublicEndPoint, "green");
+			yield return (localizer["LocalEnd"], result5780.LocalEndPoint, "yellow");
+		}
 	}
 );
 
-RootCommand rootCommand = new("NatTypeTester - NAT type testing tool")
+RootCommand rootCommand = new(localizer["AppDescription"])
 {
 	serverOption,
 	localOption,
@@ -126,26 +163,34 @@ RootCommand rootCommand = new("NatTypeTester - NAT type testing tool")
 	rfc5780Command
 };
 
-ParseResult parseResult = rootCommand.Parse(args);
-return await parseResult.InvokeAsync(cancellationToken: CancellationToken.None);
-
-async Task RunWithAbpAsync(ParseResult result, Func<IServiceProvider, TextWriter, Task> action)
+try
 {
-	using IAbpApplicationWithInternalServiceProvider application = await AbpApplicationFactory.CreateAsync<NatTypeTesterConsoleModule>(options => options.UseAutofac());
-	await application.InitializeAsync();
+	ParseResult parseResult = rootCommand.Parse(args);
+	return await parseResult.InvokeAsync();
+}
+catch (Exception ex) when (ex is not OperationCanceledException)
+{
+	AnsiConsole.MarkupLine($"[red]{localizer["Error"].Value.EscapeMarkup()}:[/] {ex.Message.EscapeMarkup()}");
+	return 1;
+}
+finally
+{
+	await application.ShutdownAsync();
+}
 
-	try
+void ShowResultTable(IEnumerable<(string Property, object? Value, string Color)> rows)
+{
+	Table table = new Table()
+		.Border(TableBorder.Rounded)
+		.AddColumn($"[bold]{localizer["Property"].Value.EscapeMarkup()}[/]")
+		.AddColumn($"[bold]{localizer["Value"].Value.EscapeMarkup()}[/]");
+
+	foreach ((string property, object? value, string color) in rows)
 	{
-		await action(application.ServiceProvider, result.InvocationConfiguration.Output);
+		table.AddRow(property.EscapeMarkup(), $"[{color}]{value?.ToString().EscapeMarkup()}[/]");
 	}
-	catch (Exception ex) when (ex is not OperationCanceledException)
-	{
-		await result.InvocationConfiguration.Error.WriteLineAsync($"Error: {ex.Message}");
-	}
-	finally
-	{
-		await application.ShutdownAsync();
-	}
+
+	AnsiConsole.Write(table);
 }
 
 StunTestInput BuildStunTestInput(ParseResult result)

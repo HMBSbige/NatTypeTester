@@ -45,6 +45,15 @@
     "OpenHomepage": "打开主页",
     "OpenConfigDirectory": "打开配置目录",
     "ConfigDirectory": "配置目录",
-    "SkipCertificateValidation": "跳过 TLS/DTLS 证书校验"
+    "SkipCertificateValidation": "跳过 TLS/DTLS 证书校验",
+    "AppDescription": "NatTypeTester - NAT 类型测试工具",
+    "RFC3489Description": "使用 RFC 3489 测试 NAT 类型",
+    "RFC5780Description": "使用 RFC 5780 测试 NAT 类型",
+    "TransportProtocol": "传输协议：Udp、Tcp、Tls、Dtls",
+    "TestType": "测试类型：Combining、Binding、Filtering、Mapping",
+    "Testing": "测试中...",
+    "Property": "属性",
+    "Value": "值",
+    "Cancelled": "已取消"
   }
 }

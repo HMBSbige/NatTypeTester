@@ -45,6 +45,15 @@
     "OpenHomepage": "Open Homepage",
     "OpenConfigDirectory": "Open Config Directory",
     "ConfigDirectory": "Configuration Directory",
-    "SkipCertificateValidation": "Skip TLS/DTLS certificate validation"
+    "SkipCertificateValidation": "Skip TLS/DTLS certificate validation",
+    "AppDescription": "NatTypeTester - NAT type testing tool",
+    "RFC3489Description": "Test NAT type using RFC 3489",
+    "RFC5780Description": "Test NAT type using RFC 5780",
+    "TransportProtocol": "Transport protocol: Udp, Tcp, Tls, Dtls",
+    "TestType": "Test type: Combining, Binding, Filtering, Mapping",
+    "Testing": "Testing...",
+    "Property": "Property",
+    "Value": "Value",
+    "Cancelled": "Cancelled"
   }
 }
