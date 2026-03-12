@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ReactiveUI" Version="23.1.8" />
-    <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="11.4.7" />
+    <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="11.4.12" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.1" />
     <PackageVersion Include="Splat.Serilog" Version="19.3.1" />
   </ItemGroup>
