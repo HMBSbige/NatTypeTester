@@ -14,6 +14,7 @@
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.HarfBuzz" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
+    <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ReactiveUI" Version="23.1.8" />
