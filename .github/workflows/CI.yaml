@@ -80,6 +80,7 @@ jobs:
   build_android:
     name: Build Android (${{ matrix.rid }})
     needs: [test, check_format]
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -137,6 +138,7 @@ jobs:
   build_android_universal:
     name: Build Android (universal)
     needs: [test, check_format]
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
