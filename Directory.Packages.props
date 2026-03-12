@@ -37,8 +37,8 @@
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.4" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="DTLS" Version="0.3.4" />
@@ -48,7 +48,7 @@
     <PackageVersion Include="NuGet.Versioning" Version="7.3.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.4" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.5" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Moq" Version="4.20.72" />
