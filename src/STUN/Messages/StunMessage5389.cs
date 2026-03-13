@@ -17,21 +17,46 @@ public class StunMessage5389
 	private const int SizeOfLength = sizeof(ushort);
 	private const int SizeOfMagicCookie = sizeof(uint);
 	private const int SizeOfTransactionId = 12;
+	/// <summary>
+	/// The fixed size of the STUN message header in bytes.
+	/// </summary>
 	public const int HeaderLength = SizeOfMessageType + SizeOfLength + SizeOfMagicCookie + SizeOfTransactionId;
 
+	/// <summary>
+	/// Gets or sets the STUN message type indicating the request or response class and method.
+	/// </summary>
 	public StunMessageType StunMessageType { get; set; }
 
+	/// <summary>
+	/// Gets or sets the magic cookie value, which is fixed at <c>0x2112A442</c> for RFC 5389.
+	/// </summary>
 	public uint MagicCookie { get; set; }
 
+	/// <summary>
+	/// Gets the 96-bit transaction ID that uniquely identifies a STUN transaction.
+	/// </summary>
 	public byte[] TransactionId { get; }
 
 	#endregion
 
+	/// <summary>
+	/// Gets or sets the collection of STUN attributes contained in this message.
+	/// </summary>
 	public IEnumerable<StunAttribute> Attributes { get; set; }
 
+	/// <summary>
+	/// Gets the total byte length of all attributes in this message.
+	/// </summary>
 	public ushort MessageLength => (ushort)Attributes.Sum(x => x.RealLength);
+
+	/// <summary>
+	/// Gets the total byte length of this message including header and all attributes.
+	/// </summary>
 	public int Length => HeaderLength + MessageLength;
 
+	/// <summary>
+	/// Initializes a new <see cref="StunMessage5389"/> with a Binding Request type, the standard magic cookie, and a random transaction ID.
+	/// </summary>
 	public StunMessage5389()
 	{
 		Attributes = Array.Empty<StunAttribute>();
@@ -41,6 +66,11 @@ public class StunMessage5389
 		RandomNumberGenerator.Fill(TransactionId);
 	}
 
+	/// <summary>
+	/// Serializes this STUN message into the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The destination buffer to write the message bytes into.</param>
+	/// <returns>The total number of bytes written.</returns>
 	public int WriteTo(Span<byte> buffer)
 	{
 		ushort messageLength = MessageLength;
@@ -62,12 +92,22 @@ public class StunMessage5389
 		return length;
 	}
 
+	/// <summary>
+	/// Attempts to parse a STUN message from the specified memory buffer.
+	/// </summary>
+	/// <param name="buffer">The buffer containing the raw STUN message bytes.</param>
+	/// <returns><see langword="true"/> if the message was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public bool TryParse(ReadOnlyMemory<byte> buffer)
 	{
 		ReadOnlySequence<byte> sequence = new(buffer);
 		return TryParse(ref sequence);
 	}
 
+	/// <summary>
+	/// Attempts to parse a STUN message from the specified byte sequence, advancing the sequence past the consumed bytes on success.
+	/// </summary>
+	/// <param name="sequence">The byte sequence to parse from. On success, it is advanced past the consumed bytes.</param>
+	/// <returns><see langword="true"/> if the message was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public bool TryParse(ref ReadOnlySequence<byte> sequence)
 	{
 		if (sequence.Length < HeaderLength)
@@ -150,6 +190,12 @@ public class StunMessage5389
 		return true;
 	}
 
+	/// <summary>
+	/// Determines whether this message belongs to the same STUN transaction as another message
+	/// by comparing their magic cookie and transaction ID.
+	/// </summary>
+	/// <param name="other">The other STUN message to compare with.</param>
+	/// <returns><see langword="true"/> if both messages share the same transaction; otherwise, <see langword="false"/>.</returns>
 	public bool IsSameTransaction(StunMessage5389 other)
 	{
 		return MagicCookie == other.MagicCookie && TransactionId.AsSpan().SequenceEqual(other.TransactionId);

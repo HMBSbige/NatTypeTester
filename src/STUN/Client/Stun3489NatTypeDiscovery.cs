@@ -8,10 +8,16 @@ using System.Net;
 namespace STUN.Client;
 
 /// <summary>
-/// https://datatracker.ietf.org/doc/html/rfc3489#section-10.1
+/// Implements the classic NAT type discovery algorithm as defined in RFC 3489 Section 10.1.
+/// This is a pure state machine that produces <see cref="StunDiscoveryAction"/> steps
+/// and consumes <see cref="StunResponse"/> results to determine the NAT type.
 /// </summary>
+/// <param name="server">The STUN server endpoint to query.</param>
 public class Stun3489NatTypeDiscovery(IPEndPoint server)
 {
+	/// <summary>
+	/// Gets the classic STUN result containing the discovered NAT type and endpoints.
+	/// </summary>
 	public ClassicStunResult Result { get; } = new();
 
 	private enum Phase
@@ -28,12 +34,21 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 	private IPEndPoint? _mappedAddress1;
 	private IPEndPoint? _test1Remote;
 
+	/// <summary>
+	/// Creates the initial query action to begin the RFC 3489 NAT type discovery process.
+	/// </summary>
+	/// <returns>The first STUN discovery action to send.</returns>
 	public StunDiscoveryAction CreateQuery()
 	{
 		_phase = Phase.Test1;
 		return CreateClassicBindingRequest(server);
 	}
 
+	/// <summary>
+	/// Processes a STUN response (or null for timeout) and returns the next action to perform.
+	/// </summary>
+	/// <param name="response">The STUN response received, or <see langword="null"/> if the request timed out.</param>
+	/// <returns>The next discovery action to send, or <see langword="null"/> if the discovery is complete.</returns>
 	public StunDiscoveryAction? GotResponse(StunResponse? response)
 	{
 		return _phase switch

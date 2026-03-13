@@ -5,10 +5,21 @@ namespace STUN.Messages.StunAttributeValues;
 /// </summary>
 public class ChangeRequestStunAttributeValue : IStunAttributeValue
 {
+	/// <summary>
+	/// Gets or sets a value indicating whether to request a response from a different IP address.
+	/// </summary>
 	public bool ChangeIp { get; set; }
 
+	/// <summary>
+	/// Gets or sets a value indicating whether to request a response from a different port.
+	/// </summary>
 	public bool ChangePort { get; set; }
 
+	/// <summary>
+	/// Serializes this CHANGE-REQUEST attribute value into the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The destination buffer.</param>
+	/// <returns>The number of bytes written.</returns>
 	public int WriteTo(Span<byte> buffer)
 	{
 		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, 4, nameof(buffer));
@@ -20,6 +31,11 @@ public class ChangeRequestStunAttributeValue : IStunAttributeValue
 		return 4;
 	}
 
+	/// <summary>
+	/// Attempts to parse a CHANGE-REQUEST attribute value from the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The buffer containing the raw attribute value bytes.</param>
+	/// <returns><see langword="true"/> if the value was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public bool TryParse(ReadOnlySpan<byte> buffer)
 	{
 		if (buffer.Length != 4)

@@ -9,10 +9,16 @@ using System.Net;
 namespace STUN.Client;
 
 /// <summary>
-/// https://datatracker.ietf.org/doc/html/rfc5780#section-4.2
+/// Implements the NAT behavior discovery algorithm as defined in RFC 5780 Section 4.2.
+/// This is a pure state machine that produces <see cref="StunDiscoveryAction"/> steps
+/// and consumes <see cref="StunResponse"/> results to determine NAT mapping and filtering behaviors.
 /// </summary>
+/// <param name="server">The STUN server endpoint to query.</param>
 public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 {
+	/// <summary>
+	/// Gets the RFC 5389/5780 STUN result containing the discovered NAT behaviors and endpoints.
+	/// </summary>
 	public StunResult5389 Result { get; } = new();
 
 	private enum Scope
@@ -37,6 +43,10 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 	private Phase _phase;
 	private IPEndPoint? _mappingTest2PublicEndPoint;
 
+	/// <summary>
+	/// Creates the initial query action to perform a full NAT behavior discovery (binding, filtering, and mapping tests).
+	/// </summary>
+	/// <returns>The first STUN discovery action to send.</returns>
 	public StunDiscoveryAction CreateQuery()
 	{
 		_scope = Scope.Full;
@@ -44,6 +54,10 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		return CreateBindingRequest(server);
 	}
 
+	/// <summary>
+	/// Creates the initial query action to perform only the binding test.
+	/// </summary>
+	/// <returns>The first STUN discovery action to send.</returns>
 	public StunDiscoveryAction CreateBindingTest()
 	{
 		_scope = Scope.BindingOnly;
@@ -51,6 +65,10 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		return CreateBindingRequest(server);
 	}
 
+	/// <summary>
+	/// Creates the initial query action to perform a NAT mapping behavior test.
+	/// </summary>
+	/// <returns>The first STUN discovery action to send.</returns>
 	public StunDiscoveryAction CreateMappingBehaviorTest()
 	{
 		_scope = Scope.Mapping;
@@ -58,6 +76,10 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		return CreateBindingRequest(server);
 	}
 
+	/// <summary>
+	/// Creates the initial query action to perform a NAT filtering behavior test.
+	/// </summary>
+	/// <returns>The first STUN discovery action to send.</returns>
 	public StunDiscoveryAction CreateFilteringBehaviorTest()
 	{
 		_scope = Scope.Filtering;
@@ -65,6 +87,11 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		return CreateBindingRequest(server);
 	}
 
+	/// <summary>
+	/// Processes a STUN response (or null for timeout) and returns the next action to perform.
+	/// </summary>
+	/// <param name="response">The STUN response received, or <see langword="null"/> if the request timed out.</param>
+	/// <returns>The next discovery action to send, or <see langword="null"/> if the discovery is complete.</returns>
 	public StunDiscoveryAction? GotResponse(StunResponse? response)
 	{
 		return _phase switch

@@ -7,10 +7,16 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace STUN.Proxy;
 
+/// <summary>
+/// A TCP proxy that establishes a direct TLS-encrypted connection to the destination.
+/// </summary>
+/// <param name="targetHost">The target host name for TLS server name indication.</param>
+/// <param name="skipCertificateValidation">Whether to skip server certificate validation.</param>
 public class TlsProxy(string targetHost, bool skipCertificateValidation = false) : DirectTcpProxy
 {
 	private SslStream? _tlsStream;
 
+	/// <inheritdoc />
 	public override async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -41,6 +47,7 @@ public class TlsProxy(string targetHost, bool skipCertificateValidation = false)
 		return _tlsStream.AsDuplexPipe();
 	}
 
+	/// <inheritdoc />
 	protected override void CloseClient()
 	{
 		_tlsStream?.Dispose();

@@ -9,8 +9,15 @@ using System.Net;
 
 namespace STUN.Client;
 
+/// <summary>
+/// A TCP-based STUN client implementing RFC 5389/5780 NAT behavior discovery.
+/// Filtering behavior tests are not supported over TCP.
+/// </summary>
 public class StunClient5389TCP : IStunClient5389
 {
+	/// <summary>
+	/// Gets or sets the timeout duration for establishing TCP connections to the STUN server.
+	/// </summary>
 	public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
 	private readonly IPEndPoint _remoteEndPoint;
@@ -19,8 +26,16 @@ public class StunClient5389TCP : IStunClient5389
 	private readonly ITcpProxy _proxy;
 	private readonly bool _ownedProxy;
 
+	/// <inheritdoc />
 	public StunResult5389 State { get; private set; } = new();
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="StunClient5389TCP"/> class.
+	/// </summary>
+	/// <param name="server">The STUN server endpoint to query.</param>
+	/// <param name="local">The local endpoint to bind to.</param>
+	/// <param name="proxy">An optional TCP proxy for connecting to the STUN server.</param>
+	/// <param name="ownedProxy">Whether this client owns and should dispose the proxy.</param>
 	public StunClient5389TCP(IPEndPoint server, IPEndPoint local, ITcpProxy? proxy = default, bool ownedProxy = true)
 	{
 		ArgumentNullException.ThrowIfNull(server);
@@ -35,12 +50,14 @@ public class StunClient5389TCP : IStunClient5389
 		State.LocalEndPoint = local;
 	}
 
+	/// <inheritdoc />
 	public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 	{
 		await MappingBehaviorTestAsync(cancellationToken);
 		State.FilteringBehavior = FilteringBehavior.None;
 	}
 
+	/// <inheritdoc />
 	public async ValueTask MappingBehaviorTestAsync(CancellationToken cancellationToken = default)
 	{
 		Stun5389NatBehaviorDiscovery session = new(_remoteEndPoint);
@@ -55,11 +72,14 @@ public class StunClient5389TCP : IStunClient5389
 		}
 	}
 
+	/// <inheritdoc />
+	/// <exception cref="NotSupportedException">Always thrown because filtering tests are only applicable to UDP.</exception>
 	public ValueTask FilteringBehaviorTestAsync(CancellationToken cancellationToken = default)
 	{
 		throw new NotSupportedException(@"Filtering test applies only to UDP.");
 	}
 
+	/// <inheritdoc />
 	public async ValueTask<StunResult5389> BindingTestAsync(CancellationToken cancellationToken = default)
 	{
 		Stun5389NatBehaviorDiscovery session = new(_remoteEndPoint);
@@ -153,6 +173,7 @@ public class StunClient5389TCP : IStunClient5389
 		}
 	}
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		if (_ownedProxy)

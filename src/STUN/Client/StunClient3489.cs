@@ -9,10 +9,11 @@ using System.Net.Sockets;
 namespace STUN.Client;
 
 /// <summary>
-/// https://datatracker.ietf.org/doc/html/rfc3489#section-10.1
+/// A UDP-based STUN client implementing the classic NAT type discovery algorithm defined in RFC 3489.
 /// </summary>
 public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 {
+	/// <inheritdoc />
 	public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
 	private readonly IPEndPoint _remoteEndPoint;
@@ -20,8 +21,18 @@ public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 	private readonly IUdpProxy _proxy;
 	private readonly bool _ownedProxy;
 
+	/// <summary>
+	/// Gets the classic STUN result containing the discovered NAT type and endpoints.
+	/// </summary>
 	public ClassicStunResult State { get; private set; } = new();
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="StunClient3489"/> class.
+	/// </summary>
+	/// <param name="server">The STUN server endpoint to query.</param>
+	/// <param name="local">The local endpoint to bind to.</param>
+	/// <param name="proxy">An optional UDP proxy for sending and receiving STUN messages.</param>
+	/// <param name="ownedProxy">Whether this client owns and should dispose the proxy.</param>
 	public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null, bool ownedProxy = true)
 	{
 		ArgumentNullException.ThrowIfNull(server);
@@ -35,6 +46,7 @@ public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 		State.LocalEndPoint = local;
 	}
 
+	/// <inheritdoc />
 	public async ValueTask ConnectProxyAsync(CancellationToken cancellationToken = default)
 	{
 		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -43,11 +55,13 @@ public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 		await _proxy.ConnectAsync(cts.Token);
 	}
 
+	/// <inheritdoc />
 	public async ValueTask CloseProxyAsync(CancellationToken cancellationToken = default)
 	{
 		await _proxy.CloseAsync(cancellationToken);
 	}
 
+	/// <inheritdoc />
 	public async ValueTask QueryAsync(CancellationToken cancellationToken = default)
 	{
 		Stun3489NatTypeDiscovery session = new(_remoteEndPoint);
@@ -98,6 +112,7 @@ public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 				?? throw new InvalidOperationException(@"UDP client local endpoint is unavailable.");
 	}
 
+	/// <inheritdoc />
 	public async ValueTask DisposeAsync()
 	{
 		if (_ownedProxy)
@@ -108,6 +123,7 @@ public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 		GC.SuppressFinalize(this);
 	}
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		if (_ownedProxy)

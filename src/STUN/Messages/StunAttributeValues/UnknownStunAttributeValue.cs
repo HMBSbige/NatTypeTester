@@ -8,8 +8,16 @@ namespace STUN.Messages.StunAttributeValues;
 /// </summary>
 public class UnknownStunAttributeValue : IStunAttributeValue
 {
+	/// <summary>
+	/// Gets the list of unrecognized attribute types reported by the server.
+	/// </summary>
 	public List<AttributeType> Types { get; } = new();
 
+	/// <summary>
+	/// Serializes this UNKNOWN-ATTRIBUTES value into the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The destination buffer.</param>
+	/// <returns>The number of bytes written.</returns>
 	public int WriteTo(Span<byte> buffer)
 	{
 		int size = Types.Count << 1;
@@ -24,6 +32,11 @@ public class UnknownStunAttributeValue : IStunAttributeValue
 		return size;
 	}
 
+	/// <summary>
+	/// Attempts to parse an UNKNOWN-ATTRIBUTES value from the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The buffer containing the raw attribute value bytes.</param>
+	/// <returns><see langword="true"/> if the value was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public bool TryParse(ReadOnlySpan<byte> buffer)
 	{
 		if (buffer.Length < 2 || (buffer.Length & 1) == 1)

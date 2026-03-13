@@ -4,10 +4,20 @@ using System.Net.Sockets;
 
 namespace STUN;
 
+/// <summary>
+/// Represents a network endpoint identified by a hostname (or IP address) and a port number.
+/// Supports parsing from string representations including IPv4, IPv6, and DNS hostnames.
+/// </summary>
 public class HostnameEndpoint
 {
+	/// <summary>
+	/// Gets the hostname or IP address.
+	/// </summary>
 	public string Hostname { get; }
 
+	/// <summary>
+	/// Gets the port number.
+	/// </summary>
 	public ushort Port { get; }
 
 	private HostnameEndpoint(string host, ushort port)
@@ -16,6 +26,14 @@ public class HostnameEndpoint
 		Port = port;
 	}
 
+	/// <summary>
+	/// Attempts to parse a string into a <see cref="HostnameEndpoint"/> instance.
+	/// Accepts formats such as "hostname", "hostname:port", "ip:port", and "[ipv6]:port".
+	/// </summary>
+	/// <param name="s">The string to parse.</param>
+	/// <param name="result">When this method returns, contains the parsed <see cref="HostnameEndpoint"/> if successful; otherwise, <see langword="null"/>.</param>
+	/// <param name="defaultPort">The default port to use if none is specified in the string.</param>
+	/// <returns><see langword="true"/> if the string was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public static bool TryParse(string s, [NotNullWhen(true)] out HostnameEndpoint? result, ushort defaultPort = 0)
 	{
 		result = null;
@@ -66,6 +84,11 @@ public class HostnameEndpoint
 		return false;
 	}
 
+	/// <summary>
+	/// Returns the string representation of the endpoint in "hostname:port" format.
+	/// IPv6 addresses are enclosed in brackets.
+	/// </summary>
+	/// <returns>A string representation of the endpoint.</returns>
 	public override string ToString()
 	{
 		if (IPAddress.TryParse(Hostname, out IPAddress? ip) && ip.AddressFamily is AddressFamily.InterNetworkV6)

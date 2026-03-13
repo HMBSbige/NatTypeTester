@@ -9,8 +9,12 @@ using System.Runtime.CompilerServices;
 
 namespace STUN.Proxy;
 
+/// <summary>
+/// A UDP proxy that routes datagrams through a SOCKS5 proxy server using UDP association.
+/// </summary>
 public class Socks5UdpProxy : IUdpProxy
 {
+	/// <inheritdoc />
 	public Socket Client
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,6 +36,11 @@ public class Socks5UdpProxy : IUdpProxy
 	private Socks5Client? _socks5Client;
 	private ServerBound _udpServerBound;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="Socks5UdpProxy"/> class with the specified local endpoint and SOCKS5 options.
+	/// </summary>
+	/// <param name="localEndPoint">The local endpoint to bind the UDP socket to.</param>
+	/// <param name="socks5Options">The SOCKS5 connection options.</param>
 	public Socks5UdpProxy(IPEndPoint localEndPoint, Socks5CreateOption socks5Options)
 	{
 		ArgumentNullException.ThrowIfNull(localEndPoint);
@@ -42,6 +51,7 @@ public class Socks5UdpProxy : IUdpProxy
 		_socks5Options = socks5Options;
 	}
 
+	/// <inheritdoc />
 	public async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
 	{
 		if (_socks5Client?.Status is Status.Established)
@@ -55,6 +65,7 @@ public class Socks5UdpProxy : IUdpProxy
 		_udpServerBound = await _socks5Client.UdpAssociateAsync(_localEndPoint.Address, (ushort)_localEndPoint.Port, cancellationToken);
 	}
 
+	/// <inheritdoc />
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
 		_socks5Client?.Dispose();
@@ -62,6 +73,7 @@ public class Socks5UdpProxy : IUdpProxy
 		return default;
 	}
 
+	/// <inheritdoc />
 	public async ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
 	{
 		Socks5Client? socks5Client = _socks5Client;
@@ -109,6 +121,7 @@ public class Socks5UdpProxy : IUdpProxy
 		}
 	}
 
+	/// <inheritdoc />
 	public async ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 	{
 		Socks5Client socks5Client = _socks5Client ?? throw new InvalidOperationException(@"SOCKS5 client is not connected");
@@ -126,6 +139,7 @@ public class Socks5UdpProxy : IUdpProxy
 		}
 	}
 
+	/// <inheritdoc />
 	public ValueTask DisposeAsync()
 	{
 		Dispose();
@@ -133,6 +147,7 @@ public class Socks5UdpProxy : IUdpProxy
 		return default;
 	}
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		_socks5Client?.Dispose();

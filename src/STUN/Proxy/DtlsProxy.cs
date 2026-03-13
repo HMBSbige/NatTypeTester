@@ -6,17 +6,26 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace STUN.Proxy;
 
+/// <summary>
+/// A UDP proxy that wraps an inner <see cref="IUdpProxy"/> with DTLS encryption.
+/// </summary>
+/// <param name="innerProxy">The inner UDP proxy to wrap with DTLS.</param>
+/// <param name="serverName">The target server name for DTLS handshake.</param>
+/// <param name="skipCertificateValidation">Whether to skip server certificate validation.</param>
 public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertificateValidation = false) : IUdpProxy
 {
 	private DtlsTransport? _dtlsTransport;
 
+	/// <inheritdoc />
 	public Socket Client => innerProxy.Client;
 
+	/// <inheritdoc />
 	public ValueTask ConnectAsync(CancellationToken cancellationToken = default)
 	{
 		return innerProxy.ConnectAsync(cancellationToken);
 	}
 
+	/// <inheritdoc />
 	public async ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 	{
 		if (_dtlsTransport is null)
@@ -43,6 +52,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 		return buffer.Length;
 	}
 
+	/// <inheritdoc />
 	public async ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
 	{
 		DtlsTransport session = _dtlsTransport ?? throw new InvalidOperationException("DTLS session has not been established.");
@@ -58,6 +68,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 		};
 	}
 
+	/// <inheritdoc />
 	public async ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
 		if (_dtlsTransport is { } session)
@@ -69,6 +80,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 		await innerProxy.CloseAsync(cancellationToken);
 	}
 
+	/// <inheritdoc />
 	public async ValueTask DisposeAsync()
 	{
 		if (_dtlsTransport is { } session)
@@ -81,6 +93,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 		GC.SuppressFinalize(this);
 	}
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		if (_dtlsTransport is { } session)

@@ -23,14 +23,31 @@ public class StunAttribute
         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      */
 
+	/// <summary>
+	/// Gets or sets the STUN attribute type.
+	/// </summary>
 	public AttributeType Type { get; set; } = AttributeType.Useless;
 
+	/// <summary>
+	/// Gets or sets the length of the attribute value in bytes.
+	/// </summary>
 	public ushort Length { get; set; }
 
+	/// <summary>
+	/// Gets the total byte length of this attribute including type, length, value, and padding.
+	/// </summary>
 	public ushort RealLength => (ushort)(Type == AttributeType.Useless ? 0 : 4 + Length + (4 - Length % 4) % 4);
 
+	/// <summary>
+	/// Gets or sets the parsed attribute value.
+	/// </summary>
 	public IStunAttributeValue Value { get; set; } = new UselessStunAttributeValue();
 
+	/// <summary>
+	/// Serializes this attribute into the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The destination buffer to write the attribute bytes into.</param>
+	/// <returns>The total number of bytes written, including padding.</returns>
 	public int WriteTo(Span<byte> buffer)
 	{
 		int length = 4 + Length;
@@ -53,6 +70,11 @@ public class StunAttribute
 		return totalLength;
 	}
 
+	/// <summary>
+	/// Attempts to parse a STUN attribute from the specified buffer.
+	/// </summary>
+	/// <param name="buffer">The buffer containing the raw attribute bytes.</param>
+	/// <param name="magicCookieAndTransactionId">The magic cookie and transaction ID bytes used for XOR-based attribute decoding.</param>
 	/// <returns>
 	/// Parse 成功字节，0 则表示 Parse 失败
 	/// </returns>

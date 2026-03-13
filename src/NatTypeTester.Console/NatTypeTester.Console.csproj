@@ -13,10 +13,4 @@
     <PackageReference Include="Volo.Abp.Autofac" />
   </ItemGroup>
 
-  <Target Name="ExcludeFilesFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">
-    <ItemGroup>
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.xml'" />
-    </ItemGroup>
-  </Target>
-
 </Project>

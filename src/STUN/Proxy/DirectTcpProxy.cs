@@ -5,8 +5,12 @@ using System.Net.Sockets;
 
 namespace STUN.Proxy;
 
+/// <summary>
+/// A TCP proxy that connects directly to the destination without any intermediary.
+/// </summary>
 public class DirectTcpProxy : ITcpProxy
 {
+	/// <inheritdoc />
 	public IPEndPoint? CurrentLocalEndPoint
 	{
 		get
@@ -16,8 +20,12 @@ public class DirectTcpProxy : ITcpProxy
 		}
 	}
 
+	/// <summary>
+	/// The underlying TCP client used for the connection.
+	/// </summary>
 	protected TcpClient? TcpClient;
 
+	/// <inheritdoc />
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -32,6 +40,7 @@ public class DirectTcpProxy : ITcpProxy
 		return TcpClient.Client.AsDuplexPipe();
 	}
 
+	/// <inheritdoc />
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -41,6 +50,9 @@ public class DirectTcpProxy : ITcpProxy
 		return default;
 	}
 
+	/// <summary>
+	/// Closes the underlying TCP client and releases its resources.
+	/// </summary>
 	protected virtual void CloseClient()
 	{
 		if (TcpClient is null)
@@ -59,8 +71,12 @@ public class DirectTcpProxy : ITcpProxy
 		}
 	}
 
+	/// <summary>
+	/// Gets a value indicating whether this proxy has been disposed.
+	/// </summary>
 	public bool IsDisposed { get; private set; }
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		IsDisposed = true;

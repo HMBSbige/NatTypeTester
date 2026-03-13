@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <NoWarn>CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Copyright>Copyright © HMBSbige</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

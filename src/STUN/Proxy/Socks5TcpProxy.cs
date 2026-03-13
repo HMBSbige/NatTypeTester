@@ -5,8 +5,12 @@ using System.Net;
 
 namespace STUN.Proxy;
 
+/// <summary>
+/// A TCP proxy that routes connections through a SOCKS5 proxy server.
+/// </summary>
 public class Socks5TcpProxy : ITcpProxy
 {
+	/// <inheritdoc />
 	public IPEndPoint? CurrentLocalEndPoint
 	{
 		get
@@ -16,10 +20,20 @@ public class Socks5TcpProxy : ITcpProxy
 		}
 	}
 
+	/// <summary>
+	/// The SOCKS5 connection options.
+	/// </summary>
 	protected readonly Socks5CreateOption Socks5Options;
 
+	/// <summary>
+	/// The underlying SOCKS5 client used for proxied connections.
+	/// </summary>
 	protected Socks5Client? Socks5Client;
 
+	/// <summary>
+	/// Initializes a new instance of the <see cref="Socks5TcpProxy"/> class with the specified SOCKS5 options.
+	/// </summary>
+	/// <param name="socks5Options">The SOCKS5 connection options.</param>
 	public Socks5TcpProxy(Socks5CreateOption socks5Options)
 	{
 		ArgumentNullException.ThrowIfNull(socks5Options);
@@ -28,6 +42,7 @@ public class Socks5TcpProxy : ITcpProxy
 		Socks5Options = socks5Options;
 	}
 
+	/// <inheritdoc />
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -45,6 +60,7 @@ public class Socks5TcpProxy : ITcpProxy
 		return Socks5Client.GetPipe();
 	}
 
+	/// <inheritdoc />
 	public ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -54,6 +70,9 @@ public class Socks5TcpProxy : ITcpProxy
 		return default;
 	}
 
+	/// <summary>
+	/// Closes the underlying SOCKS5 client and releases its resources.
+	/// </summary>
 	protected virtual void CloseClient()
 	{
 		if (Socks5Client is null)
@@ -72,8 +91,12 @@ public class Socks5TcpProxy : ITcpProxy
 		}
 	}
 
+	/// <summary>
+	/// Gets a value indicating whether this proxy has been disposed.
+	/// </summary>
 	public bool IsDisposed { get; private set; }
 
+	/// <inheritdoc />
 	public void Dispose()
 	{
 		IsDisposed = true;
