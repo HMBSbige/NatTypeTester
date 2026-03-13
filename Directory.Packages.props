@@ -8,7 +8,7 @@
     <PackageVersion Include="Avalonia.Desktop" Version="11.3.12" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.12" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.12" />
-    <PackageVersion Include="FluentIcons.Avalonia" Version="2.0.320" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="2.0.321" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
