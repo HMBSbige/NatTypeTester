@@ -16,6 +16,10 @@ public partial class RFC5780View : ReactiveUserControl<RFC5780ViewModel>, ISingl
 				LocalEndComboBox.Bind(ComboBox.PlaceholderTextProperty, new ObservableStringLocalizer("LocalEndPlaceholder")).DisposeWith(d);
 				PublicEndLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("PublicEnd")).DisposeWith(d);
 				TestButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Test")).DisposeWith(d);
+				CancelButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Cancel")).DisposeWith(d);
+				BindingTestButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("BindingTest")).DisposeWith(d);
+				MappingTestButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("MappingBehavior")).DisposeWith(d);
+				FilteringTestButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("FilteringBehavior")).DisposeWith(d);
 			}
 		);
 	}

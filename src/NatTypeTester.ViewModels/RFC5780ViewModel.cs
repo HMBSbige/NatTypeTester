@@ -34,9 +34,12 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 
 	private readonly Dictionary<TransportType, ResultSnapshot> _cachedResults = new();
 
+	private CancellationTokenSource? _cts;
+
 	public RFC5780ViewModel()
 	{
 		DiscoveryNatTypeCommand.DisposeWith(Disposables);
+		CancelTestCommand.DisposeWith(Disposables);
 
 		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
 
@@ -46,55 +49,96 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 	}
 
 	[ReactiveCommand]
-	private async Task DiscoveryNatTypeAsync(CancellationToken cancellationToken = default)
+	private void CancelTest()
 	{
-		IRfc5780AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc5780AppService>();
-		SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
-		MainWindowViewModel mainWindowViewModel = TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>();
+		_cts?.Cancel();
+	}
 
-		TransportType transport = TransportType;
+	[ReactiveCommand]
+	private async Task DiscoveryNatTypeAsync(StunTestType testType, CancellationToken cancellationToken = default)
+	{
+		using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		_cts = cts;
 
-		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					.Subscribe
-					(_ =>
-						{
-							if (service.State is { } state)
-							{
-								ApplyAndCacheResult(state, transport);
-							}
-						}
-					))
+		try
 		{
-			StunResult5389 result = await service.TestAsync
-			(
-				new StunTestInput
-				{
-					StunServer = mainWindowViewModel.CurrentStunServer,
-					ProxyType = settings.ProxyType,
-					ProxyServer = settings.ProxyServer,
-					ProxyUser = settings.ProxyUser,
-					ProxyPassword = settings.ProxyPassword,
-					LocalEndPoint = LocalEnd,
-					SkipCertificateValidation = settings.SkipCertificateValidation
-				},
-				transport,
-				cancellationToken
-			);
+			IRfc5780AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc5780AppService>();
+			SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
+			MainWindowViewModel mainWindowViewModel = TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>();
 
-			ApplyAndCacheResult(result, transport);
+			TransportType transport = TransportType;
+
+			StunTestInput input = new()
+			{
+				StunServer = mainWindowViewModel.CurrentStunServer,
+				ProxyType = settings.ProxyType,
+				ProxyServer = settings.ProxyServer,
+				ProxyUser = settings.ProxyUser,
+				ProxyPassword = settings.ProxyPassword,
+				LocalEndPoint = LocalEnd,
+				SkipCertificateValidation = settings.SkipCertificateValidation
+			};
+
+			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+						.Subscribe
+						(_ =>
+							{
+								if (service.State is { } state)
+								{
+									ApplyAndCacheResult(state, transport, testType);
+								}
+							}
+						))
+			{
+				StunResult5389 result = await (testType switch
+				{
+					StunTestType.Binding => service.BindingTestAsync(input, transport, cts.Token),
+					StunTestType.Mapping => service.MappingBehaviorTestAsync(input, transport, cts.Token),
+					StunTestType.Filtering => service.FilteringBehaviorTestAsync(input, transport, cts.Token),
+					_ => service.TestAsync(input, transport, cts.Token)
+				});
+
+				ApplyAndCacheResult(result, transport, testType);
+			}
+		}
+		finally
+		{
+			_cts = null;
 		}
 	}
 
-	private void ApplyAndCacheResult(StunResult5389 result, TransportType transport)
+	private void ApplyAndCacheResult(StunResult5389 result, TransportType transport, StunTestType testType)
 	{
-		ResultSnapshot snapshot = new
-		(
-			result.BindingTestResult,
-			result.MappingBehavior,
-			result.FilteringBehavior,
-			result.PublicEndPoint?.ToString(),
-			result.LocalEndPoint?.ToString()
-		);
+		ResultSnapshot existing = _cachedResults.GetValueOrDefault(transport);
+		ResultSnapshot snapshot = testType switch
+		{
+			StunTestType.Binding => existing with
+			{
+				BindingTestResult = result.BindingTestResult,
+				PublicEndPoint = result.PublicEndPoint?.ToString(),
+				LocalEnd = result.LocalEndPoint?.ToString()
+			},
+			StunTestType.Mapping => existing with
+			{
+				MappingBehavior = result.MappingBehavior,
+				PublicEndPoint = result.PublicEndPoint?.ToString(),
+				LocalEnd = result.LocalEndPoint?.ToString()
+			},
+			StunTestType.Filtering => existing with
+			{
+				FilteringBehavior = result.FilteringBehavior,
+				PublicEndPoint = result.PublicEndPoint?.ToString(),
+				LocalEnd = result.LocalEndPoint?.ToString()
+			},
+			_ => new ResultSnapshot
+			(
+				result.BindingTestResult,
+				result.MappingBehavior,
+				result.FilteringBehavior,
+				result.PublicEndPoint?.ToString(),
+				result.LocalEndPoint?.ToString()
+			)
+		};
 		_cachedResults[transport] = snapshot;
 		ApplySnapshot(snapshot);
 	}

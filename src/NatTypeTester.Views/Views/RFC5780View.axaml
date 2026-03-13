@@ -7,6 +7,7 @@
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     xmlns:stun="clr-namespace:STUN.Enums;assembly=STUN"
+    xmlns:shared="clr-namespace:NatTypeTester.Domain.Shared;assembly=NatTypeTester.Domain.Shared"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
     d:DesignWidth="380" d:DesignHeight="500"
@@ -20,17 +21,33 @@
         <Border DockPanel.Dock="Bottom"
                 Margin="8,4,8,8"
                 CornerRadius="4">
-            <Button x:Name="TestButton"
-                    Classes="accent"
-                    HorizontalAlignment="Stretch"
-                    Padding="8"
-                    HorizontalContentAlignment="Center"
-                    Command="{Binding DiscoveryNatTypeCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <ic:FluentIcon Icon="Play" IconVariant="Regular" />
-                    <TextBlock x:Name="TestButtonText" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
+            <Panel>
+                <Button x:Name="TestButton"
+                        Classes="accent"
+                        HorizontalAlignment="Stretch"
+                        Padding="8"
+                        HorizontalContentAlignment="Center"
+                        IsVisible="{Binding !IsTesting}"
+                        Command="{Binding DiscoveryNatTypeCommand}"
+                        CommandParameter="{x:Static shared:StunTestType.Combining}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <ic:FluentIcon Icon="Play" IconVariant="Regular" />
+                        <TextBlock x:Name="TestButtonText" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="CancelButton"
+                        Classes="accent"
+                        HorizontalAlignment="Stretch"
+                        Padding="8"
+                        HorizontalContentAlignment="Center"
+                        IsVisible="{Binding IsTesting}"
+                        Command="{Binding CancelTestCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <ic:FluentIcon Icon="Stop" IconVariant="Regular" />
+                        <TextBlock x:Name="CancelButtonText" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Panel>
         </Border>
 
         <ScrollViewer>
@@ -48,18 +65,78 @@
 
                 <StackPanel Spacing="3">
                     <TextBlock x:Name="BindingTestLabel" />
-                    <TextBox IsReadOnly="True" Text="{Binding BindingTestResult, Mode=OneWay}" />
+                    <Grid ColumnDefinitions="*,4,Auto">
+                        <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding BindingTestResult, Mode=OneWay}" />
+                        <Panel Grid.Column="2">
+                            <Button x:Name="BindingTestButton"
+                                    Classes="accent"
+                                    Padding="8"
+                                    VerticalAlignment="Stretch"
+                                    IsVisible="{Binding !IsTesting}"
+                                    Command="{Binding DiscoveryNatTypeCommand}"
+                                    CommandParameter="{x:Static shared:StunTestType.Binding}">
+                                <ic:FluentIcon Icon="Play" IconVariant="Regular" />
+                            </Button>
+                            <Button Classes="accent"
+                                    Padding="8"
+                                    VerticalAlignment="Stretch"
+                                    IsVisible="{Binding IsTesting}"
+                                    Command="{Binding CancelTestCommand}">
+                                <ic:FluentIcon Icon="Stop" IconVariant="Regular" />
+                            </Button>
+                        </Panel>
+                    </Grid>
                 </StackPanel>
 
                 <StackPanel Spacing="3">
                     <TextBlock x:Name="MappingBehaviorLabel" />
-                    <TextBox IsReadOnly="True" Text="{Binding MappingBehavior, Mode=OneWay}" />
+                    <Grid ColumnDefinitions="*,4,Auto">
+                        <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding MappingBehavior, Mode=OneWay}" />
+                        <Panel Grid.Column="2">
+                            <Button x:Name="MappingTestButton"
+                                    Classes="accent"
+                                    Padding="8"
+                                    VerticalAlignment="Stretch"
+                                    IsVisible="{Binding !IsTesting}"
+                                    Command="{Binding DiscoveryNatTypeCommand}"
+                                    CommandParameter="{x:Static shared:StunTestType.Mapping}">
+                                <ic:FluentIcon Icon="Play" IconVariant="Regular" />
+                            </Button>
+                            <Button Classes="accent"
+                                    Padding="8"
+                                    VerticalAlignment="Stretch"
+                                    IsVisible="{Binding IsTesting}"
+                                    Command="{Binding CancelTestCommand}">
+                                <ic:FluentIcon Icon="Stop" IconVariant="Regular" />
+                            </Button>
+                        </Panel>
+                    </Grid>
                 </StackPanel>
 
                 <StackPanel Spacing="3"
                             IsVisible="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsFilteringVisible}}">
                     <TextBlock x:Name="FilteringBehaviorLabel" />
-                    <TextBox IsReadOnly="True" Text="{Binding FilteringBehavior, Mode=OneWay}" />
+                    <Grid ColumnDefinitions="*,4,Auto">
+                        <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding FilteringBehavior, Mode=OneWay}" />
+                        <Panel Grid.Column="2">
+                            <Button x:Name="FilteringTestButton"
+                                    Classes="accent"
+                                    Padding="8"
+                                    VerticalAlignment="Stretch"
+                                    IsVisible="{Binding !IsTesting}"
+                                    Command="{Binding DiscoveryNatTypeCommand}"
+                                    CommandParameter="{x:Static shared:StunTestType.Filtering}">
+                                <ic:FluentIcon Icon="Play" IconVariant="Regular" />
+                            </Button>
+                            <Button Classes="accent"
+                                    Padding="8"
+                                    VerticalAlignment="Stretch"
+                                    IsVisible="{Binding IsTesting}"
+                                    Command="{Binding CancelTestCommand}">
+                                <ic:FluentIcon Icon="Stop" IconVariant="Regular" />
+                            </Button>
+                        </Panel>
+                    </Grid>
                 </StackPanel>
 
                 <StackPanel Spacing="3" IsEnabled="{Binding !IsTesting}">

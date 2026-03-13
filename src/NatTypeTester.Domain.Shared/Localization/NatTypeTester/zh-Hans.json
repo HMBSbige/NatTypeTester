@@ -54,6 +54,7 @@
     "Testing": "测试中...",
     "Property": "属性",
     "Value": "值",
-    "Cancelled": "已取消"
+    "Cancelled": "已取消",
+    "Cancel": "取消"
   }
 }

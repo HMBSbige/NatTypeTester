@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using NatTypeTester.Application.Contracts;
 using NatTypeTester.Console;
+using NatTypeTester.Domain.Shared;
 using NatTypeTester.Domain.Shared.Localization;
 using Spectre.Console;
 using STUN.Enums;
