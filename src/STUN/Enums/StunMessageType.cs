@@ -4,7 +4,7 @@ namespace STUN.Enums;
 /// This enum specifies STUN message type.
 /// </summary>
 /// <returns>
-/// https://tools.ietf.org/html/rfc5389#section-6
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-6
 /// </returns>
 public enum StunMessageType : ushort
 {

@@ -3,7 +3,7 @@ using System.Text;
 namespace STUN.Messages.StunAttributeValues;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc5389#section-15.6
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-15.6
 /// </summary>
 public class ErrorCodeStunAttributeValue : IStunAttributeValue
 {

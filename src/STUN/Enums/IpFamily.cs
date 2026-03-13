@@ -1,7 +1,7 @@
 namespace STUN.Enums;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc5389#section-15.1
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-15.1
 /// </summary>
 public enum IpFamily : byte
 {

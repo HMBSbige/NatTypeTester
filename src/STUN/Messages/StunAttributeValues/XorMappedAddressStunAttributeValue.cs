@@ -4,7 +4,7 @@ using System.Net;
 namespace STUN.Messages.StunAttributeValues;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc5389#section-15.2
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-15.2
 /// </summary>
 public class XorMappedAddressStunAttributeValue : AddressStunAttributeValue
 {

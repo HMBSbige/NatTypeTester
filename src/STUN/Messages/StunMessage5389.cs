@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 namespace STUN.Messages;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc5389#section-6
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-6
 /// </summary>
 public class StunMessage5389
 {

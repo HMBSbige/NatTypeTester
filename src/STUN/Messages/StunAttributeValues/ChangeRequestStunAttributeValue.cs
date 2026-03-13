@@ -1,7 +1,7 @@
 namespace STUN.Messages.StunAttributeValues;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc5780#section-7.2
+/// https://datatracker.ietf.org/doc/html/rfc5780#section-7.2
 /// </summary>
 public class ChangeRequestStunAttributeValue : IStunAttributeValue
 {

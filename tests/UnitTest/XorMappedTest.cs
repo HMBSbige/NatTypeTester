@@ -26,7 +26,7 @@ public class XorMappedTest
 	private readonly byte[] _ipv6Response = ((byte[])[0x00, (byte)IpFamily.IPv6]).Concat(XorPort).Concat(XorIPv6).ToArray();
 
 	/// <summary>
-	/// https://datatracker.ietf.org/doc/html/rfc5769.html
+	/// https://datatracker.ietf.org/doc/html/rfc5769
 	/// </summary>
 	[Test]
 	public async Task TestXorMapped()

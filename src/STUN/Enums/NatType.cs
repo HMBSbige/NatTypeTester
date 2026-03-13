@@ -1,8 +1,8 @@
 namespace STUN.Enums;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc3489#section-5
-/// https://tools.ietf.org/html/rfc3489#section-10.1
+/// https://datatracker.ietf.org/doc/html/rfc3489#section-5
+/// https://datatracker.ietf.org/doc/html/rfc3489#section-10.1
 /// </summary>
 public enum NatType
 {

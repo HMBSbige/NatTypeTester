@@ -2,10 +2,8 @@ using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
 using STUN.StunResult;
-using STUN.Utils;
 using System.Buffers;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipelines;
 using System.Net;
 
@@ -45,70 +43,15 @@ public class StunClient5389TCP : IStunClient5389
 
 	public async ValueTask MappingBehaviorTestAsync(CancellationToken cancellationToken = default)
 	{
-		State = new StunResult5389();
+		Stun5389NatBehaviorDiscovery session = new(_remoteEndPoint);
+		State = session.Result;
+		StunDiscoveryAction? action = session.CreateMappingBehaviorTest();
 
-		// test I
-		StunResult5389 bindingResult = await BindingTestAsync(cancellationToken);
-		State = bindingResult with { };
-		if (State.BindingTestResult is not BindingTestResult.Success)
+		while (action is not null)
 		{
-			return;
-		}
-
-		if (!HasValidOtherAddress(State.OtherEndPoint))
-		{
-			State.MappingBehavior = MappingBehavior.UnsupportedServer;
-			return;
-		}
-
-		if (Equals(State.PublicEndPoint, State.LocalEndPoint))
-		{
-			State.MappingBehavior = MappingBehavior.Direct; // or Endpoint-Independent
-			return;
-		}
-
-		// test II
-		StunResult5389 result2 = await MappingBehaviorTestBase2Async();
-		if (State.MappingBehavior is not MappingBehavior.Unknown)
-		{
-			return;
-		}
-
-		// test III
-		await MappingBehaviorTestBase3Async();
-
-		return;
-
-		bool HasValidOtherAddress([NotNullWhen(true)] IPEndPoint? other)
-		{
-			return other is not null && !Equals(other.Address, _remoteEndPoint.Address) && other.Port != _remoteEndPoint.Port;
-		}
-
-		async ValueTask<StunResult5389> MappingBehaviorTestBase2Async()
-		{
-			StunResult5389 result = await BindingTestBaseAsync(new IPEndPoint(State.OtherEndPoint.Address, _remoteEndPoint.Port), cancellationToken);
-
-			if (result.BindingTestResult is not BindingTestResult.Success)
-			{
-				State.MappingBehavior = MappingBehavior.Fail;
-			}
-			else if (Equals(result.PublicEndPoint, State.PublicEndPoint))
-			{
-				State.MappingBehavior = MappingBehavior.EndpointIndependent;
-			}
-			return result;
-		}
-
-		async ValueTask MappingBehaviorTestBase3Async()
-		{
-			StunResult5389 result3 = await BindingTestBaseAsync(State.OtherEndPoint, cancellationToken);
-			if (result3.BindingTestResult is not BindingTestResult.Success)
-			{
-				State.MappingBehavior = MappingBehavior.Fail;
-				return;
-			}
-
-			State.MappingBehavior = Equals(result3.PublicEndPoint, result2.PublicEndPoint) ? MappingBehavior.AddressDependent : MappingBehavior.AddressAndPortDependent;
+			StunResponse? response = await RequestAsync(action.Message, action.SendTo, cancellationToken);
+			action = session.GotResponse(response);
+			State = session.Result;
 		}
 	}
 
@@ -119,40 +62,16 @@ public class StunClient5389TCP : IStunClient5389
 
 	public async ValueTask<StunResult5389> BindingTestAsync(CancellationToken cancellationToken = default)
 	{
-		return await BindingTestBaseAsync(_remoteEndPoint, cancellationToken);
-	}
+		Stun5389NatBehaviorDiscovery session = new(_remoteEndPoint);
+		StunDiscoveryAction? action = session.CreateBindingTest();
 
-	internal virtual async ValueTask<StunResult5389> BindingTestBaseAsync(IPEndPoint remote, CancellationToken cancellationToken = default)
-	{
-		StunResult5389 result = new();
-		StunMessage5389 test = new()
+		while (action is not null)
 		{
-			StunMessageType = StunMessageType.BindingRequest
-		};
-		StunResponse? response1 = await RequestAsync(test, remote, cancellationToken);
-		IPEndPoint? mappedAddress1 = response1?.Message.GetXorMappedAddressAttribute();
-		IPEndPoint? otherAddress = response1?.Message.GetOtherAddressAttribute();
-
-		if (response1 is null)
-		{
-			result.BindingTestResult = BindingTestResult.Fail;
-		}
-		else if (mappedAddress1 is null)
-		{
-			result.BindingTestResult = BindingTestResult.UnsupportedServer;
-		}
-		else
-		{
-			result.BindingTestResult = BindingTestResult.Success;
+			StunResponse? response = await RequestAsync(action.Message, action.SendTo, cancellationToken);
+			action = session.GotResponse(response);
 		}
 
-		IPEndPoint? local = response1?.Local;
-
-		result.LocalEndPoint = local;
-		result.PublicEndPoint = mappedAddress1;
-		result.OtherEndPoint = otherAddress;
-
-		return result;
+		return session.Result;
 	}
 
 	private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, CancellationToken cancellationToken)
@@ -162,6 +81,7 @@ public class StunClient5389TCP : IStunClient5389
 			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			cts.CancelAfter(ConnectTimeout);
 			IDuplexPipe pipe = await _proxy.ConnectAsync(_lastLocalEndPoint, remote, cts.Token);
+
 			try
 			{
 				int length = sendMessage.WriteTo(pipe.Output.GetSpan(sendMessage.Length));
@@ -175,6 +95,7 @@ public class StunClient5389TCP : IStunClient5389
 				if (success && message.IsSameTransaction(sendMessage))
 				{
 					IPEndPoint? local = _proxy.CurrentLocalEndPoint;
+
 					if (local is not null)
 					{
 						_lastLocalEndPoint = local;
@@ -204,6 +125,7 @@ public class StunClient5389TCP : IStunClient5389
 
 					ReadResult result = await reader.ReadAsync(cancellationToken);
 					ReadOnlySequence<byte> buffer = result.Buffer;
+
 					try
 					{
 						if (message.TryParse(ref buffer))

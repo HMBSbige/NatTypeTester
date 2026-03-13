@@ -4,7 +4,7 @@ using System.Buffers.Binary;
 namespace STUN.Messages.StunAttributeValues;
 
 /// <summary>
-/// https://tools.ietf.org/html/rfc5389#section-15.9
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-15.9
 /// </summary>
 public class UnknownStunAttributeValue : IStunAttributeValue
 {

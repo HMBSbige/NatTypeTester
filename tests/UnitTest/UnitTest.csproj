@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <PackageReference Include="Dns.Net" />
-    <PackageReference Include="Moq" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
 

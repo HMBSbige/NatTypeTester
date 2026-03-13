@@ -4,10 +4,10 @@ namespace STUN.Enums;
 /// STUN Attribute Registry
 /// </summary>
 /// <remarks>
-/// https://tools.ietf.org/html/rfc3489#section-11.2
-/// https://tools.ietf.org/html/rfc5389#section-18.2
-/// https://tools.ietf.org/html/rfc5780#section-9.1
-/// https://tools.ietf.org/html/rfc8489#section-18.3
+/// https://datatracker.ietf.org/doc/html/rfc3489#section-11.2
+/// https://datatracker.ietf.org/doc/html/rfc5389#section-18.2
+/// https://datatracker.ietf.org/doc/html/rfc5780#section-9.1
+/// https://datatracker.ietf.org/doc/html/rfc8489#section-18.3
 /// </remarks>
 public enum AttributeType : ushort
 {
