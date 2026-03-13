@@ -11,19 +11,23 @@
     <File Path="Directory.Build.props" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src\NatTypeTester.Application.Contracts\NatTypeTester.Application.Contracts.csproj" />
-    <Project Path="src\NatTypeTester.Application\NatTypeTester.Application.csproj" />
-    <Project Path="src\NatTypeTester.Configuration\NatTypeTester.Configuration.csproj" />
-    <Project Path="src\NatTypeTester.Android\NatTypeTester.Android.csproj" />
-    <Project Path="src\NatTypeTester.Console\NatTypeTester.Console.csproj" />
-    <Project Path="src\NatTypeTester.Desktop\NatTypeTester.Desktop.csproj" />
-    <Project Path="src\NatTypeTester.Domain.Shared\NatTypeTester.Domain.Shared.csproj" />
-    <Project Path="src\NatTypeTester.Domain\NatTypeTester.Domain.csproj" />
-    <Project Path="src\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
-    <Project Path="src\NatTypeTester.Views\NatTypeTester.Views.csproj" />
-    <Project Path="src\STUN\STUN.csproj" />
+    <Project Path="src/NatTypeTester.Application.Contracts/NatTypeTester.Application.Contracts.csproj" />
+    <Project Path="src/NatTypeTester.Application/NatTypeTester.Application.csproj" />
+    <Project Path="src/NatTypeTester.Configuration/NatTypeTester.Configuration.csproj" />
+    <Project Path="src/NatTypeTester.Domain.Shared/NatTypeTester.Domain.Shared.csproj" />
+    <Project Path="src/NatTypeTester.Domain/NatTypeTester.Domain.csproj" />
+    <Project Path="src/NatTypeTester.ViewModels/NatTypeTester.ViewModels.csproj" />
+    <Project Path="src/NatTypeTester.Views/NatTypeTester.Views.csproj" />
+  </Folder>
+  <Folder Name="/src/EntryPoints/">
+    <Project Path="src/NatTypeTester.Android/NatTypeTester.Android.csproj" />
+    <Project Path="src/NatTypeTester.Console/NatTypeTester.Console.csproj" />
+    <Project Path="src/NatTypeTester.Desktop/NatTypeTester.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/src/Libraries/">
+    <Project Path="src/STUN/STUN.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests\UnitTest\UnitTest.csproj" />
+    <Project Path="tests/UnitTest/UnitTest.csproj" />
   </Folder>
 </Solution>
