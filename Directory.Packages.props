@@ -23,12 +23,12 @@
     <PackageVersion Include="Splat.Serilog" Version="19.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Volo.Abp.Autofac" Version="10.1.1" />
-    <PackageVersion Include="Volo.Abp.Core" Version="10.1.1" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.1.1" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.1.1" />
-    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.1.1" />
-    <PackageVersion Include="Volo.Abp.Localization" Version="10.1.1" />
+    <PackageVersion Include="Volo.Abp.Autofac" Version="10.2.0" />
+    <PackageVersion Include="Volo.Abp.Core" Version="10.2.0" />
+    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.2.0" />
+    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.2.0" />
+    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.2.0" />
+    <PackageVersion Include="Volo.Abp.Localization" Version="10.2.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Serilog" Version="4.3.1" />
