@@ -10,7 +10,7 @@
     ":automergeBranch",
     ":automergeDigest",
     ":automergeMinor",
-    ":disableRateLimiting"
+    "schedule:monthly"
   ],
   "packageRules": [
     {
