@@ -66,26 +66,23 @@ public class XorMappedAddressStunAttributeValue : AddressStunAttributeValue
 
 	private ushort Xor(ushort port)
 	{
-		Span<byte> span = stackalloc byte[2];
-		BinaryPrimitives.WriteUInt16BigEndian(span, port);
-		span[0] ^= _magicCookieAndTransactionId[0];
-		span[1] ^= _magicCookieAndTransactionId[1];
-		return BinaryPrimitives.ReadUInt16BigEndian(span);
+		ushort mask = BinaryPrimitives.ReadUInt16BigEndian(_magicCookieAndTransactionId);
+		return (ushort)(port ^ mask);
 	}
 
 	private IPAddress Xor(IPAddress address)
 	{
-		Span<byte> b = stackalloc byte[16];
-		if (!address.TryWriteBytes(b, out int bytesWritten))
+		Span<byte> addressBytes = stackalloc byte[16];
+		if (!address.TryWriteBytes(addressBytes, out int bytesWritten))
 		{
 			throw new InvalidOperationException(@"Unable to encode address.");
 		}
 
 		for (int i = 0; i < bytesWritten; ++i)
 		{
-			b[i] ^= _magicCookieAndTransactionId[i];
+			addressBytes[i] ^= _magicCookieAndTransactionId[i];
 		}
 
-		return new IPAddress(b.Slice(0, bytesWritten));
+		return new IPAddress(addressBytes.Slice(0, bytesWritten));
 	}
 }
