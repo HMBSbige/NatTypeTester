@@ -9,29 +9,25 @@
     d:DesignWidth="380" d:DesignHeight="84"
     x:Class="NatTypeTester.Views.Views.StunServerCardView"
     x:DataType="vm:MainWindowViewModel">
-    <Border Margin="8,8,8,4"
-            Padding="10"
-            Background="{DynamicResource SystemControlBackgroundAltMediumLowBrush}"
-            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumLowBrush}"
-            BorderThickness="1"
-            CornerRadius="12">
-        <StackPanel Spacing="6">
+    <GroupBox Margin="8,8,8,4" Padding="10">
+        <GroupBox.Header>
             <StackPanel Orientation="Horizontal" Spacing="6">
                 <ic:FluentIcon Icon="Server" IconVariant="Regular" />
                 <TextBlock x:Name="StunServerLabel" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" />
             </StackPanel>
-            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">
-                <ComboBox Grid.Column="0" IsEditable="True"
-                          ItemsSource="{Binding StunServers}"
-                          Text="{Binding CurrentStunServer}"
-                          HorizontalAlignment="Stretch" />
-                <Button x:Name="AddStunServerButton" Grid.Column="1" Command="{Binding AddStunServerCommand}">
-                    <ic:FluentIcon Icon="Add" IconVariant="Regular" />
-                </Button>
-                <Button x:Name="DeleteStunServerButton" Grid.Column="2" Command="{Binding DeleteStunServerCommand}">
-                    <ic:FluentIcon Icon="Delete" IconVariant="Regular" />
-                </Button>
-            </Grid>
-        </StackPanel>
-    </Border>
+        </GroupBox.Header>
+
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">
+            <ComboBox Grid.Column="0" IsEditable="True"
+                      ItemsSource="{Binding StunServers}"
+                      Text="{Binding CurrentStunServer}"
+                      HorizontalAlignment="Stretch" />
+            <Button x:Name="AddStunServerButton" Grid.Column="1" Command="{Binding AddStunServerCommand}">
+                <ic:FluentIcon Icon="Add" IconVariant="Regular" />
+            </Button>
+            <Button x:Name="DeleteStunServerButton" Grid.Column="2" Command="{Binding DeleteStunServerCommand}">
+                <ic:FluentIcon Icon="Delete" IconVariant="Regular" />
+            </Button>
+        </Grid>
+    </GroupBox>
 </UserControl>

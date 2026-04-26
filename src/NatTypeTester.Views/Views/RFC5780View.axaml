@@ -5,7 +5,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
-    xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
     xmlns:stun="clr-namespace:STUN.Enums;assembly=STUN"
     xmlns:shared="clr-namespace:NatTypeTester.Domain.Shared;assembly=NatTypeTester.Domain.Shared"
     xmlns:ic="using:FluentIcons.Avalonia"
@@ -54,13 +53,13 @@
             <StackPanel Margin="8" Spacing="8">
                 <StackPanel Orientation="Horizontal" Spacing="10" IsEnabled="{Binding !IsTesting}">
                     <RadioButton Content="UDP" GroupName="TransportType"
-                                 IsChecked="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsChecked}, ConverterParameter={x:Static stun:TransportType.Udp}}" />
+                                 IsChecked="{Binding TransportType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static stun:TransportType.Udp}}" />
                     <RadioButton Content="TCP" GroupName="TransportType"
-                                 IsChecked="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsChecked}, ConverterParameter={x:Static stun:TransportType.Tcp}}" />
+                                 IsChecked="{Binding TransportType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static stun:TransportType.Tcp}}" />
                     <RadioButton Content="TLS" GroupName="TransportType"
-                                 IsChecked="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsChecked}, ConverterParameter={x:Static stun:TransportType.Tls}}" />
+                                 IsChecked="{Binding TransportType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static stun:TransportType.Tls}}" />
                     <RadioButton Content="DTLS" GroupName="TransportType"
-                                 IsChecked="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsChecked}, ConverterParameter={x:Static stun:TransportType.Dtls}}" />
+                                 IsChecked="{Binding TransportType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static stun:TransportType.Dtls}}" />
                 </StackPanel>
 
                 <StackPanel Spacing="3">
@@ -114,7 +113,7 @@
                 </StackPanel>
 
                 <StackPanel Spacing="3"
-                            IsVisible="{Binding TransportType, Converter={x:Static valueConverters:TransportTypeConverters.IsFilteringVisible}}">
+                            IsVisible="{Binding TransportType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static stun:TransportType.Udp}}">
                     <TextBlock x:Name="FilteringBehaviorLabel" />
                     <Grid ColumnDefinitions="*,4,Auto">
                         <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding FilteringBehavior, Mode=OneWay}" />

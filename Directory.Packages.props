@@ -1,34 +1,29 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Avalonia.Android" Version="11.3.13" />
-    <PackageVersion Include="Avalonia.Desktop" Version="11.3.13" />
-    <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.13" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.13" />
-    <PackageVersion Include="FluentIcons.Avalonia" Version="2.0.321" />
+    <PackageVersion Include="Avalonia.Android" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.1" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.325" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="SkiaSharp" Version="3.119.2" />
-    <PackageVersion Include="SkiaSharp.HarfBuzz" Version="3.119.2" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
-    <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.4" />
+    <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.5" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="ReactiveUI" Version="23.1.8" />
-    <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="11.4.12" />
+    <PackageVersion Include="ReactiveUI" Version="23.2.1" />
+    <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="12.0.1" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.1" />
     <PackageVersion Include="Splat.Serilog" Version="19.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Volo.Abp.Autofac" Version="10.2.0" />
-    <PackageVersion Include="Volo.Abp.Core" Version="10.2.0" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.2.0" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.2.0" />
-    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.2.0" />
-    <PackageVersion Include="Volo.Abp.Localization" Version="10.2.0" />
+    <PackageVersion Include="Volo.Abp.Autofac" Version="10.3.0" />
+    <PackageVersion Include="Volo.Abp.Core" Version="10.3.0" />
+    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.3.0" />
+    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.3.0" />
+    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.3.0" />
+    <PackageVersion Include="Volo.Abp.Localization" Version="10.3.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Serilog" Version="4.3.1" />
@@ -37,21 +32,20 @@
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="DTLS" Version="0.3.4" />
+    <PackageVersion Include="DTLS" Version="0.4.0" />
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
     <PackageVersion Include="HMBSbige.UpdateChecker" Version="10.0.0" />
     <PackageVersion Include="MinVer" Version="7.0.0" />
-    <PackageVersion Include="NuGet.Versioning" Version="7.3.0" />
+    <PackageVersion Include="NuGet.Versioning" Version="7.3.1" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
-    <PackageVersion Include="Spectre.Console" Version="0.54.0" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.5" />
+    <PackageVersion Include="Spectre.Console" Version="0.55.2" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="TUnit" Version="1.24.18" />
+    <PackageVersion Include="TUnit" Version="1.39.0" />
   </ItemGroup>
 </Project>

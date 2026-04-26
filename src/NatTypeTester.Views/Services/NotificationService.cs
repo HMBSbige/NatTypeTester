@@ -3,15 +3,31 @@ namespace NatTypeTester.Views.Services;
 [UsedImplicitly]
 internal class NotificationService : INotificationService, ISingletonDependency
 {
-	private WindowNotificationManager? NotificationManager => field ??= CreateNotificationManager();
+	private (TopLevel TopLevel, WindowNotificationManager Manager)? _notificationManagerCache;
 
-	private static WindowNotificationManager? CreateNotificationManager()
+	private WindowNotificationManager? NotificationManager
 	{
-		if (TopLevelHelper.GetTopLevel() is not { } topLevel)
+		get
 		{
-			return null;
-		}
+			TopLevel? topLevel = TopLevelHelper.GetTopLevel();
+			if (topLevel is null)
+			{
+				return null;
+			}
 
+			if (_notificationManagerCache is { } cache && cache.TopLevel == topLevel)
+			{
+				return cache.Manager;
+			}
+
+			WindowNotificationManager manager = CreateNotificationManager(topLevel);
+			_notificationManagerCache = (topLevel, manager);
+			return manager;
+		}
+	}
+
+	private static WindowNotificationManager CreateNotificationManager(TopLevel topLevel)
+	{
 		WindowNotificationManager manager = new(topLevel)
 		{
 			Position = NotificationPosition.TopRight,

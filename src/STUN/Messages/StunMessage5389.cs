@@ -78,15 +78,15 @@ public class StunMessage5389
 		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, length, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)StunMessageType);
-		BinaryPrimitives.WriteUInt16BigEndian(buffer[SizeOfMessageType..], messageLength);
-		BinaryPrimitives.WriteUInt32BigEndian(buffer[(SizeOfMessageType + SizeOfLength)..], MagicCookie);
-		TransactionId.CopyTo(buffer[(SizeOfMessageType + SizeOfLength + SizeOfMagicCookie)..]);
+		BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(SizeOfMessageType), messageLength);
+		BinaryPrimitives.WriteUInt32BigEndian(buffer.Slice(SizeOfMessageType + SizeOfLength), MagicCookie);
+		TransactionId.CopyTo(buffer.Slice(SizeOfMessageType + SizeOfLength + SizeOfMagicCookie));
 
-		buffer = buffer[HeaderLength..];
+		buffer = buffer.Slice(HeaderLength);
 		foreach (StunAttribute attribute in Attributes)
 		{
 			int outLength = attribute.WriteTo(buffer);
-			buffer = buffer[outLength..];
+			buffer = buffer.Slice(outLength);
 		}
 
 		return length;
@@ -176,7 +176,7 @@ public class StunMessage5389
 				}
 
 				list.Add(attribute);
-				attributeBuffer = attributeBuffer[offset..];
+				attributeBuffer = attributeBuffer.Slice(offset);
 			}
 
 			Attributes = list;

@@ -5,7 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
-    xmlns:valueConverters="clr-namespace:NatTypeTester.Views.ValueConverters"
+    xmlns:stun="clr-namespace:STUN.Enums;assembly=STUN"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
     d:DesignWidth="380" d:DesignHeight="600"
@@ -16,28 +16,21 @@
     </Design.DataContext>
 
     <UserControl.Styles>
-        <Style Selector="Border.settings-card">
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="8" />
+        <Style Selector="GroupBox.settings-card">
             <Setter Property="Padding" Value="10" />
+            <Setter Property="Margin" Value="0" />
         </Style>
-        <Style Selector="Border.settings-card > StackPanel">
+        <Style Selector="GroupBox.settings-card > StackPanel">
             <Setter Property="Spacing" Value="8" />
-        </Style>
-        <Style Selector="TextBlock.section-title">
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="14" />
         </Style>
     </UserControl.Styles>
 
     <ScrollViewer>
         <StackPanel Margin="8" Spacing="10">
-            <!-- Configuration Directory -->
-            <Border Classes="settings-card"
-                    IsVisible="{Binding CanOpenConfigDirectory,Mode=OneTime}">
+            <GroupBox x:Name="ConfigDirectoryGroupBox"
+                      Classes="settings-card"
+                      IsVisible="{Binding CanOpenConfigDirectory,Mode=OneTime}">
                 <StackPanel>
-                    <TextBlock x:Name="ConfigDirectoryLabel" Classes="section-title" />
                     <Button x:Name="OpenConfigDirectoryButton" Command="{Binding OpenConfigDirectoryCommand}"
                             HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" Spacing="5">
@@ -46,16 +39,11 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
-            </Border>
+            </GroupBox>
 
-            <!-- Update Settings -->
-            <Border Classes="settings-card">
+            <GroupBox x:Name="UpdateGroupBox" Classes="settings-card">
                 <StackPanel>
-                    <TextBlock x:Name="UpdateLabel" Classes="section-title" />
-
-                    <!-- Version Info and Action Buttons -->
                     <StackPanel Spacing="8">
-                        <!-- Version Info -->
                         <StackPanel Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <TextBlock x:Name="CurrentVersionLabel" />
@@ -68,7 +56,6 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Action Buttons -->
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button x:Name="CheckUpdateButton" Command="{Binding CheckUpdateCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="5">
@@ -85,13 +72,10 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Include PreRelease -->
                     <CheckBox x:Name="IncludePreReleaseCheckBox" IsChecked="{Binding IncludePreRelease}" />
 
-                    <!-- Auto Check Update -->
                     <CheckBox x:Name="AutoCheckUpdateCheckBox" IsChecked="{Binding AutoCheckUpdate}" />
 
-                    <!-- Check Interval (indented as sub-option) -->
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="24,0,0,0"
                                 IsEnabled="{Binding #AutoCheckUpdateCheckBox.IsChecked}">
                         <TextBlock x:Name="CheckUpdateIntervalLabel" VerticalAlignment="Center" />
@@ -100,21 +84,18 @@
                                        ShowButtonSpinner="False" />
                     </StackPanel>
                 </StackPanel>
-            </Border>
+            </GroupBox>
 
-            <!-- Proxy Settings -->
-            <Border Classes="settings-card">
+            <GroupBox x:Name="ProxyGroupBox" Classes="settings-card">
                 <StackPanel>
-                    <TextBlock x:Name="ProxyLabel" Classes="section-title" />
                     <StackPanel Orientation="Horizontal" Spacing="20">
                         <RadioButton x:Name="NoProxyRadioButton" GroupName="ProxyType"
-                                     IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.PlainConverter}}" />
+                                     IsChecked="{Binding ProxyType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static stun:ProxyType.Plain}}" />
                         <RadioButton x:Name="Socks5ProxyRadioButton" GroupName="ProxyType"
-                                     IsChecked="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.Socks5Converter}}" />
+                                     IsChecked="{Binding ProxyType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static stun:ProxyType.Socks5}}" />
                     </StackPanel>
 
-                    <!-- Proxy Config Grid -->
-                    <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static valueConverters:ProxyTypeConverters.IsSocks5Converter}}" Spacing="8">
+                    <StackPanel IsVisible="{Binding ProxyType, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static stun:ProxyType.Plain}}" Spacing="8">
                         <StackPanel Spacing="3">
                             <TextBlock x:Name="ProxyServerLabel" />
                             <TextBox Text="{Binding ProxyServer}" />
@@ -129,14 +110,12 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Ignore Certificate Errors -->
                     <CheckBox x:Name="SkipCertificateValidationCheckBox" IsChecked="{Binding SkipCertificateValidation}" />
                 </StackPanel>
-            </Border>
+            </GroupBox>
 
-            <Border Classes="settings-card">
+            <GroupBox x:Name="StunServerListGroupBox" Classes="settings-card">
                 <StackPanel>
-                    <TextBlock x:Name="StunServerListLabel" Classes="section-title" />
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
                         <TextBox Grid.Column="0" Text="{Binding StunServerListUri}" />
                         <Button x:Name="LoadStunServerListButton" Grid.Column="1"
@@ -145,18 +124,16 @@
                         </Button>
                     </Grid>
                 </StackPanel>
-            </Border>
+            </GroupBox>
 
-            <!-- Language Settings -->
-            <Border Classes="settings-card">
+            <GroupBox x:Name="LanguageGroupBox" Classes="settings-card">
                 <StackPanel>
-                    <TextBlock x:Name="LanguageLabel" Classes="section-title" />
                     <ComboBox ItemsSource="{Binding Languages}"
                               SelectedItem="{Binding SelectedLanguage}"
                               DisplayMemberBinding="{Binding DisplayName}"
                               MinWidth="150" />
                 </StackPanel>
-            </Border>
+            </GroupBox>
         </StackPanel>
     </ScrollViewer>
 

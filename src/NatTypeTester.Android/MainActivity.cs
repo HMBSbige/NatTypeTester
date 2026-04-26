@@ -1,14 +1,12 @@
 using Android.Content.PM;
-using Autofac.Extensions.DependencyInjection;
+using Android.Runtime;
 using Avalonia;
 using Avalonia.Android;
 using Avalonia.Media;
-using Microsoft.Extensions.DependencyInjection;
+using JetBrains.Annotations;
 using NatTypeTester.Views;
 using NatTypeTester.Views.Infrastructure;
-using ReactiveUI.Avalonia.Splat;
 using SkiaSharp;
-using Volo.Abp;
 
 namespace NatTypeTester.Android;
 
@@ -20,36 +18,22 @@ namespace NatTypeTester.Android;
 	MainLauncher = true,
 	ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode
 )]
-public class MainActivity : AvaloniaMainActivity<App>
+public class MainActivity : AvaloniaMainActivity
 {
 	public override void OnBackPressed()
 	{
 		MoveTaskToBack(true);
 	}
+}
 
+[Application]
+[UsedImplicitly]
+public class AndroidApp(nint javaReference, JniHandleOwnership transfer) : AvaloniaAndroidApplication<App>(javaReference, transfer)
+{
 	protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
 	{
 		return base.CustomizeAppBuilder(builder)
-			.UseReactiveUIWithAutofac
-			(
-				containerBuilder =>
-				{
-					ServiceCollection services = new();
-
-					AbpApplicationFactory.Create<NatTypeTesterViewsModule>(services);
-
-					containerBuilder.Populate(services);
-				},
-				withResolver: resolver =>
-				{
-					IServiceProvider serviceProvider = resolver.GetRequiredService<IServiceProvider>();
-					resolver.GetRequiredService<IAbpApplicationWithExternalServiceProvider>().Initialize(serviceProvider);
-				},
-				withReactiveUIBuilder: rxBuilder =>
-				{
-					rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSubject);
-				}
-			)
+			.UseNatTypeTesterApp()
 			.With(CreateFontManagerOptions())
 			.LogToTrace();
 	}

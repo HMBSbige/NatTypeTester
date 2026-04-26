@@ -15,6 +15,10 @@ public class App : Avalonia.Application
 		{
 			desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
 		}
+		else if (ApplicationLifetime is IActivityApplicationLifetime activity)
+		{
+			activity.MainViewFactory = () => TopLevelHelper.RegisterActivityMainView(serviceProvider.GetRequiredService<MainView>());
+		}
 		else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
 		{
 			singleViewPlatform.MainView = serviceProvider.GetRequiredService<MainView>();

@@ -3,7 +3,6 @@ using Socks5.Models;
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 
 namespace STUN.Proxy;
 
@@ -30,7 +29,7 @@ public class TlsOverSocks5Proxy(Socks5CreateOption socks5Options, string targetH
 			RemoteCertificateValidationCallback = skipCertificateValidation
 				? static (_, _, chain, _) =>
 				{
-					DisposeChainContents(chain);
+					CertificateChainDisposer.DisposeContents(chain);
 					return true;
 				}
 			: default
@@ -44,25 +43,17 @@ public class TlsOverSocks5Proxy(Socks5CreateOption socks5Options, string targetH
 	/// <inheritdoc />
 	protected override void CloseClient()
 	{
-		_tlsStream?.Dispose();
-		base.CloseClient();
-	}
+		SslStream? tlsStream = _tlsStream;
+		_tlsStream = null;
 
-	private static void DisposeChainContents(X509Chain? chain)
-	{
-		if (chain is null)
+		try
 		{
-			return;
+			tlsStream?.Dispose();
 		}
-
-		foreach (X509Certificate2 extraCert in chain.ChainPolicy.ExtraStore)
+		finally
 		{
-			extraCert.Dispose();
-		}
-
-		foreach (X509ChainElement element in chain.ChainElements)
-		{
-			element.Certificate.Dispose();
+			base.CloseClient();
 		}
 	}
+
 }

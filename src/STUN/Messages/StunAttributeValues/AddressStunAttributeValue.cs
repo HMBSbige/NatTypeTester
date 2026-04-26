@@ -38,8 +38,8 @@ public abstract class AddressStunAttributeValue : IStunAttributeValue
 
 		buffer[0] = 0;
 		buffer[1] = (byte)Family;
-		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Port);
-		if (!address.TryWriteBytes(buffer[4..], out int bytesWritten))
+		BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), Port);
+		if (!address.TryWriteBytes(buffer.Slice(4), out int bytesWritten))
 		{
 			throw new ArgumentException(@"Buffer is too small.", nameof(buffer));
 		}
@@ -80,9 +80,9 @@ public abstract class AddressStunAttributeValue : IStunAttributeValue
 			return false;
 		}
 
-		Port = BinaryPrimitives.ReadUInt16BigEndian(buffer[2..]);
+		Port = BinaryPrimitives.ReadUInt16BigEndian(buffer.Slice(2));
 
-		Address = new IPAddress(buffer[4..]);
+		Address = new IPAddress(buffer.Slice(4));
 
 		return true;
 	}

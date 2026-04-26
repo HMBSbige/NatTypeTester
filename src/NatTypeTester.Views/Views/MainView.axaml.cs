@@ -1,6 +1,6 @@
 namespace NatTypeTester.Views.Views;
 
-public partial class MainView : ReactiveUserControl<MainWindowViewModel>, ISingletonDependency
+public partial class MainView : ReactiveUserControl<MainWindowViewModel>, ITransientDependency
 {
 	public MainView()
 	{

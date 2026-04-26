@@ -16,53 +16,63 @@ await application.InitializeAsync();
 IServiceProvider sp = application.ServiceProvider;
 IStringLocalizer localizer = sp.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();
 
+string Localize(string key)
+{
+	return localizer[key].Value;
+}
+
+string EscapeMarkup(object? value)
+{
+	return value?.ToString()?.EscapeMarkup() ?? string.Empty;
+}
+
 // Common options
 Option<string> serverOption = new("--server", "-s")
 {
 	Required = true,
 	Recursive = true,
-	Description = localizer["StunServer"]
+	Description = Localize("StunServer")
 };
 Option<string?> localOption = new("--local", "-l")
 {
 	Recursive = true,
-	Description = localizer["LocalEnd"]
+	Description = Localize("LocalEnd")
 };
 Option<string?> proxyOption = new("--proxy")
 {
 	Recursive = true,
-	Description = localizer["SOCKS5Proxy"]
+	Description = Localize("SOCKS5Proxy")
 };
 Option<string?> proxyUserOption = new("--proxy-user")
 {
 	Recursive = true,
-	Description = localizer["ProxyUsername"]
+	Description = Localize("ProxyUsername")
 };
 Option<string?> proxyPasswordOption = new("--proxy-password")
 {
 	Recursive = true,
-	Description = localizer["ProxyPassword"]
+	Description = Localize("ProxyPassword")
 };
 
 // RFC 5780 specific options
 Option<bool> skipCertOption = new("--skip-cert")
 {
-	Description = localizer["SkipCertificateValidation"],
+	Description = Localize("SkipCertificateValidation"),
 	DefaultValueFactory = _ => false
 };
 Option<TransportType> transportOption = new("--transport", "-t")
 {
-	Description = localizer["TransportProtocol"],
+	Description = Localize("TransportProtocol"),
 	DefaultValueFactory = _ => TransportType.Udp
 };
 Option<StunTestType> testTypeOption = new("--test-type")
 {
-	Description = localizer["TestType"],
+	Description = Localize("TestType"),
 	DefaultValueFactory = _ => StunTestType.Combining
 };
 
 // rfc3489 subcommand
-Command rfc3489Command = new("rfc3489", localizer["RFC3489Description"]);
+Command rfc3489Command = new("rfc3489", Localize("RFC3489Description"));
 
 rfc3489Command.SetAction
 (async (result, cancellationToken) =>
@@ -70,27 +80,27 @@ rfc3489Command.SetAction
 		StunTestInput input = BuildStunTestInput(result);
 
 		ClassicStunResult result3489 = await AnsiConsole.Status()
-			.StartAsync(localizer["Testing"], _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
+			.StartAsync(Localize("Testing"), _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
 
 		if (cancellationToken.IsCancellationRequested)
 		{
-			AnsiConsole.MarkupLine($"[yellow]{localizer["Cancelled"].Value.EscapeMarkup()}[/]");
+			AnsiConsole.MarkupLineInterpolated($"[yellow]{Localize("Cancelled")}[/]");
 			return;
 		}
 
 		ShowResultTable
 		(
 			[
-				(localizer["NatType"], result3489.NatType, "cyan"),
-				(localizer["PublicEnd"], result3489.PublicEndPoint, "green"),
-				(localizer["LocalEnd"], result3489.LocalEndPoint, "yellow")
+				(Localize("NatType"), result3489.NatType, "cyan"),
+				(Localize("PublicEnd"), result3489.PublicEndPoint, "green"),
+				(Localize("LocalEnd"), result3489.LocalEndPoint, "yellow")
 			]
 		);
 	}
 );
 
 // rfc5780 subcommand
-Command rfc5780Command = new("rfc5780", localizer["RFC5780Description"])
+Command rfc5780Command = new("rfc5780", Localize("RFC5780Description"))
 {
 	skipCertOption,
 	transportOption,
@@ -109,7 +119,7 @@ rfc5780Command.SetAction
 		StunResult5389 result5780 = await AnsiConsole.Status()
 			.StartAsync
 			(
-				localizer["Testing"],
+				Localize("Testing"),
 				_ => testType switch
 				{
 					StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
@@ -121,7 +131,7 @@ rfc5780Command.SetAction
 
 		if (cancellationToken.IsCancellationRequested)
 		{
-			AnsiConsole.MarkupLine($"[yellow]{localizer["Cancelled"].Value.EscapeMarkup()}[/]");
+			AnsiConsole.MarkupLineInterpolated($"[yellow]{Localize("Cancelled")}[/]");
 			return;
 		}
 
@@ -132,28 +142,29 @@ rfc5780Command.SetAction
 		{
 			if (testType is StunTestType.Combining or StunTestType.Binding)
 			{
-				yield return (localizer["BindingTest"], result5780.BindingTestResult, "cyan");
+				yield return (Localize("BindingTest"), result5780.BindingTestResult, "cyan");
 			}
 
 			if (testType is StunTestType.Combining or StunTestType.Mapping)
 			{
-				yield return (localizer["MappingBehavior"], result5780.MappingBehavior, "magenta");
+				yield return (Localize("MappingBehavior"), result5780.MappingBehavior, "magenta");
 			}
 
-			if (testType is StunTestType.Filtering
-				|| testType is StunTestType.Combining && transport is TransportType.Udp
-				)
+			bool shouldShowFilteringBehavior = testType is StunTestType.Filtering
+				|| testType is StunTestType.Combining && transport is TransportType.Udp;
+
+			if (shouldShowFilteringBehavior)
 			{
-				yield return (localizer["FilteringBehavior"], result5780.FilteringBehavior, "blue");
+				yield return (Localize("FilteringBehavior"), result5780.FilteringBehavior, "blue");
 			}
 
-			yield return (localizer["PublicEnd"], result5780.PublicEndPoint, "green");
-			yield return (localizer["LocalEnd"], result5780.LocalEndPoint, "yellow");
+			yield return (Localize("PublicEnd"), result5780.PublicEndPoint, "green");
+			yield return (Localize("LocalEnd"), result5780.LocalEndPoint, "yellow");
 		}
 	}
 );
 
-RootCommand rootCommand = new(localizer["AppDescription"])
+RootCommand rootCommand = new(Localize("AppDescription"))
 {
 	serverOption,
 	localOption,
@@ -171,7 +182,7 @@ try
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {
-	AnsiConsole.MarkupLine($"[red]{localizer["Error"].Value.EscapeMarkup()}:[/] {ex.Message.EscapeMarkup()}");
+	AnsiConsole.MarkupLineInterpolated($"[red]{Localize("Error")}:[/] {ex.Message}");
 	return 1;
 }
 finally
@@ -183,12 +194,12 @@ void ShowResultTable(IEnumerable<(string Property, object? Value, string Color)>
 {
 	Table table = new Table()
 		.Border(TableBorder.Rounded)
-		.AddColumn($"[bold]{localizer["Property"].Value.EscapeMarkup()}[/]")
-		.AddColumn($"[bold]{localizer["Value"].Value.EscapeMarkup()}[/]");
+		.AddColumn($"[bold]{Localize("Property").EscapeMarkup()}[/]")
+		.AddColumn($"[bold]{Localize("Value").EscapeMarkup()}[/]");
 
 	foreach ((string property, object? value, string color) in rows)
 	{
-		table.AddRow(property.EscapeMarkup(), $"[{color}]{value?.ToString().EscapeMarkup()}[/]");
+		table.AddRow(property.EscapeMarkup(), $"[{color}]{EscapeMarkup(value)}[/]");
 	}
 
 	AnsiConsole.Write(table);

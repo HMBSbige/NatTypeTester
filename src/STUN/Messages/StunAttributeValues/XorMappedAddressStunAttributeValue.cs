@@ -34,8 +34,8 @@ public class XorMappedAddressStunAttributeValue : AddressStunAttributeValue
 
 		buffer[0] = 0;
 		buffer[1] = (byte)Family;
-		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Xor(Port));
-		if (!Xor(address).TryWriteBytes(buffer[4..], out int bytesWritten))
+		BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), Xor(Port));
+		if (!Xor(address).TryWriteBytes(buffer.Slice(4), out int bytesWritten))
 		{
 			throw new ArgumentException(@"Buffer is too small.", nameof(buffer));
 		}
@@ -86,6 +86,6 @@ public class XorMappedAddressStunAttributeValue : AddressStunAttributeValue
 			b[i] ^= _magicCookieAndTransactionId[i];
 		}
 
-		return new IPAddress(b[..bytesWritten]);
+		return new IPAddress(b.Slice(0, bytesWritten));
 	}
 }

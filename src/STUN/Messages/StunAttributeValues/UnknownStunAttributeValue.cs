@@ -26,7 +26,7 @@ public class UnknownStunAttributeValue : IStunAttributeValue
 		foreach (AttributeType attributeType in Types)
 		{
 			BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)attributeType);
-			buffer = buffer[sizeof(ushort)..];
+			buffer = buffer.Slice(sizeof(ushort));
 		}
 
 		return size;
@@ -49,7 +49,7 @@ public class UnknownStunAttributeValue : IStunAttributeValue
 		{
 			ushort type = BinaryPrimitives.ReadUInt16BigEndian(buffer);
 			Types.Add((AttributeType)type);
-			buffer = buffer[sizeof(ushort)..];
+			buffer = buffer.Slice(sizeof(ushort));
 		}
 
 		return true;

@@ -129,7 +129,7 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient, IAsyncDisposab
 			Memory<byte> buffer = memoryOwner.Memory;
 			int length = sendMessage.WriteTo(buffer.Span);
 
-			await _proxy.SendToAsync(buffer[..length], SocketFlags.None, remote, cancellationToken);
+			await _proxy.SendToAsync(buffer.Slice(0, length), SocketFlags.None, remote, cancellationToken);
 
 			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			cts.CancelAfter(ReceiveTimeout);
@@ -138,7 +138,7 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient, IAsyncDisposab
 
 			StunMessage5389 message = new();
 
-			if (message.TryParse(buffer[..r.ReceivedBytes]) && message.IsSameTransaction(sendMessage))
+			if (message.TryParse(buffer.Slice(0, r.ReceivedBytes)) && message.IsSameTransaction(sendMessage))
 			{
 				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, GetClientLocalEndPoint().Port));
 			}

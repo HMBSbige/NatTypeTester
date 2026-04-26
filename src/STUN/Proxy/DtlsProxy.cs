@@ -2,7 +2,6 @@ using DTLS.Common;
 using DTLS.Dtls;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 
 namespace STUN.Proxy;
 
@@ -38,7 +37,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 				RemoteCertificateValidation = skipCertificateValidation
 					? static (_, chain, _) =>
 					{
-						DisposeChainContents(chain);
+						CertificateChainDisposer.DisposeContents(chain);
 						return true;
 					}
 				: default
@@ -71,57 +70,72 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 	/// <inheritdoc />
 	public async ValueTask CloseAsync(CancellationToken cancellationToken = default)
 	{
-		if (_dtlsTransport is { } session)
+		try
 		{
-			await session.DisposeAsync();
-			_dtlsTransport = null;
+			await CloseDtlsTransportAsync(cancellationToken);
 		}
-
-		await innerProxy.CloseAsync(cancellationToken);
+		finally
+		{
+			await innerProxy.CloseAsync(cancellationToken);
+		}
 	}
 
 	/// <inheritdoc />
 	public async ValueTask DisposeAsync()
 	{
-		if (_dtlsTransport is { } session)
+		try
 		{
-			await session.DisposeAsync();
-			_dtlsTransport = null;
+			await CloseDtlsTransportAsync();
 		}
-
-		await innerProxy.DisposeAsync();
-		GC.SuppressFinalize(this);
+		finally
+		{
+			await innerProxy.DisposeAsync();
+			GC.SuppressFinalize(this);
+		}
 	}
 
 	/// <inheritdoc />
 	public void Dispose()
 	{
-		if (_dtlsTransport is { } session)
+		try
 		{
-			session.Dispose();
-			_dtlsTransport = null;
+			DisposeDtlsTransport();
 		}
-
-		innerProxy.Dispose();
-		GC.SuppressFinalize(this);
+		finally
+		{
+			innerProxy.Dispose();
+			GC.SuppressFinalize(this);
+		}
 	}
 
-	private static void DisposeChainContents(X509Chain? chain)
+	private async ValueTask CloseDtlsTransportAsync(CancellationToken cancellationToken = default)
 	{
-		if (chain is null)
+		if (_dtlsTransport is not { } session)
 		{
 			return;
 		}
 
-		foreach (X509Certificate2 extraCert in chain.ChainPolicy.ExtraStore)
+		_dtlsTransport = null;
+
+		try
 		{
-			extraCert.Dispose();
+			await session.CloseAsync(cancellationToken);
+		}
+		finally
+		{
+			await session.DisposeAsync();
+		}
+	}
+
+	private void DisposeDtlsTransport()
+	{
+		if (_dtlsTransport is not { } session)
+		{
+			return;
 		}
 
-		foreach (X509ChainElement element in chain.ChainElements)
-		{
-			element.Certificate.Dispose();
-		}
+		_dtlsTransport = null;
+		session.Dispose();
 	}
 
 	private sealed class UdpProxyDatagramTransport(IUdpProxy proxy, IPEndPoint peerEndPoint) : IDatagramTransport

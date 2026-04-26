@@ -57,8 +57,8 @@ public class StunAttribute
 		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, totalLength, nameof(buffer));
 
 		BinaryPrimitives.WriteUInt16BigEndian(buffer, (ushort)Type);
-		BinaryPrimitives.WriteUInt16BigEndian(buffer[2..], Length);
-		int valueLength = Value.WriteTo(buffer[4..]);
+		BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), Length);
+		int valueLength = Value.WriteTo(buffer.Slice(4));
 
 		if (valueLength != Length)
 		{
@@ -87,7 +87,7 @@ public class StunAttribute
 
 		Type = (AttributeType)BinaryPrimitives.ReadUInt16BigEndian(buffer);
 
-		Length = BinaryPrimitives.ReadUInt16BigEndian(buffer[2..]);
+		Length = BinaryPrimitives.ReadUInt16BigEndian(buffer.Slice(2));
 
 		if (buffer.Length < 4 + Length)
 		{
