@@ -3,18 +3,18 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Avalonia.Android" Version="12.0.1" />
-    <PackageVersion Include="Avalonia.Desktop" Version="12.0.1" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Android" Version="12.0.2" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.0.2" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.2" />
     <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.325" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.5" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="ReactiveUI" Version="23.2.1" />
+    <PackageVersion Include="ReactiveUI" Version="23.2.19" />
     <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="12.0.1" />
-    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.1" />
+    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.30" />
     <PackageVersion Include="Splat.Serilog" Version="19.3.1" />
   </ItemGroup>
   <ItemGroup>
@@ -36,7 +36,7 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="DTLS" Version="0.4.0" />
+    <PackageVersion Include="DTLS" Version="0.4.1" />
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
     <PackageVersion Include="HMBSbige.UpdateChecker" Version="10.0.0" />
     <PackageVersion Include="MinVer" Version="7.0.0" />
@@ -46,6 +46,6 @@
     <PackageVersion Include="System.CommandLine" Version="2.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.39.0" />
+    <PackageVersion Include="TUnit" Version="1.40.10" />
   </ItemGroup>
 </Project>
