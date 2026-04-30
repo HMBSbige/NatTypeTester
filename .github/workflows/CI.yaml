@@ -75,7 +75,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}.${{ matrix.project }}-${{ matrix.rid }}
-          path: src/${{ env.ProjectName }}.${{ matrix.project }}/bin/Release/${{ env.NET_TFM }}/${{ matrix.rid }}/publish/
+          path: artifacts/publish/${{ env.ProjectName }}.${{ matrix.project }}/release_${{ matrix.rid }}/
+          if-no-files-found: error
 
   build_android:
     name: Build Android (${{ matrix.rid }})
@@ -87,6 +88,8 @@ jobs:
         rid:
           - android-arm64
           - android-x64
+    env:
+      APK_PUBLISH_DIR: artifacts/publish/${{ github.event.repository.name }}.Android/release_${{ matrix.rid }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -124,22 +127,23 @@ jobs:
           -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Rename APK
-        working-directory: src/${{ env.ProjectName }}.Android
-        run: |
-          apk_dir="bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish"
-          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-${{ matrix.rid }}.apk"
+        working-directory: ${{ env.APK_PUBLISH_DIR }}
+        run: mv *-Signed.apk "${{ env.ProjectName }}-${{ matrix.rid }}.apk"
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-${{ matrix.rid }}
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/${{ matrix.rid }}/publish/${{ env.ProjectName }}-${{ matrix.rid }}.apk
+          path: ${{ env.APK_PUBLISH_DIR }}/${{ env.ProjectName }}-${{ matrix.rid }}.apk
+          if-no-files-found: error
 
   build_android_universal:
     name: Build Android (universal)
     needs: [test, check_format]
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
+    env:
+      APK_PUBLISH_DIR: artifacts/publish/${{ github.event.repository.name }}.Android/release
     steps:
       - uses: actions/checkout@v6
         with:
@@ -176,16 +180,15 @@ jobs:
           -p:AndroidSigningKeyPass=${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Rename APK
-        working-directory: src/${{ env.ProjectName }}.Android
-        run: |
-          apk_dir="bin/Release/${{ env.NET_TFM }}-android/publish"
-          mv "${apk_dir}"/*-Signed.apk "${apk_dir}/${{ env.ProjectName }}-android-universal.apk"
+        working-directory: ${{ env.APK_PUBLISH_DIR }}
+        run: mv *-Signed.apk "${{ env.ProjectName }}-android-universal.apk"
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ProjectName }}-android-universal
-          path: src/${{ env.ProjectName }}.Android/bin/Release/${{ env.NET_TFM }}-android/publish/${{ env.ProjectName }}-android-universal.apk
+          path: ${{ env.APK_PUBLISH_DIR }}/${{ env.ProjectName }}-android-universal.apk
+          if-no-files-found: error
 
   nuget:
     name: Push NuGet (${{ matrix.PackageName }})
@@ -220,7 +223,7 @@ jobs:
           user: ${{ secrets.NUGET_USER }}
 
       - name: Push nuget packages
-        working-directory: src/${{ matrix.PackageName }}/bin/Release
+        working-directory: artifacts/package/release
         run: |
           dotnet nuget push *.nupkg -s https://api.nuget.org/v3/index.json -k ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --skip-duplicate
           dotnet nuget push *.nupkg -s https://nuget.pkg.github.com/HMBSbige -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate

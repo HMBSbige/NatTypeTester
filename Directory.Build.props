@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
     <DebugType>embedded</DebugType>
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
