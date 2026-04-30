@@ -24,7 +24,6 @@
     <!--    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>-->
     <PublishTrimmed>true</PublishTrimmed>
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
-    <TrimMode>partial</TrimMode>
     <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
     <!--    <PublishAot>true</PublishAot>-->
   </PropertyGroup>
