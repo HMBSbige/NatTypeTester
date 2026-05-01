@@ -46,6 +46,6 @@
     <PackageVersion Include="System.CommandLine" Version="2.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.40.10" />
+    <PackageVersion Include="TUnit" Version="1.41.0" />
   </ItemGroup>
 </Project>
