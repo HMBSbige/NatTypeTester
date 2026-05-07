@@ -10,6 +10,7 @@
     <ApplicationId>io.github.hmbsbige.nattypetester</ApplicationId>
     <AndroidPackageFormats>apk</AndroidPackageFormats>
     <AndroidUseApkSigner>true</AndroidUseApkSigner>
+    <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
   </PropertyGroup>
 
   <!-- versionName = MinVer version, versionCode = git commit count (auto-increments with every commit) -->
