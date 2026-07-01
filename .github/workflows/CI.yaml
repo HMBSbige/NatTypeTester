@@ -101,7 +101,7 @@ jobs:
       - run: dotnet workload install android
 
       - name: Cache Android dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/android-sdk
@@ -155,7 +155,7 @@ jobs:
       - run: dotnet workload install android
 
       - name: Cache Android dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/android-sdk
