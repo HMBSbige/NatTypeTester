@@ -20,7 +20,7 @@ jobs:
     name: Check format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
@@ -38,7 +38,7 @@ jobs:
           - macos-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.NET_VERSION }}
@@ -59,7 +59,7 @@ jobs:
           - linux-arm64
           - osx-arm64
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
@@ -91,7 +91,7 @@ jobs:
     env:
       APK_PUBLISH_DIR: artifacts/publish/${{ github.event.repository.name }}.Android/release_${{ matrix.rid }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
@@ -145,7 +145,7 @@ jobs:
     env:
       APK_PUBLISH_DIR: artifacts/publish/${{ github.event.repository.name }}.Android/release
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
@@ -204,7 +204,7 @@ jobs:
           - STUN
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
