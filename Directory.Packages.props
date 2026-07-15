@@ -6,7 +6,7 @@
     <PackageVersion Include="Avalonia.Android" Version="12.0.2" />
     <PackageVersion Include="Avalonia.Desktop" Version="12.0.2" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.2" />
-    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.325" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.333" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.5" />
