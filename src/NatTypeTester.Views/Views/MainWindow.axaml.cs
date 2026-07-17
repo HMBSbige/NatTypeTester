@@ -1,7 +1,6 @@
 namespace NatTypeTester.Views.Views;
 
-[UsedImplicitly]
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, ISingletonDependency
+public partial class MainWindow : Window
 {
 	public MainWindow()
 	{

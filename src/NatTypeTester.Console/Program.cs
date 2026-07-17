@@ -1,106 +1,84 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
-using NatTypeTester.Application.Contracts;
-using NatTypeTester.Console;
-using NatTypeTester.Domain.Shared;
-using NatTypeTester.Domain.Shared.Localization;
-using Spectre.Console;
-using STUN.Enums;
-using STUN.StunResult;
-using System.CommandLine;
-using Volo.Abp;
+await using ServiceProvider serviceProvider = new ServiceCollection()
+	.AddNatTypeTesterApplication()
+	.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
 
-using IAbpApplicationWithInternalServiceProvider application = await AbpApplicationFactory.CreateAsync<NatTypeTesterConsoleModule>(options => options.UseAutofac());
-await application.InitializeAsync();
-
-IServiceProvider sp = application.ServiceProvider;
-IStringLocalizer localizer = sp.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();
-
-string Localize(string key)
-{
-	return localizer[key].Value;
-}
-
-string EscapeMarkup(object? value)
-{
-	return value?.ToString()?.EscapeMarkup() ?? string.Empty;
-}
+IServiceProvider sp = serviceProvider;
+ILocalizedValues language = NatTypeTesterLanguage.Current;
 
 // Common options
 Option<string> serverOption = new("--server", "-s")
 {
 	Required = true,
 	Recursive = true,
-	Description = Localize("StunServer")
+	Description = language.StunServer.ToString()
 };
 Option<string?> localOption = new("--local", "-l")
 {
 	Recursive = true,
-	Description = Localize("LocalEnd")
+	Description = language.LocalEnd.ToString()
 };
 Option<string?> proxyOption = new("--proxy")
 {
 	Recursive = true,
-	Description = Localize("SOCKS5Proxy")
+	Description = language.SOCKS5Proxy.ToString()
 };
 Option<string?> proxyUserOption = new("--proxy-user")
 {
 	Recursive = true,
-	Description = Localize("ProxyUsername")
+	Description = language.ProxyUsername.ToString()
 };
 Option<string?> proxyPasswordOption = new("--proxy-password")
 {
 	Recursive = true,
-	Description = Localize("ProxyPassword")
+	Description = language.ProxyPassword.ToString()
 };
 
 // RFC 5780 specific options
 Option<bool> skipCertOption = new("--skip-cert")
 {
-	Description = Localize("SkipCertificateValidation"),
+	Description = language.SkipCertificateValidation.ToString(),
 	DefaultValueFactory = _ => false
 };
 Option<TransportType> transportOption = new("--transport", "-t")
 {
-	Description = Localize("TransportProtocol"),
+	Description = language.TransportProtocol.ToString(),
 	DefaultValueFactory = _ => TransportType.Udp
 };
 Option<StunTestType> testTypeOption = new("--test-type")
 {
-	Description = Localize("TestType"),
+	Description = language.TestType.ToString(),
 	DefaultValueFactory = _ => StunTestType.Combining
 };
 
 // rfc3489 subcommand
-Command rfc3489Command = new("rfc3489", Localize("RFC3489Description"));
+Command rfc3489Command = new("rfc3489", language.RFC3489Description.ToString());
 
 rfc3489Command.SetAction
 (async (result, cancellationToken) =>
 	{
-		StunTestInput input = BuildStunTestInput(result);
-
-		ClassicStunResult result3489 = await AnsiConsole.Status()
-			.StartAsync(Localize("Testing"), _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
-
-		if (cancellationToken.IsCancellationRequested)
+		return await ExecuteCommandAsync(async () =>
 		{
-			AnsiConsole.MarkupLineInterpolated($"[yellow]{Localize("Cancelled")}[/]");
-			return;
-		}
+			StunTestInput input = BuildStunTestInput(result);
 
-		ShowResultTable
-		(
-			[
-				(Localize("NatType"), result3489.NatType, "cyan"),
-				(Localize("PublicEnd"), result3489.PublicEndPoint, "green"),
-				(Localize("LocalEnd"), result3489.LocalEndPoint, "yellow")
-			]
-		);
+			ClassicStunResult result3489 = await AnsiConsole.Status()
+				.StartAsync(language.Testing.ToString(), _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
+
+			cancellationToken.ThrowIfCancellationRequested();
+
+			ShowResultTable
+			(
+				[
+					(language.NatType.ToString(), result3489.NatType, "cyan"),
+					(language.PublicEnd.ToString(), result3489.PublicEndPoint, "green"),
+					(language.LocalEnd.ToString(), result3489.LocalEndPoint, "yellow")
+				]
+			);
+		});
 	}
 );
 
 // rfc5780 subcommand
-Command rfc5780Command = new("rfc5780", Localize("RFC5780Description"))
+Command rfc5780Command = new("rfc5780", language.RFC5780Description.ToString())
 {
 	skipCertOption,
 	transportOption,
@@ -110,61 +88,60 @@ Command rfc5780Command = new("rfc5780", Localize("RFC5780Description"))
 rfc5780Command.SetAction
 (async (result, cancellationToken) =>
 	{
-		StunTestInput input = BuildStunTestInput(result);
-		TransportType transport = result.GetValue(transportOption);
-		StunTestType testType = result.GetValue(testTypeOption);
-
-		IRfc5780AppService service = sp.GetRequiredService<IRfc5780AppService>();
-
-		StunResult5389 result5780 = await AnsiConsole.Status()
-			.StartAsync
-			(
-				Localize("Testing"),
-				_ => testType switch
-				{
-					StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
-					StunTestType.Mapping => service.MappingBehaviorTestAsync(input, transport, cancellationToken),
-					StunTestType.Filtering => service.FilteringBehaviorTestAsync(input, transport, cancellationToken),
-					_ => service.TestAsync(input, transport, cancellationToken)
-				}
-			);
-
-		if (cancellationToken.IsCancellationRequested)
+		return await ExecuteCommandAsync(async () =>
 		{
-			AnsiConsole.MarkupLineInterpolated($"[yellow]{Localize("Cancelled")}[/]");
+			StunTestInput input = BuildStunTestInput(result);
+			TransportType transport = result.GetValue(transportOption);
+			StunTestType testType = result.GetValue(testTypeOption);
+
+			IRfc5780AppService service = sp.GetRequiredService<IRfc5780AppService>();
+
+			StunResult5389 result5780 = await AnsiConsole.Status()
+				.StartAsync
+				(
+					language.Testing.ToString(),
+					_ => testType switch
+					{
+						StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
+						StunTestType.Mapping => service.MappingBehaviorTestAsync(input, transport, cancellationToken),
+						StunTestType.Filtering => service.FilteringBehaviorTestAsync(input, transport, cancellationToken),
+						_ => service.TestAsync(input, transport, cancellationToken)
+					}
+				);
+
+			cancellationToken.ThrowIfCancellationRequested();
+
+			ShowResultTable(GetRows());
 			return;
-		}
 
-		ShowResultTable(GetRows());
-		return;
-
-		IEnumerable<(string, object?, string)> GetRows()
-		{
-			if (testType is StunTestType.Combining or StunTestType.Binding)
+			IEnumerable<(string, object?, string)> GetRows()
 			{
-				yield return (Localize("BindingTest"), result5780.BindingTestResult, "cyan");
+				if (testType is StunTestType.Combining or StunTestType.Binding)
+				{
+					yield return (language.BindingTest.ToString(), result5780.BindingTestResult, "cyan");
+				}
+
+				if (testType is StunTestType.Combining or StunTestType.Mapping)
+				{
+					yield return (language.MappingBehavior.ToString(), result5780.MappingBehavior, "magenta");
+				}
+
+				bool shouldShowFilteringBehavior = testType is StunTestType.Filtering
+					|| testType is StunTestType.Combining && transport is TransportType.Udp;
+
+				if (shouldShowFilteringBehavior)
+				{
+					yield return (language.FilteringBehavior.ToString(), result5780.FilteringBehavior, "blue");
+				}
+
+				yield return (language.PublicEnd.ToString(), result5780.PublicEndPoint, "green");
+				yield return (language.LocalEnd.ToString(), result5780.LocalEndPoint, "yellow");
 			}
-
-			if (testType is StunTestType.Combining or StunTestType.Mapping)
-			{
-				yield return (Localize("MappingBehavior"), result5780.MappingBehavior, "magenta");
-			}
-
-			bool shouldShowFilteringBehavior = testType is StunTestType.Filtering
-				|| testType is StunTestType.Combining && transport is TransportType.Udp;
-
-			if (shouldShowFilteringBehavior)
-			{
-				yield return (Localize("FilteringBehavior"), result5780.FilteringBehavior, "blue");
-			}
-
-			yield return (Localize("PublicEnd"), result5780.PublicEndPoint, "green");
-			yield return (Localize("LocalEnd"), result5780.LocalEndPoint, "yellow");
-		}
+		});
 	}
 );
 
-RootCommand rootCommand = new(Localize("AppDescription"))
+RootCommand rootCommand = new(language.AppDescription.ToString())
 {
 	serverOption,
 	localOption,
@@ -182,24 +159,43 @@ try
 }
 catch (Exception ex) when (ex is not OperationCanceledException)
 {
-	AnsiConsole.MarkupLineInterpolated($"[red]{Localize("Error")}:[/] {ex.Message}");
+	return ShowError(ex);
+}
+
+int ShowError(Exception ex)
+{
+	AnsiConsole.MarkupLineInterpolated($"[red]{language.Error}:[/] {ex.Message}");
 	return 1;
 }
-finally
+
+async Task<int> ExecuteCommandAsync(Func<Task> action)
 {
-	await application.ShutdownAsync();
+	try
+	{
+		await action();
+		return 0;
+	}
+	catch (OperationCanceledException)
+	{
+		AnsiConsole.MarkupLineInterpolated($"[yellow]{language.Cancelled}[/]");
+		return 1;
+	}
+	catch (Exception ex)
+	{
+		return ShowError(ex);
+	}
 }
 
 void ShowResultTable(IEnumerable<(string Property, object? Value, string Color)> rows)
 {
 	Table table = new Table()
 		.Border(TableBorder.Rounded)
-		.AddColumn($"[bold]{Localize("Property").EscapeMarkup()}[/]")
-		.AddColumn($"[bold]{Localize("Value").EscapeMarkup()}[/]");
+		.AddColumn($"[bold]{language.Property.ToString().EscapeMarkup()}[/]")
+		.AddColumn($"[bold]{language.Value.ToString().EscapeMarkup()}[/]");
 
 	foreach ((string property, object? value, string color) in rows)
 	{
-		table.AddRow(property.EscapeMarkup(), $"[{color}]{EscapeMarkup(value)}[/]");
+		table.AddRow(property.EscapeMarkup(), $"[{color}]{value?.ToString()?.EscapeMarkup() ?? string.Empty}[/]");
 	}
 
 	AnsiConsole.Write(table);
@@ -214,10 +210,13 @@ StunTestInput BuildStunTestInput(ParseResult result)
 	{
 		StunServer = server,
 		LocalEndPoint = result.GetValue(localOption),
-		ProxyType = proxy is not null ? ProxyType.Socks5 : ProxyType.Plain,
-		ProxyServer = proxy,
-		ProxyUser = result.GetValue(proxyUserOption),
-		ProxyPassword = result.GetValue(proxyPasswordOption),
+		Proxy = new ProxyOptions
+		{
+			Type = proxy is not null ? ProxyType.Socks5 : ProxyType.Plain,
+			Server = proxy,
+			UserName = result.GetValue(proxyUserOption),
+			Password = result.GetValue(proxyPasswordOption)
+		},
 		SkipCertificateValidation = result.GetValue(skipCertOption)
 	};
 }

@@ -1,10 +1,7 @@
 namespace NatTypeTester.Application;
 
-[UsedImplicitly]
-public class Rfc5780AppService : ApplicationService, IRfc5780AppService
+internal class Rfc5780AppService(StunTestInputResolver resolver) : IRfc5780AppService
 {
-	private StunTestInputResolver Resolver => LazyServiceProvider.GetRequiredService<StunTestInputResolver>();
-
 	private IStunClient5389? _client;
 
 	public StunResult5389? State => _client?.State;
@@ -81,9 +78,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 			transportType is TransportType.Tls or TransportType.Dtls ? StunServer.DefaultTlsPort : StunServer.DefaultPort
 		);
 
-		Socks5CreateOption? socks5CreateOption = await Resolver.ResolveSocks5OptionAsync(input, cancellationToken);
-
-		(IPAddress serverIp, IPEndPoint localEndPoint) = await Resolver.ResolveServerIpAndLocalEndPointAsync(server, input.LocalEndPoint, cancellationToken);
+		(Socks5CreateOption? socks5CreateOption, IPAddress serverIp, IPEndPoint localEndPoint) = await resolver.ResolveAsync(input, server, cancellationToken);
 
 		try
 		{
@@ -92,7 +87,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 				case TransportType.Dtls:
 				case TransportType.Udp:
 				{
-					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
+					await using IUdpProxy proxy = ProxyFactory.CreateProxy(transportType, input.Proxy.Type, localEndPoint, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					await using StunClient5389UDP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 					_client = client;
@@ -112,7 +107,7 @@ public class Rfc5780AppService : ApplicationService, IRfc5780AppService
 				case TransportType.Tls:
 				default:
 				{
-					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.ProxyType, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
+					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.Proxy.Type, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					using StunClient5389TCP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
 
 					_client = client;

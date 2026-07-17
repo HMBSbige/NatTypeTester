@@ -38,9 +38,6 @@ public class StunClient5389TCP : IStunClient5389
 	/// <param name="ownedProxy">Whether this client owns and should dispose the proxy.</param>
 	public StunClient5389TCP(IPEndPoint server, IPEndPoint local, ITcpProxy? proxy = default, bool ownedProxy = true)
 	{
-		ArgumentNullException.ThrowIfNull(server);
-		ArgumentNullException.ThrowIfNull(local);
-
 		_proxy = proxy ?? new DirectTcpProxy();
 		_ownedProxy = ownedProxy;
 

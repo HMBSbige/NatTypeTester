@@ -15,12 +15,6 @@
   "packageRules": [
     {
       "matchSourceUrls": [
-        "https://github.com/abpframework/abp"
-      ],
-      "groupName": "abp"
-    },
-    {
-      "matchSourceUrls": [
         "https://github.com/reactiveui/**"
       ],
       "groupName": "ReactiveUI",

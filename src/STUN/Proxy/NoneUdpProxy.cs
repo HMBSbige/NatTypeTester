@@ -17,8 +17,6 @@ public class NoneUdpProxy : IUdpProxy
 	/// <param name="localEndPoint">The local endpoint to bind the UDP socket to.</param>
 	public NoneUdpProxy(IPEndPoint localEndPoint)
 	{
-		ArgumentNullException.ThrowIfNull(localEndPoint);
-
 		Client = new Socket(localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
 		Client.Bind(localEndPoint);
 	}

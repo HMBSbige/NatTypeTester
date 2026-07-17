@@ -1,6 +1,6 @@
 namespace NatTypeTester.Application.Contracts;
 
-public interface IRfc5780AppService : IApplicationService
+public interface IRfc5780AppService
 {
 	StunResult5389? State { get; }
 

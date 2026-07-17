@@ -1,286 +1,42 @@
 namespace NatTypeTester.ViewModels;
 
-[UsedImplicitly]
-public partial class SettingsViewModel : ViewModelBase, ISingletonDependency
+public partial class SettingsViewModel : ViewModelBase
 {
-	[Reactive]
-	public partial ProxyType ProxyType { get; set; }
+	public ApplicationSettingsViewModel Application => AppLocator.Current.GetRequiredService<ApplicationSettingsViewModel>();
+
+	public ConnectionSettingsViewModel Connection => AppLocator.Current.GetRequiredService<ConnectionSettingsViewModel>();
+
+	public StunServerSettingsViewModel StunServer => AppLocator.Current.GetRequiredService<StunServerSettingsViewModel>();
+
+	public UpdateSettingsViewModel Update => AppLocator.Current.GetRequiredService<UpdateSettingsViewModel>();
 
 	[Reactive]
-	public partial string? ProxyServer { get; set; }
+	public partial bool IsInitialized { get; private set; }
 
-	[Reactive]
-	public partial string? ProxyUser { get; set; }
-
-	[Reactive]
-	public partial string? ProxyPassword { get; set; }
-
-	[ReactiveCollection]
-	private ObservableCollection<LanguageOption> _languages;
-
-	[Reactive]
-	public partial LanguageOption? SelectedLanguage { get; set; }
-
-	[Reactive]
-	public partial string? StunServerListUri { get; set; }
-
-	[Reactive]
-	public partial bool AutoCheckUpdate { get; set; }
-
-	[Reactive]
-	public partial double CheckUpdateIntervalHours { get; set; }
-
-	[Reactive]
-	public partial bool IncludePreRelease { get; set; }
-
-	[Reactive]
-	public partial bool SkipCertificateValidation { get; set; }
-
-	[Reactive]
-	public partial string? LatestVersion { get; set; }
-
-	[Reactive]
-	public partial string? CurrentVersion { get; set; }
-
-	public static bool CanOpenConfigDirectory => OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS();
-
-	private IAppConfigManager AppConfigManager => TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
-
-	private INotificationService NotificationService => TransientCachedServiceProvider.GetRequiredService<INotificationService>();
-
-	private IStunServerListAppService StunServerListAppService => TransientCachedServiceProvider.GetRequiredService<IStunServerListAppService>();
-
-	private IUpdateAppService UpdateAppService => TransientCachedServiceProvider.GetRequiredService<IUpdateAppService>();
-
-	private ILauncherService LauncherService => TransientCachedServiceProvider.GetRequiredService<ILauncherService>();
-
-	public SettingsViewModel()
+	protected void LoadConfig()
 	{
-		LoadStunServerListCommand.DisposeWith(Disposables);
-		CheckUpdateCommand.DisposeWith(Disposables);
-		OpenHomepageCommand.DisposeWith(Disposables);
-		OpenConfigDirectoryCommand.DisposeWith(Disposables);
-
-		_languages = [];
-
-		this.WhenAnyValue(x => x.SelectedLanguage)
-			.Skip(1)
-			.WhereNotNull()
-			.Subscribe(lang => ApplyCulture(lang.CultureName), ex => RxState.DefaultExceptionHandler.OnNext(ex))
-			.DisposeWith(Disposables);
+		Forget(LoadConfigAsync);
 	}
 
-	internal async Task InitializeAsync(AppConfig config)
+	public void ApplyConfig(AppConfig config)
 	{
-		_languages.Add(new LanguageOption(string.Empty, L["FollowSystem"]));
-
-		ILanguageProvider languageProvider = TransientCachedServiceProvider.GetRequiredService<ILanguageProvider>();
-		IReadOnlyList<LanguageInfo> languageInfos = await languageProvider.GetLanguagesAsync();
-
-		foreach (LanguageInfo l in languageInfos)
-		{
-			_languages.Add(new LanguageOption(l.CultureName, l.DisplayName));
-		}
-
-		ProxyType = config.ProxyType;
-		ProxyServer = config.ProxyServer;
-		ProxyUser = config.ProxyUser;
-		ProxyPassword = config.ProxyPassword;
-		StunServerListUri = config.StunServerListUri;
-		SelectedLanguage = Languages.FirstOrDefault(l => l.CultureName == config.Language) ?? Languages.FirstOrDefault();
-		ApplyCulture(SelectedLanguage?.CultureName);
-
-		AutoCheckUpdate = config.AutoCheckUpdate;
-		CheckUpdateIntervalHours = config.CheckUpdateInterval.TotalHours;
-		IncludePreRelease = config.IncludePreRelease;
-		SkipCertificateValidation = config.SkipCertificateValidation;
-		CurrentVersion = UpdateAppService.CurrentVersion;
-
-		ObserveAndUpdateConfig
-		(
-			this.WhenAnyValue
-			(
-				x => x.ProxyType,
-				x => x.ProxyServer,
-				x => x.ProxyUser,
-				x => x.ProxyPassword,
-				x => x.SelectedLanguage,
-				x => x.StunServerListUri
-			),
-			(appConfig, value) =>
-			{
-				appConfig.ProxyType = value.Item1;
-				appConfig.ProxyServer = value.Item2;
-				appConfig.ProxyUser = value.Item3;
-				appConfig.ProxyPassword = value.Item4;
-				appConfig.Language = value.Item5?.CultureName;
-				appConfig.StunServerListUri = value.Item6;
-			}
-		);
-
-		ObserveAndUpdateConfig
-		(
-			this.WhenAnyValue
-			(
-				x => x.AutoCheckUpdate,
-				x => x.CheckUpdateIntervalHours,
-				x => x.IncludePreRelease,
-				x => x.SkipCertificateValidation
-			),
-			(appConfig, value) =>
-			{
-				appConfig.AutoCheckUpdate = value.Item1;
-				appConfig.CheckUpdateInterval = TimeSpan.FromHours(value.Item2);
-				appConfig.IncludePreRelease = value.Item3;
-				appConfig.SkipCertificateValidation = value.Item4;
-			}
-		);
-	}
-
-	private void ObserveAndUpdateConfig<T>(IObservable<T> source, Action<AppConfig, T> updateAction)
-	{
-		source
-			.Skip(1)
-			.DistinctUntilChanged()
-			.Select
-			(value => Observable.FromAsync
-					(ct => AppConfigManager.UpdateAsync(cfg => updateAction(cfg, value), ct).AsTask())
-				.CatchDefault()
-			)
-			.Switch()
-			.Subscribe()
-			.DisposeWith(Disposables);
-	}
-
-	[ReactiveCommand]
-	private async Task CheckUpdateAsync(CancellationToken cancellationToken = default)
-	{
-		await CheckForUpdateCoreAsync(false, cancellationToken);
-	}
-
-	internal async Task CheckForUpdateOnStartupAsync(CancellationToken cancellationToken = default)
-	{
-		AppConfig config = await AppConfigManager.GetAsync(cancellationToken);
-
-#if DEBUG
-		NotificationService.Show
-		(
-			L["Update"],
-			"[DEBUG] Checking for updates on startup."
-		);
-#endif
-
-		if (!config.AutoCheckUpdate)
+		if (IsInitialized)
 		{
 			return;
 		}
 
-		if (config.LastUpdateCheckTime is { } lastCheck)
-		{
-			TimeSpan elapsed = DateTimeOffset.Now - lastCheck;
+		Application.ApplyConfig(config);
+		Connection.ApplyConfig(config);
+		StunServer.ApplyConfig(config);
+		Update.ApplyConfig(config);
 
-			if (elapsed < config.CheckUpdateInterval)
-			{
-				return;
-			}
-		}
-
-		await CheckForUpdateCoreAsync(true, cancellationToken);
+		IsInitialized = true;
 	}
 
-	private async Task CheckForUpdateCoreAsync(bool silentOnSuccess, CancellationToken cancellationToken = default)
+	private async Task LoadConfigAsync(CancellationToken cancellationToken)
 	{
-		UpdateCheckResult result = await UpdateAppService.CheckForUpdateAsync(IncludePreRelease, cancellationToken);
-
-		LatestVersion = result.LatestVersion;
-
-		if (result.HasUpdate)
-		{
-			NotificationService.Show
-			(
-				L["Update"],
-				string.Format(L["NewVersionAvailable"], result.LatestVersion)
-			);
-		}
-		else if (!silentOnSuccess)
-		{
-			NotificationService.Show
-			(
-				L["Update"],
-				L["AlreadyLatestVersion"],
-				AppNotificationType.Success
-			);
-		}
-
-		await AppConfigManager.UpdateAsync(c => c.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
-	}
-
-	[ReactiveCommand]
-	private ValueTask OpenHomepage()
-	{
-		return LauncherService.LaunchUriAsync(new Uri(NatTypeTesterConsts.HomepageUrl));
-	}
-
-	[ReactiveCommand]
-	private ValueTask OpenConfigDirectory()
-	{
-		if (!CanOpenConfigDirectory)
-		{
-			return ValueTask.CompletedTask;
-		}
-
-		UriBuilder uriBuilder = new()
-		{
-			Scheme = Uri.UriSchemeFile,
-			Host = string.Empty,
-			Path = ConfigurationConsts.ConfigDirectory
-		};
-		return LauncherService.LaunchUriAsync(uriBuilder.Uri);
-	}
-
-	[ReactiveCommand]
-	private async Task LoadStunServerListAsync(CancellationToken cancellationToken = default)
-	{
-		if (string.IsNullOrWhiteSpace(StunServerListUri))
-		{
-			return;
-		}
-
-		try
-		{
-			LoadStunServerListInput input = new()
-			{
-				Uri = StunServerListUri,
-				ProxyType = ProxyType,
-				ProxyServer = ProxyServer,
-				ProxyUser = ProxyUser,
-				ProxyPassword = ProxyPassword
-			};
-
-			List<string> validServers = await StunServerListAppService.LoadAsync(input, cancellationToken);
-
-			if (validServers.Count is 0)
-			{
-				NotificationService.Show(L["StunServerList"], L["StunServerListEmpty"], AppNotificationType.Error);
-				return;
-			}
-
-			TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>().ReplaceStunServers(validServers);
-
-			NotificationService.Show(L["StunServerList"], string.Format(L["StunServerListLoaded"], validServers.Count), AppNotificationType.Success);
-		}
-		catch (Exception ex)
-		{
-			NotificationService.Show(L["Error"], ex.Message, AppNotificationType.Error);
-		}
-	}
-
-	private void ApplyCulture(string? language)
-	{
-		CultureInfo culture = string.IsNullOrEmpty(language) ? CultureInfo.InstalledUICulture : new CultureInfo(language);
-
-		TransientCachedServiceProvider.GetRequiredService<ObservableCultureService>().ChangeCulture(culture);
+		IAppConfigManager configManager = AppLocator.Current.GetRequiredService<IAppConfigManager>();
+		AppConfig config = await configManager.GetAsync(cancellationToken);
+		ApplyConfig(config);
 	}
 }
-
-public record LanguageOption(string CultureName, string DisplayName);

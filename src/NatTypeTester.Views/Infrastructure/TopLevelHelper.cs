@@ -2,11 +2,11 @@ namespace NatTypeTester.Views.Infrastructure;
 
 internal static class TopLevelHelper
 {
-	private static Control? _activityMainView;
+	private static WeakReference<Control>? _activityMainViewReference;
 
 	public static Control RegisterActivityMainView(Control mainView)
 	{
-		_activityMainView = mainView;
+		_activityMainViewReference = new WeakReference<Control>(mainView);
 		return mainView;
 	}
 
@@ -15,9 +15,14 @@ internal static class TopLevelHelper
 		return Avalonia.Application.Current?.ApplicationLifetime switch
 		{
 			IClassicDesktopStyleApplicationLifetime desktop => desktop.MainWindow,
-			IActivityApplicationLifetime => TopLevel.GetTopLevel(_activityMainView),
+			IActivityApplicationLifetime => TopLevel.GetTopLevel(GetActivityMainView()),
 			ISingleViewApplicationLifetime singleView => TopLevel.GetTopLevel(singleView.MainView),
 			_ => null
 		};
+	}
+
+	private static Control? GetActivityMainView()
+	{
+		return _activityMainViewReference is { } reference && reference.TryGetTarget(out Control? mainView) ? mainView : null;
 	}
 }

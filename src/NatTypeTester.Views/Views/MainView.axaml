@@ -5,15 +5,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
     xmlns:views="clr-namespace:NatTypeTester.Views.Views"
+    xmlns:localization="using:NatTypeTester.Domain.Shared.Localization"
     xmlns:ic="using:FluentIcons.Avalonia"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     mc:Ignorable="d"
     d:DesignWidth="420" d:DesignHeight="535"
     x:Class="NatTypeTester.Views.Views.MainView"
     x:DataType="vm:MainWindowViewModel"
+    IsEnabled="{Binding SettingsViewModel.IsInitialized}"
     Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
     <Design.DataContext>
-        <designViewModels:DesignMainWindowViewModel />
+        <designViewModels:DesignMainViewModel />
     </Design.DataContext>
 
     <UserControl.Styles>
@@ -97,19 +99,22 @@
                     <ListBoxItem DockPanel.Dock="Top">
                         <Grid ColumnDefinitions="36,*">
                             <ic:FluentIcon Grid.Column="0" Icon="NetworkCheck" IconVariant="Regular" />
-                            <TextBlock x:Name="Rfc5780NavLabel" Grid.Column="1" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding RFC5780, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                         </Grid>
                     </ListBoxItem>
                     <ListBoxItem DockPanel.Dock="Top">
                         <Grid ColumnDefinitions="36,*">
                             <ic:FluentIcon Grid.Column="0" Icon="Globe" IconVariant="Color" />
-                            <TextBlock x:Name="Rfc3489NavLabel" Grid.Column="1" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding RFC3489, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                         </Grid>
                     </ListBoxItem>
                     <ListBoxItem DockPanel.Dock="Bottom">
                         <Grid ColumnDefinitions="36,*">
                             <ic:FluentIcon Grid.Column="0" Icon="Settings" IconVariant="Color" />
-                            <TextBlock x:Name="SettingsNavLabel" Grid.Column="1" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Settings, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                         </Grid>
                     </ListBoxItem>
                 </ListBox>
@@ -123,11 +128,13 @@
                         <CrossFade Duration="0:0:0.3" />
                     </Carousel.PageTransition>
                     <DockPanel>
-                        <views:StunServerCardView DockPanel.Dock="Top" />
+                        <views:StunServerCardView DockPanel.Dock="Top"
+                                                  DataContext="{Binding SettingsViewModel.StunServer}" />
                         <views:RFC5780View DataContext="{Binding RFC5780ViewModel}" />
                     </DockPanel>
                     <DockPanel>
-                        <views:StunServerCardView DockPanel.Dock="Top" />
+                        <views:StunServerCardView DockPanel.Dock="Top"
+                                                  DataContext="{Binding SettingsViewModel.StunServer}" />
                         <views:RFC3489View DataContext="{Binding RFC3489ViewModel}" />
                     </DockPanel>
                     <views:SettingsView DataContext="{Binding SettingsViewModel}" />

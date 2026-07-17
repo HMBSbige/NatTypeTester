@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
+    xmlns:localization="using:NatTypeTester.Domain.Shared.Localization"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     xmlns:stun="clr-namespace:STUN.Enums;assembly=STUN"
     xmlns:shared="clr-namespace:NatTypeTester.Domain.Shared;assembly=NatTypeTester.Domain.Shared"
@@ -21,7 +22,7 @@
                 Margin="8,4,8,8"
                 CornerRadius="4">
             <Panel>
-                <Button x:Name="TestButton"
+                <Button
                         Classes="accent"
                         HorizontalAlignment="Stretch"
                         Padding="8"
@@ -31,10 +32,11 @@
                         CommandParameter="{x:Static shared:StunTestType.Combining}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <ic:FluentIcon Icon="Play" IconVariant="Regular" />
-                        <TextBlock x:Name="TestButtonText" VerticalAlignment="Center" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Test, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     </StackPanel>
                 </Button>
-                <Button x:Name="CancelButton"
+                <Button
                         Classes="accent"
                         HorizontalAlignment="Stretch"
                         Padding="8"
@@ -43,7 +45,8 @@
                         Command="{Binding CancelTestCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <ic:FluentIcon Icon="Stop" IconVariant="Regular" />
-                        <TextBlock x:Name="CancelButtonText" VerticalAlignment="Center" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Cancel, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     </StackPanel>
                 </Button>
             </Panel>
@@ -63,12 +66,14 @@
                 </StackPanel>
 
                 <StackPanel Spacing="3">
-                    <TextBlock x:Name="BindingTestLabel" />
+                    <TextBlock
+                               Text="{Binding BindingTest, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <Grid ColumnDefinitions="*,4,Auto">
                         <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding BindingTestResult, Mode=OneWay}" />
                         <Panel Grid.Column="2">
-                            <Button x:Name="BindingTestButton"
+                            <Button
                                     Classes="accent"
+                                    ToolTip.Tip="{Binding BindingTest, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                                     Padding="8"
                                     VerticalAlignment="Stretch"
                                     IsVisible="{Binding !IsTesting}"
@@ -88,12 +93,14 @@
                 </StackPanel>
 
                 <StackPanel Spacing="3">
-                    <TextBlock x:Name="MappingBehaviorLabel" />
+                    <TextBlock
+                               Text="{Binding MappingBehavior, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <Grid ColumnDefinitions="*,4,Auto">
                         <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding MappingBehavior, Mode=OneWay}" />
                         <Panel Grid.Column="2">
-                            <Button x:Name="MappingTestButton"
+                            <Button
                                     Classes="accent"
+                                    ToolTip.Tip="{Binding MappingBehavior, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                                     Padding="8"
                                     VerticalAlignment="Stretch"
                                     IsVisible="{Binding !IsTesting}"
@@ -114,12 +121,14 @@
 
                 <StackPanel Spacing="3"
                             IsVisible="{Binding TransportType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static stun:TransportType.Udp}}">
-                    <TextBlock x:Name="FilteringBehaviorLabel" />
+                    <TextBlock
+                               Text="{Binding FilteringBehavior, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <Grid ColumnDefinitions="*,4,Auto">
                         <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding FilteringBehavior, Mode=OneWay}" />
                         <Panel Grid.Column="2">
-                            <Button x:Name="FilteringTestButton"
+                            <Button
                                     Classes="accent"
+                                    ToolTip.Tip="{Binding FilteringBehavior, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                                     Padding="8"
                                     VerticalAlignment="Stretch"
                                     IsVisible="{Binding !IsTesting}"
@@ -139,8 +148,10 @@
                 </StackPanel>
 
                 <StackPanel Spacing="3" IsEnabled="{Binding !IsTesting}">
-                    <TextBlock x:Name="LocalEndLabel" />
-                    <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
+                    <TextBlock
+                               Text="{Binding LocalEnd, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
+                    <ComboBox IsEditable="True"
+                              PlaceholderText="{Binding LocalEndPlaceholder, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                               Text="{Binding LocalEnd}"
                               HorizontalAlignment="Stretch">
                         <ComboBoxItem Content="0.0.0.0:0" />
@@ -149,7 +160,8 @@
                 </StackPanel>
 
                 <StackPanel Spacing="3">
-                    <TextBlock x:Name="PublicEndLabel" />
+                    <TextBlock
+                               Text="{Binding PublicEnd, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
                 </StackPanel>
             </StackPanel>

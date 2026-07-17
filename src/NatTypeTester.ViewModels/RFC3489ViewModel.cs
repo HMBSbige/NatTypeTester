@@ -1,7 +1,6 @@
 namespace NatTypeTester.ViewModels;
 
-[UsedImplicitly]
-public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
+public partial class RFC3489ViewModel : ViewModelBase
 {
 	[Reactive]
 	public partial NatType NatType { get; set; }
@@ -18,18 +17,18 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 	public RFC3489ViewModel()
 	{
 		TestClassicNatTypeCommand.DisposeWith(Disposables);
-
 		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
 	}
 
 	[ReactiveCommand]
 	private async Task TestClassicNatTypeAsync(CancellationToken cancellationToken = default)
 	{
-		IRfc3489AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc3489AppService>();
-		SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
-		MainWindowViewModel mainWindowViewModel = TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>();
+		StunTestInput input = AppLocator.Current.CreateStunTestInput(LocalEnd);
+
+		IRfc3489AppService service = AppLocator.Current.GetRequiredService<IRfc3489AppService>();
 
 		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+					.ObserveOn(RxSchedulers.MainThreadScheduler)
 					.Subscribe
 					(_ =>
 						{
@@ -41,21 +40,7 @@ public partial class RFC3489ViewModel : ViewModelBase, ISingletonDependency
 					)
 			)
 		{
-			ClassicStunResult result = await service.TestAsync
-			(
-				new StunTestInput
-				{
-					StunServer = mainWindowViewModel.CurrentStunServer,
-					ProxyType = settings.ProxyType,
-					ProxyServer = settings.ProxyServer,
-					ProxyUser = settings.ProxyUser,
-					ProxyPassword = settings.ProxyPassword,
-					LocalEndPoint = LocalEnd,
-					SkipCertificateValidation = settings.SkipCertificateValidation
-				},
-				cancellationToken
-			);
-
+			ClassicStunResult result = await service.TestAsync(input, cancellationToken);
 			ApplyResult(result);
 		}
 	}

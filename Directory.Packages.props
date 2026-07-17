@@ -3,49 +3,44 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Avalonia.Android" Version="12.0.2" />
-    <PackageVersion Include="Avalonia.Desktop" Version="12.0.2" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.2" />
-    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.325" />
+    <PackageVersion Include="Avalonia.Android" Version="12.1.0" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.0" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.0" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.333" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.5" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="ReactiveUI" Version="23.2.19" />
-    <PackageVersion Include="ReactiveUI.Avalonia.Autofac" Version="12.0.1" />
-    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="2.6.30" />
-    <PackageVersion Include="Splat.Serilog" Version="19.3.1" />
+    <PackageVersion Include="ReactiveUI" Version="23.2.28" />
+    <PackageVersion Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" Version="12.0.3" />
+    <PackageVersion Include="ReactiveUI.SourceGenerators" Version="3.1.0" />
+    <PackageVersion Include="Splat.Serilog" Version="19.4.1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Volo.Abp.Autofac" Version="10.3.0" />
-    <PackageVersion Include="Volo.Abp.Core" Version="10.3.0" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application" Version="10.3.0" />
-    <PackageVersion Include="Volo.Abp.Ddd.Application.Contracts" Version="10.3.0" />
-    <PackageVersion Include="Volo.Abp.Ddd.Domain" Version="10.3.0" />
-    <PackageVersion Include="Volo.Abp.Localization" Version="10.3.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageVersion Include="Serilog" Version="4.3.1" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.7" />
+    <PackageVersion Include="dotnetCampus.SourceLocalizations" Version="0.1.1-alpha.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.10" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="DTLS" Version="0.4.1" />
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
-    <PackageVersion Include="HMBSbige.UpdateChecker" Version="10.0.0" />
+    <PackageVersion Include="HMBSbige.UpdateChecker" Version="11.0.0" />
     <PackageVersion Include="MinVer" Version="7.0.0" />
-    <PackageVersion Include="NuGet.Versioning" Version="7.3.1" />
+    <PackageVersion Include="NuGet.Versioning" Version="7.6.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
-    <PackageVersion Include="Spectre.Console" Version="0.55.2" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.7" />
+    <PackageVersion Include="Spectre.Console" Version="0.57.2" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.10" />
+    <PackageVersion Include="ThisAssembly.AssemblyInfo" Version="2.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.41.0" />
+    <PackageVersion Include="TUnit" Version="1.61.0" />
   </ItemGroup>
 </Project>

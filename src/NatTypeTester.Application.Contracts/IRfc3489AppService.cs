@@ -1,6 +1,6 @@
 namespace NatTypeTester.Application.Contracts;
 
-public interface IRfc3489AppService : IApplicationService
+public interface IRfc3489AppService
 {
 	ClassicStunResult? State { get; }
 

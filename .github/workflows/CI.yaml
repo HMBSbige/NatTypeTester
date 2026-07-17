@@ -20,8 +20,8 @@ jobs:
     name: Check format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.NET_VERSION }}
       - run: dotnet workload install android
@@ -38,8 +38,8 @@ jobs:
           - macos-latest
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.NET_VERSION }}
       - run: dotnet test --project tests/UnitTest/UnitTest.csproj -c Release
@@ -59,11 +59,11 @@ jobs:
           - linux-arm64
           - osx-arm64
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.NET_VERSION }}
 
@@ -91,17 +91,17 @@ jobs:
     env:
       APK_PUBLISH_DIR: artifacts/publish/${{ github.event.repository.name }}.Android/release_${{ matrix.rid }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.NET_VERSION }}
       - run: dotnet workload install android
 
       - name: Cache Android dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/android-sdk
@@ -145,17 +145,17 @@ jobs:
     env:
       APK_PUBLISH_DIR: artifacts/publish/${{ github.event.repository.name }}.Android/release
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.NET_VERSION }}
       - run: dotnet workload install android
 
       - name: Cache Android dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/android-sdk
@@ -204,11 +204,11 @@ jobs:
           - STUN
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           filter: tree:0
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.NET_VERSION }}
 

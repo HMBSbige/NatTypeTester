@@ -8,22 +8,35 @@ internal class StunTestInputResolver(IServiceProvider serviceProvider)
 	{
 		if (!StunServer.TryParse(stunServer, out StunServer? server, defaultPort))
 		{
-			throw new InvalidOperationException($@"Invalid STUN server: {stunServer}");
+			throw new ArgumentException(NatTypeTesterLanguage.Current.WrongStunServer);
 		}
 
 		return server;
 	}
 
-	public async Task<Socks5CreateOption?> ResolveSocks5OptionAsync(StunTestInput input, CancellationToken cancellationToken = default)
+	public async Task<(Socks5CreateOption? Socks5Option, IPAddress ServerIp, IPEndPoint LocalEndPoint)> ResolveAsync(StunTestInput input, StunServer server, CancellationToken cancellationToken = default)
 	{
-		if (input.ProxyType is ProxyType.Plain)
+		// 代理与 STUN 服务器的 DNS 解析互不依赖，并行执行
+		Task<Socks5CreateOption?> socks5Task = ResolveSocks5OptionAsync(input.Proxy, cancellationToken);
+		Task<(IPAddress, IPEndPoint)> endPointTask = ResolveServerIpAndLocalEndPointAsync(server, input.LocalEndPoint, cancellationToken);
+		await Task.WhenAll(socks5Task, endPointTask);
+
+		Socks5CreateOption? socks5CreateOption = await socks5Task;
+		(IPAddress serverIp, IPEndPoint localEndPoint) = await endPointTask;
+
+		return (socks5CreateOption, serverIp, localEndPoint);
+	}
+
+	private async Task<Socks5CreateOption?> ResolveSocks5OptionAsync(ProxyOptions proxyOptions, CancellationToken cancellationToken = default)
+	{
+		if (proxyOptions.Type is ProxyType.Plain)
 		{
 			return null;
 		}
 
-		if (!HostnameEndpoint.TryParse(input.ProxyServer ?? string.Empty, out HostnameEndpoint? proxyEndpoint))
+		if (!HostnameEndpoint.TryParse(proxyOptions.Server ?? string.Empty, out HostnameEndpoint? proxyEndpoint, NatTypeTesterConsts.DefaultSocks5Port))
 		{
-			throw new InvalidOperationException($@"Invalid proxy server: {input.ProxyServer}");
+			throw new ArgumentException(NatTypeTesterLanguage.Current.UnknownProxyAddress);
 		}
 
 		return new Socks5CreateOption
@@ -32,15 +45,19 @@ internal class StunTestInputResolver(IServiceProvider serviceProvider)
 			Port = proxyEndpoint.Port,
 			UsernamePassword = new UsernamePassword
 			{
-				UserName = input.ProxyUser,
-				Password = input.ProxyPassword
+				UserName = proxyOptions.UserName,
+				Password = proxyOptions.Password
 			}
 		};
 	}
 
-	public async Task<(IPAddress ServerIp, IPEndPoint LocalEndPoint)> ResolveServerIpAndLocalEndPointAsync(StunServer server, string? localEndPointText, CancellationToken cancellationToken = default)
+	private async Task<(IPAddress ServerIp, IPEndPoint LocalEndPoint)> ResolveServerIpAndLocalEndPointAsync(StunServer server, string? localEndPointText, CancellationToken cancellationToken = default)
 	{
-		IPEndPoint.TryParse(localEndPointText ?? string.Empty, out IPEndPoint? localEndPoint);
+		IPEndPoint? localEndPoint = null;
+		if (!string.IsNullOrWhiteSpace(localEndPointText) && !IPEndPoint.TryParse(localEndPointText, out localEndPoint))
+		{
+			throw new ArgumentException(NatTypeTesterLanguage.Current.InvalidLocalEndPoint);
+		}
 
 		IDnsClient dnsClient = localEndPoint is not null
 			? serviceProvider.GetRequiredKeyedService<IDnsClient>(localEndPoint.AddressFamily)

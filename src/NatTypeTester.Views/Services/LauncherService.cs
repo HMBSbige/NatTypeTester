@@ -1,7 +1,6 @@
 namespace NatTypeTester.Views.Services;
 
-[UsedImplicitly]
-internal class LauncherService : ILauncherService, ISingletonDependency
+internal sealed class LauncherService : ILauncherService
 {
 	public async ValueTask LaunchUriAsync(Uri uri)
 	{

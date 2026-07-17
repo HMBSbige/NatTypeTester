@@ -1,21 +1,19 @@
 namespace NatTypeTester.Application;
 
-internal readonly record struct HttpProxyOptions(ProxyType ProxyType, string? ProxyServer, string? ProxyUser, string? ProxyPassword);
-
 internal static class AppHttpClientFactory
 {
-	public static HttpClient Create(IHttpClientFactory httpClientFactory, HttpProxyOptions proxyOptions)
+	public static HttpClient Create(IHttpClientFactory httpClientFactory, ProxyOptions proxyOptions)
 	{
-		if (proxyOptions.ProxyType is ProxyType.Socks5
-			&& !string.IsNullOrWhiteSpace(proxyOptions.ProxyServer)
-			&& HostnameEndpoint.TryParse(proxyOptions.ProxyServer, out HostnameEndpoint? proxyEndpoint, 1080))
+		if (proxyOptions.Type is ProxyType.Socks5
+			&& !string.IsNullOrWhiteSpace(proxyOptions.Server)
+			&& HostnameEndpoint.TryParse(proxyOptions.Server, out HostnameEndpoint? proxyEndpoint, NatTypeTesterConsts.DefaultSocks5Port))
 		{
 			SocketsHttpHandler handler = new();
 			WebProxy proxy = new($"socks5://{proxyEndpoint.Hostname}:{proxyEndpoint.Port}");
 
-			if (!string.IsNullOrWhiteSpace(proxyOptions.ProxyUser))
+			if (!string.IsNullOrWhiteSpace(proxyOptions.UserName))
 			{
-				proxy.Credentials = new NetworkCredential(proxyOptions.ProxyUser, proxyOptions.ProxyPassword);
+				proxy.Credentials = new NetworkCredential(proxyOptions.UserName, proxyOptions.Password);
 			}
 
 			handler.Proxy = proxy;

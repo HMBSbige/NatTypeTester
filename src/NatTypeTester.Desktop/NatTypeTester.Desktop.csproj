@@ -7,15 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="ChsBuffer.Avalonia.AppHost" />
+    <PackageReference Include="ChsBuffer.Avalonia.AppHost" Condition="'$(PublishAot)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NatTypeTester.Views\NatTypeTester.Views.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TrimmerRootDescriptor Include="TrimRoots.xml" />
   </ItemGroup>
 
   <Target Name="ExcludeFilesFromPublish" AfterTargets="ComputeResolvedFilesToPublishList">

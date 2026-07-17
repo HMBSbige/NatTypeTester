@@ -266,7 +266,12 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 
 		// Mapping test III: send to otherEndPoint
 		_phase = Phase.MappingTest3;
-		return CreateBindingRequest(Result.OtherEndPoint!);
+		if (Result.OtherEndPoint is null)
+		{
+			throw new InvalidOperationException("OTHER-ADDRESS is required before mapping test III.");
+		}
+
+		return CreateBindingRequest(Result.OtherEndPoint);
 
 	end:
 		_phase = Phase.Done;

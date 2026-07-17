@@ -1,33 +1,21 @@
-global using DynamicData;
-global using JetBrains.Annotations;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Localization;
-global using NatTypeTester.Application;
-global using NatTypeTester.Application.Contracts;
-global using NatTypeTester.Domain.Configuration;
-global using NatTypeTester.Domain.Shared;
-global using NatTypeTester.Domain.Shared.Configuration;
-global using NatTypeTester.Domain.Shared.Localization;
-global using NatTypeTester.ViewModels.Extensions;
-global using NatTypeTester.ViewModels.Services;
-global using ReactiveUI;
-global using ReactiveUI.SourceGenerators;
-global using STUN;
-global using STUN.Enums;
-global using STUN.StunResult;
-global using System.Collections.ObjectModel;
-global using System.Globalization;
-global using System.Reactive;
-global using System.Reactive.Disposables;
-global using System.Reactive.Disposables.Fluent;
-global using System.Reactive.Linq;
-global using System.Reactive.Subjects;
-global using Volo.Abp.DependencyInjection;
-global using Volo.Abp.Localization;
-global using Volo.Abp.Modularity;
-
 namespace NatTypeTester.ViewModels;
 
-[DependsOn(typeof(NatTypeTesterApplicationModule))]
-[UsedImplicitly]
-public class NatTypeTesterViewModelsModule : AbpModule;
+public static class NatTypeTesterViewModelsServiceCollectionExtensions
+{
+	public static IServiceCollection AddNatTypeTesterViewModels(this IServiceCollection services)
+	{
+		services.AddNatTypeTesterApplicationContracts();
+		services.AddNatTypeTesterDomain();
+
+		services.TryAddSingleton<ApplicationSettingsViewModel>();
+		services.TryAddSingleton<ConnectionSettingsViewModel>();
+		services.TryAddSingleton<StunServerSettingsViewModel>();
+		services.TryAddSingleton<UpdateSettingsViewModel>();
+		services.TryAddSingleton<MainWindowViewModel>();
+		services.TryAddSingleton<RFC3489ViewModel>();
+		services.TryAddSingleton<RFC5780ViewModel>();
+		services.TryAddSingleton<SettingsViewModel>();
+
+		return services;
+	}
+}

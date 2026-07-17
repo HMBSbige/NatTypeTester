@@ -19,8 +19,6 @@ public class TlsProxy(string targetHost, bool skipCertificateValidation = false)
 	public override async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
-		ArgumentNullException.ThrowIfNull(local);
-		ArgumentNullException.ThrowIfNull(dst);
 
 		await CloseAsync(cancellationToken);
 

@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
+    xmlns:localization="using:NatTypeTester.Domain.Shared.Localization"
     xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
@@ -18,7 +19,7 @@
         <Border DockPanel.Dock="Bottom"
                 Margin="8,4,8,8"
                 CornerRadius="4">
-            <Button x:Name="TestButton"
+            <Button
                     Classes="accent"
                     HorizontalAlignment="Stretch"
                     Padding="8"
@@ -26,7 +27,8 @@
                     Command="{Binding TestClassicNatTypeCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <ic:FluentIcon Icon="Play" IconVariant="Regular" />
-                    <TextBlock x:Name="TestButtonText" VerticalAlignment="Center" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{Binding Test, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                 </StackPanel>
             </Button>
         </Border>
@@ -38,20 +40,24 @@
                         BorderThickness="1" CornerRadius="8" Padding="10">
                     <DockPanel>
                         <ic:FluentIcon Icon="Warning" IconVariant="Color" DockPanel.Dock="Left" Margin="0,0,8,0" VerticalAlignment="Top" />
-                        <TextBlock x:Name="Rfc3489WarningText"
+                        <TextBlock
+                                   Text="{Binding RFC3489Warning, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                                    TextWrapping="Wrap"
                                    Foreground="{DynamicResource SystemControlPageTextBaseHighBrush}" />
                     </DockPanel>
                 </Border>
 
                 <StackPanel Spacing="3">
-                    <TextBlock x:Name="NatTypeLabel"/>
+                    <TextBlock
+                               Text="{Binding NatType, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <TextBox IsReadOnly="True" Text="{Binding NatType, Mode=OneWay}" />
                 </StackPanel>
 
                 <StackPanel Spacing="3" IsEnabled="{Binding !IsTesting}">
-                    <TextBlock x:Name="LocalEndLabel" />
-                    <ComboBox x:Name="LocalEndComboBox" IsEditable="True"
+                    <TextBlock
+                               Text="{Binding LocalEnd, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
+                    <ComboBox IsEditable="True"
+                              PlaceholderText="{Binding LocalEndPlaceholder, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                               Text="{Binding LocalEnd}"
                               HorizontalAlignment="Stretch">
                         <ComboBoxItem Content="0.0.0.0:0" />
@@ -60,7 +66,8 @@
                 </StackPanel>
 
                 <StackPanel Spacing="3">
-                    <TextBlock x:Name="PublicEndLabel" />
+                    <TextBlock
+                               Text="{Binding PublicEnd, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <TextBox IsReadOnly="True" Text="{Binding PublicEndPoint, Mode=OneWay}" />
                 </StackPanel>
             </StackPanel>

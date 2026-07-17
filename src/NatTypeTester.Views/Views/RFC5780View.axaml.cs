@@ -1,26 +1,9 @@
 namespace NatTypeTester.Views.Views;
 
-public partial class RFC5780View : ReactiveUserControl<RFC5780ViewModel>, ISingletonDependency
+public partial class RFC5780View : UserControl
 {
 	public RFC5780View()
 	{
 		InitializeComponent();
-
-		this.WhenActivated
-		(d =>
-			{
-				BindingTestLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("BindingTest")).DisposeWith(d);
-				MappingBehaviorLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("MappingBehavior")).DisposeWith(d);
-				FilteringBehaviorLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("FilteringBehavior")).DisposeWith(d);
-				LocalEndLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("LocalEnd")).DisposeWith(d);
-				LocalEndComboBox.Bind(ComboBox.PlaceholderTextProperty, new ObservableStringLocalizer("LocalEndPlaceholder")).DisposeWith(d);
-				PublicEndLabel.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("PublicEnd")).DisposeWith(d);
-				TestButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Test")).DisposeWith(d);
-				CancelButtonText.Bind(TextBlock.TextProperty, new ObservableStringLocalizer("Cancel")).DisposeWith(d);
-				BindingTestButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("BindingTest")).DisposeWith(d);
-				MappingTestButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("MappingBehavior")).DisposeWith(d);
-				FilteringTestButton.Bind(ToolTip.TipProperty, new ObservableStringLocalizer("FilteringBehavior")).DisposeWith(d);
-			}
-		);
 	}
 }

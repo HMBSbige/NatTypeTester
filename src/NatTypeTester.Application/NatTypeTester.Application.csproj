@@ -4,7 +4,7 @@
     <PackageReference Include="HMBSbige.UpdateChecker" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="NuGet.Versioning" />
-    <PackageReference Include="Volo.Abp.Ddd.Application" />
+    <PackageReference Include="ThisAssembly.AssemblyInfo" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NatTypeTester.Application.Contracts\NatTypeTester.Application.Contracts.csproj" />

@@ -4,16 +4,24 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:NatTypeTester.ViewModels;assembly=NatTypeTester.ViewModels"
+    xmlns:designViewModels="clr-namespace:NatTypeTester.Views.DesignViewModels"
+    xmlns:localization="using:NatTypeTester.Domain.Shared.Localization"
     xmlns:ic="using:FluentIcons.Avalonia"
     mc:Ignorable="d"
     d:DesignWidth="380" d:DesignHeight="84"
     x:Class="NatTypeTester.Views.Views.StunServerCardView"
-    x:DataType="vm:MainWindowViewModel">
+    x:DataType="vm:StunServerSettingsViewModel"
+    IsEnabled="{Binding IsInitialized}">
+    <Design.DataContext>
+        <designViewModels:DesignStunServerSettingsViewModel />
+    </Design.DataContext>
+
     <GroupBox Margin="8,8,8,4" Padding="10">
         <GroupBox.Header>
             <StackPanel Orientation="Horizontal" Spacing="6">
                 <ic:FluentIcon Icon="Server" IconVariant="Regular" />
-                <TextBlock x:Name="StunServerLabel" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" />
+                <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontSize="14"
+                           Text="{Binding StunServer, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
             </StackPanel>
         </GroupBox.Header>
 
@@ -22,10 +30,12 @@
                       ItemsSource="{Binding StunServers}"
                       Text="{Binding CurrentStunServer}"
                       HorizontalAlignment="Stretch" />
-            <Button x:Name="AddStunServerButton" Grid.Column="1" Command="{Binding AddStunServerCommand}">
+            <Button Grid.Column="1" Command="{Binding AddStunServerCommand}"
+                    ToolTip.Tip="{Binding AddStunServer, Source={x:Static localization:NatTypeTesterLanguage.Current}}">
                 <ic:FluentIcon Icon="Add" IconVariant="Regular" />
             </Button>
-            <Button x:Name="DeleteStunServerButton" Grid.Column="2" Command="{Binding DeleteStunServerCommand}">
+            <Button Grid.Column="2" Command="{Binding DeleteStunServerCommand}"
+                    ToolTip.Tip="{Binding DeleteStunServer, Source={x:Static localization:NatTypeTesterLanguage.Current}}">
                 <ic:FluentIcon Icon="Delete" IconVariant="Regular" />
             </Button>
         </Grid>

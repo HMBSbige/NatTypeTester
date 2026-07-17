@@ -35,9 +35,6 @@ public class StunClient3489 : IUdpStunClient, IAsyncDisposable
 	/// <param name="ownedProxy">Whether this client owns and should dispose the proxy.</param>
 	public StunClient3489(IPEndPoint server, IPEndPoint local, IUdpProxy? proxy = null, bool ownedProxy = true)
 	{
-		ArgumentNullException.ThrowIfNull(server);
-		ArgumentNullException.ThrowIfNull(local);
-
 		_proxy = proxy ?? new NoneUdpProxy(local);
 		_ownedProxy = ownedProxy;
 

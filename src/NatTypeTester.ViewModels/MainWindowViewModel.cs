@@ -1,127 +1,29 @@
 namespace NatTypeTester.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, IActivatableViewModel, ISingletonDependency
+public class MainWindowViewModel : ViewModelBase
 {
-	public ViewModelActivator Activator { get; } = new();
+	private bool _startupTasksStarted;
 
-	public RFC3489ViewModel RFC3489ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC3489ViewModel>();
+	public RFC3489ViewModel RFC3489ViewModel => AppLocator.Current.GetRequiredService<RFC3489ViewModel>();
 
-	public RFC5780ViewModel RFC5780ViewModel => TransientCachedServiceProvider.GetRequiredService<RFC5780ViewModel>();
+	public RFC5780ViewModel RFC5780ViewModel => AppLocator.Current.GetRequiredService<RFC5780ViewModel>();
 
-	public SettingsViewModel SettingsViewModel => TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
+	public SettingsViewModel SettingsViewModel => AppLocator.Current.GetRequiredService<SettingsViewModel>();
 
-	[Reactive]
-	public partial string CurrentStunServer { get; set; } = string.Empty;
-
-	[BindableDerivedList]
-	private readonly ReadOnlyObservableCollection<string> _stunServers;
-
-	private readonly SourceList<string> _stunServerSource = new();
-
-	public MainWindowViewModel()
+	public async Task RunStartupTasksAsync()
 	{
-		AddStunServerCommand.DisposeWith(Disposables);
-		DeleteStunServerCommand.DisposeWith(Disposables);
-
-		_stunServerSource.DisposeWith(Disposables);
-
-		_stunServerSource.Connect()
-			.Bind(out _stunServers)
-			.Subscribe()
-			.DisposeWith(Disposables);
-
-		this.WhenActivatedAsync(InitializeAsync);
-	}
-
-	[ReactiveCommand]
-	private void AddStunServer()
-	{
-		if (!StunServer.TryParse(CurrentStunServer, out StunServer? server))
+		if (_startupTasksStarted)
 		{
 			return;
 		}
 
-		CurrentStunServer = server.ToString();
+		_startupTasksStarted = true;
 
-		if (_stunServerSource.Items.Any(s => string.Equals(s, CurrentStunServer, StringComparison.OrdinalIgnoreCase)))
-		{
-			return;
-		}
+		IAppConfigManager configManager = AppLocator.Current.GetRequiredService<IAppConfigManager>();
+		AppConfig config = await configManager.GetAsync();
+		SettingsViewModel settingsViewModel = SettingsViewModel;
 
-		_stunServerSource.Add(CurrentStunServer);
-	}
-
-	[ReactiveCommand]
-	private void DeleteStunServer()
-	{
-		int index = _stunServerSource.Items.IndexOf
-		(
-			_stunServerSource.Items.FirstOrDefault(s => string.Equals(s, CurrentStunServer, StringComparison.OrdinalIgnoreCase))
-		);
-
-		if (index < 0)
-		{
-			return;
-		}
-
-		_stunServerSource.RemoveAt(index);
-
-		if (_stunServerSource.Count > 0)
-		{
-			CurrentStunServer = index < _stunServerSource.Count
-				? _stunServerSource.Items[index]
-				: _stunServerSource.Items[^1];
-		}
-		else
-		{
-			CurrentStunServer = string.Empty;
-		}
-	}
-
-	public void ReplaceStunServers(IEnumerable<string> servers)
-	{
-		_stunServerSource.Edit
-		(list =>
-			{
-				list.Clear();
-				list.AddRange(servers);
-			}
-		);
-	}
-
-	private async Task InitializeAsync(CancellationToken cancellationToken = default)
-	{
-		IAppConfigManager configManager = TransientCachedServiceProvider.GetRequiredService<IAppConfigManager>();
-		AppConfig config = await configManager.GetAsync(cancellationToken);
-
-		await SettingsViewModel.InitializeAsync(config);
-
-		_stunServerSource.AddRange(config.StunServers);
-
-		string? savedServer = config.CurrentStunServer;
-		CurrentStunServer = string.IsNullOrEmpty(savedServer) ? _stunServerSource.Items[0] : savedServer;
-
-		this.WhenAnyValue(x => x.CurrentStunServer)
-			.Skip(1)
-			.DistinctUntilChanged()
-			.Select
-			(value => Observable.FromAsync(ct => configManager.UpdateAsync(cfg => cfg.CurrentStunServer = value, ct).AsTask())
-				.CatchDefault()
-			)
-			.Switch()
-			.Subscribe()
-			.DisposeWith(Disposables);
-
-		_stunServerSource.Connect()
-			.Skip(1)
-			.Select
-			(_ => Observable.FromAsync(ct => configManager.UpdateAsync(cfg => cfg.StunServers = _stunServerSource.Items.ToList(), ct).AsTask())
-				.CatchDefault()
-			)
-			.Switch()
-			.Subscribe()
-			.DisposeWith(Disposables);
-
-		await SettingsViewModel.CheckForUpdateOnStartupAsync(cancellationToken);
+		settingsViewModel.ApplyConfig(config);
+		Forget(cancellationToken => settingsViewModel.Update.CheckForUpdateOnStartupAsync(config, cancellationToken));
 	}
 }

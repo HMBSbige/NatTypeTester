@@ -2,7 +2,4 @@
   <ItemGroup>
     <ProjectReference Include="..\NatTypeTester.Domain.Shared\NatTypeTester.Domain.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Volo.Abp.Ddd.Domain" />
-  </ItemGroup>
 </Project>

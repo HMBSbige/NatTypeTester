@@ -1,7 +1,6 @@
 namespace NatTypeTester.Views.Services;
 
-[UsedImplicitly]
-internal class NotificationService : INotificationService, ISingletonDependency
+internal sealed class NotificationService : INotificationService
 {
 	private (TopLevel TopLevel, WindowNotificationManager Manager)? _notificationManagerCache;
 
@@ -10,8 +9,10 @@ internal class NotificationService : INotificationService, ISingletonDependency
 		get
 		{
 			TopLevel? topLevel = TopLevelHelper.GetTopLevel();
+
 			if (topLevel is null)
 			{
+				_notificationManagerCache = null;
 				return null;
 			}
 

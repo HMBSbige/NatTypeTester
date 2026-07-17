@@ -1,0 +1,10 @@
+global using DotNetCampus.Localizations;
+global using Microsoft.Extensions.DependencyInjection;
+global using NatTypeTester.Application;
+global using NatTypeTester.Application.Contracts;
+global using NatTypeTester.Domain.Shared;
+global using NatTypeTester.Domain.Shared.Localization;
+global using Spectre.Console;
+global using STUN.Enums;
+global using STUN.StunResult;
+global using System.CommandLine;

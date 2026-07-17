@@ -1,7 +1,3 @@
-using Avalonia;
-using NatTypeTester.Views;
-using NatTypeTester.Views.Infrastructure;
-
 namespace NatTypeTester.Desktop;
 
 internal static class Program
@@ -14,7 +10,14 @@ internal static class Program
 	[STAThread]
 	public static int Main(string[] args)
 	{
-		return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+		try
+		{
+			return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+		}
+		finally
+		{
+			AppLocator.GetLocator().Dispose();
+		}
 	}
 
 	/// <summary>

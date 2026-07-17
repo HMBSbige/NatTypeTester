@@ -6,7 +6,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NatTypeTester.Application\NatTypeTester.Application.csproj" />
+    <ProjectReference Include="..\NatTypeTester.Application.Contracts\NatTypeTester.Application.Contracts.csproj" />
+    <ProjectReference Include="..\NatTypeTester.Domain\NatTypeTester.Domain.csproj" />
   </ItemGroup>
 
 </Project>

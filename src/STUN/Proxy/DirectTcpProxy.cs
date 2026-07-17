@@ -29,8 +29,6 @@ public class DirectTcpProxy : ITcpProxy
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
-		ArgumentNullException.ThrowIfNull(local);
-		ArgumentNullException.ThrowIfNull(dst);
 
 		await CloseAsync(cancellationToken);
 

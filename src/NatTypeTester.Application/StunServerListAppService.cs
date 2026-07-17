@@ -1,18 +1,14 @@
 namespace NatTypeTester.Application;
 
-[UsedImplicitly]
-public class StunServerListAppService : ApplicationService, IStunServerListAppService
+internal class StunServerListAppService(IHttpClientFactory httpClientFactory) : IStunServerListAppService
 {
-	private IHttpClientFactory HttpClientFactory => LazyServiceProvider.GetRequiredService<IHttpClientFactory>();
-
 	public async Task<List<string>> LoadAsync(LoadStunServerListInput input, CancellationToken cancellationToken = default)
 	{
 		string[] lines;
 
 		if (Uri.TryCreate(input.Uri, UriKind.Absolute, out Uri? uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
 		{
-			HttpProxyOptions proxyOptions = new(input.ProxyType, input.ProxyServer, input.ProxyUser, input.ProxyPassword);
-			using HttpClient httpClient = AppHttpClientFactory.Create(HttpClientFactory, proxyOptions);
+			using HttpClient httpClient = AppHttpClientFactory.Create(httpClientFactory, input.Proxy);
 			string content = await httpClient.GetStringAsync(uri, cancellationToken);
 			lines = content.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 		}

@@ -36,7 +36,6 @@ public class Socks5TcpProxy : ITcpProxy
 	/// <param name="socks5Options">The SOCKS5 connection options.</param>
 	public Socks5TcpProxy(Socks5CreateOption socks5Options)
 	{
-		ArgumentNullException.ThrowIfNull(socks5Options);
 		ArgumentNullException.ThrowIfNull(socks5Options.Address, nameof(socks5Options.Address));
 
 		Socks5Options = socks5Options;
@@ -46,8 +45,6 @@ public class Socks5TcpProxy : ITcpProxy
 	public virtual async ValueTask<IDuplexPipe> ConnectAsync(IPEndPoint local, IPEndPoint dst, CancellationToken cancellationToken = default)
 	{
 		ObjectDisposedException.ThrowIf(IsDisposed, this);
-		ArgumentNullException.ThrowIfNull(local);
-		ArgumentNullException.ThrowIfNull(dst);
 
 		await CloseAsync(cancellationToken);
 

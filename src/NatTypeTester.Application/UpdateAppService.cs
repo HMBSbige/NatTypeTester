@@ -1,37 +1,24 @@
-using NatTypeTester.Domain.Configuration;
-using NatTypeTester.Domain.Shared;
-using NuGet.Versioning;
-using System.Reflection;
-using UpdateChecker;
-
 namespace NatTypeTester.Application;
 
-[UsedImplicitly]
-public class UpdateAppService : ApplicationService, IUpdateAppService
+internal class UpdateAppService(IHttpClientFactory httpClientFactory) : IUpdateAppService
 {
-	private IHttpClientFactory HttpClientFactory => LazyServiceProvider.GetRequiredService<IHttpClientFactory>();
-
-	private IAppConfigManager AppConfigManager => LazyServiceProvider.GetRequiredService<IAppConfigManager>();
-
 	public string CurrentVersion => ResolveCurrentVersion()?.ToNormalizedString() ?? string.Empty;
 
-	public async Task<UpdateCheckResult> CheckForUpdateAsync(bool includePreRelease, CancellationToken cancellationToken = default)
+	public async Task<UpdateCheckResult> CheckForUpdateAsync(UpdateCheckInput input, CancellationToken cancellationToken = default)
 	{
-		AppConfig appConfig = await AppConfigManager.GetAsync(cancellationToken);
-		HttpProxyOptions proxyOptions = new(appConfig.ProxyType, appConfig.ProxyServer, appConfig.ProxyUser, appConfig.ProxyPassword);
-		using HttpClient httpClient = AppHttpClientFactory.Create(HttpClientFactory, proxyOptions);
+		using HttpClient httpClient = AppHttpClientFactory.Create(httpClientFactory, input.Proxy);
 		httpClient.Timeout = TimeSpan.FromSeconds(15);
 		httpClient.DefaultRequestHeaders.UserAgent.TryParseAdd(nameof(NatTypeTester));
 
-		GitHubReleasesUpdateChecker checker = new
-		(
-			NatTypeTesterConsts.Author,
-			NatTypeTesterConsts.Repository,
-			includePreRelease,
-			CurrentVersion,
-			tag => tag,
-			new TagVersionComparer()
-		);
+		GitHubReleasesUpdateCheckerOptions options = new()
+		{
+			Owner = NatTypeTesterConsts.Author,
+			Repo = NatTypeTesterConsts.Repository,
+			IsPreRelease = input.IncludePreRelease,
+			CurrentVersion = CurrentVersion,
+			VersionScheme = new NuGetVersionScheme()
+		};
+		GitHubReleasesUpdateChecker checker = new(options);
 
 		bool hasUpdate = await checker.CheckAsync(httpClient, cancellationToken);
 		string? latestVersion = TryParseVersion(checker.LatestVersion)?.ToNormalizedString();
@@ -46,8 +33,7 @@ public class UpdateAppService : ApplicationService, IUpdateAppService
 
 	private static NuGetVersion? ResolveCurrentVersion()
 	{
-		Assembly assembly = Assembly.GetEntryAssembly() ?? typeof(UpdateAppService).Assembly;
-		return TryParseVersion(assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
+		return TryParseVersion(ThisAssembly.Info.InformationalVersion);
 	}
 
 	private static NuGetVersion? TryParseVersion(string? value)
@@ -55,12 +41,19 @@ public class UpdateAppService : ApplicationService, IUpdateAppService
 		return NuGetVersion.TryParse(value, out NuGetVersion? version) ? version : default;
 	}
 
-	private sealed class TagVersionComparer : IComparer<object>
+	private sealed class NuGetVersionScheme : IVersionScheme
 	{
-		public int Compare(object? x, object? y)
+		public bool TryParse(string value, out string version)
 		{
-			NuGetVersion? xVersion = TryParseVersion(x?.ToString());
-			NuGetVersion? yVersion = TryParseVersion(y?.ToString());
+			NuGetVersion? nuGetVersion = TryParseVersion(value);
+			version = nuGetVersion?.ToNormalizedString() ?? string.Empty;
+			return nuGetVersion is not null;
+		}
+
+		public int Compare(string x, string y)
+		{
+			NuGetVersion? xVersion = TryParseVersion(x);
+			NuGetVersion? yVersion = TryParseVersion(y);
 			return Comparer<NuGetVersion?>.Default.Compare(xVersion, yVersion);
 		}
 	}

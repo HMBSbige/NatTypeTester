@@ -1,33 +1,39 @@
 namespace NatTypeTester.Configuration;
 
-public sealed class AppConfigManager(IOptions<AppConfig> options, string configPath) : IAppConfigManager, IDisposable
+public sealed class AppConfigManager(IOptions<AppConfigStorageOptions> storageOptions) : IAppConfigManager
 {
-	private static readonly JsonObject DefaultNode = SerializeToJsonObject(new AppConfig());
+	private static readonly JsonObject DefaultNode = SerializeToJsonObject(AppConfig.CreateDefault());
 
+	private readonly string _configPath = storageOptions.Value.FilePath;
 	private readonly SemaphoreSlim _saveLock = new(1, 1);
-
 	private long _saveVersion;
+	private AppConfig? _config;
 
-	private readonly AppConfig _config = options.Value;
-
-	public void Dispose()
+	public async ValueTask<AppConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
-		_saveLock.Dispose();
-	}
+		await _saveLock.WaitAsync(cancellationToken);
 
-	public ValueTask<AppConfig> GetAsync(CancellationToken cancellationToken = default)
-	{
-		return ValueTask.FromResult(_config);
+		try
+		{
+			return await GetOrLoadCoreAsync(cancellationToken);
+		}
+		finally
+		{
+			_saveLock.Release();
+		}
 	}
 
 	public async ValueTask UpdateAsync(Action<AppConfig> update, CancellationToken cancellationToken = default)
 	{
+		AppConfig config;
 		long version;
 
 		await _saveLock.WaitAsync(cancellationToken);
+
 		try
 		{
-			update(_config);
+			config = await GetOrLoadCoreAsync(cancellationToken);
+			update(config);
 			version = ++_saveVersion;
 		}
 		finally
@@ -38,6 +44,7 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 		await Task.Delay(TimeSpan.FromMilliseconds(300), cancellationToken);
 
 		await _saveLock.WaitAsync(cancellationToken);
+
 		try
 		{
 			if (_saveVersion != version)
@@ -45,7 +52,7 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 				return;
 			}
 
-			await SaveCoreAsync(_config, cancellationToken);
+			await SaveCoreAsync(config, cancellationToken);
 		}
 		finally
 		{
@@ -53,9 +60,49 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 		}
 	}
 
+	private async ValueTask<AppConfig> GetOrLoadCoreAsync(CancellationToken cancellationToken)
+	{
+		return _config ??= await LoadCoreAsync(cancellationToken);
+	}
+
+	private async ValueTask<AppConfig> LoadCoreAsync(CancellationToken cancellationToken)
+	{
+		AppConfig config;
+
+		try
+		{
+			if (!File.Exists(_configPath))
+			{
+				config = new AppConfig();
+			}
+			else
+			{
+				await using FileStream stream = File.OpenRead(_configPath);
+				config = await JsonSerializer.DeserializeAsync
+				(
+					stream,
+					AppConfigJsonContext.Default.AppConfig,
+					cancellationToken
+				) ?? new AppConfig();
+			}
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			throw;
+		}
+		catch
+		{
+			config = new AppConfig();
+		}
+
+		config.ApplyDefaults();
+
+		return config;
+	}
+
 	private async ValueTask SaveCoreAsync(AppConfig config, CancellationToken cancellationToken)
 	{
-		if (Path.GetDirectoryName(configPath) is { } directory)
+		if (Path.GetDirectoryName(_configPath) is { } directory)
 		{
 			Directory.CreateDirectory(directory);
 		}
@@ -70,21 +117,21 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 			}
 		}
 
-		string tempPath = configPath + ".tmp";
+		string tempPath = _configPath + ".tmp";
 
 		await using (FileStream stream = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.Read))
 		{
 			await JsonSerializer.SerializeAsync(stream, node, AppConfigJsonContext.Default.JsonObject, cancellationToken);
 		}
 
-		if (File.Exists(configPath))
+		if (File.Exists(_configPath))
 		{
-			string bakPath = configPath + ".bak";
-			File.Replace(tempPath, configPath, bakPath);
+			string bakPath = _configPath + ".bak";
+			File.Replace(tempPath, _configPath, bakPath);
 		}
 		else
 		{
-			File.Move(tempPath, configPath);
+			File.Move(tempPath, _configPath);
 		}
 
 		return;
@@ -98,6 +145,6 @@ public sealed class AppConfigManager(IOptions<AppConfig> options, string configP
 	private static JsonObject SerializeToJsonObject(AppConfig config)
 	{
 		return JsonSerializer.SerializeToNode(config, AppConfigJsonContext.Default.AppConfig) as JsonObject
-			?? throw new InvalidOperationException(@"Serialized app config is not a JSON object.");
+				?? throw new InvalidOperationException(@"Serialized app config is not a JSON object.");
 	}
 }

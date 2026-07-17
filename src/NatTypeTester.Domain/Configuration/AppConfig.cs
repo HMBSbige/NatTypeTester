@@ -27,4 +27,19 @@ public record AppConfig
 	public DateTimeOffset? LastUpdateCheckTime { get; set; }
 
 	public bool SkipCertificateValidation { get; set; }
+
+	public static AppConfig CreateDefault()
+	{
+		AppConfig config = new();
+		config.ApplyDefaults();
+		return config;
+	}
+
+	public void ApplyDefaults()
+	{
+		if (StunServers is not { Count: > 0 })
+		{
+			StunServers = [.. ConfigurationConsts.DefaultStunServers];
+		}
+	}
 }

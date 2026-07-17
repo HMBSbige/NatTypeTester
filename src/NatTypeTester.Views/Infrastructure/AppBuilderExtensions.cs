@@ -1,28 +1,18 @@
-using Autofac.Extensions.DependencyInjection;
-using ReactiveUI.Avalonia.Splat;
-
 namespace NatTypeTester.Views.Infrastructure;
 
 public static class AppBuilderExtensions
 {
 	public static AppBuilder UseNatTypeTesterApp(this AppBuilder builder)
 	{
-		return builder.UseReactiveUIWithAutofac
+		return builder.UseReactiveUIWithMicrosoftDependencyResolver
 		(
-			containerBuilder =>
+			static services => services.AddNatTypeTesterViews(),
+			withResolver: static provider =>
 			{
-				ServiceCollection services = new();
-
-				AbpApplicationFactory.Create<NatTypeTesterViewsModule>(services);
-
-				containerBuilder.Populate(services);
+				ArgumentNullException.ThrowIfNull(provider);
+				provider.GetRequiredService<NotificationExceptionHandler>().Install();
 			},
-			withResolver: resolver =>
-			{
-				IServiceProvider serviceProvider = resolver.GetRequiredService<IServiceProvider>();
-				resolver.GetRequiredService<IAbpApplicationWithExternalServiceProvider>().Initialize(serviceProvider);
-			},
-			withReactiveUIBuilder: rxBuilder =>
+			withReactiveUIBuilder: static rxBuilder =>
 			{
 				rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSubject);
 			}

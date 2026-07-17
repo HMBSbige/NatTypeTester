@@ -10,16 +10,16 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="FluentIcons.Avalonia" />
-    <PackageReference Include="ReactiveUI.Avalonia.Autofac" />
+    <PackageReference Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Sinks.Async" />
     <PackageReference Include="Serilog.Sinks.Debug" />
     <PackageReference Include="Splat.Serilog" />
-    <PackageReference Include="Volo.Abp.Autofac" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NatTypeTester.Application\NatTypeTester.Application.csproj" />
     <ProjectReference Include="..\NatTypeTester.Configuration\NatTypeTester.Configuration.csproj" />
     <ProjectReference Include="..\NatTypeTester.ViewModels\NatTypeTester.ViewModels.csproj" />
   </ItemGroup>

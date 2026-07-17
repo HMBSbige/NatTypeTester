@@ -1,13 +1,3 @@
-using Android.Content.PM;
-using Android.Runtime;
-using Avalonia;
-using Avalonia.Android;
-using Avalonia.Media;
-using JetBrains.Annotations;
-using NatTypeTester.Views;
-using NatTypeTester.Views.Infrastructure;
-using SkiaSharp;
-
 namespace NatTypeTester.Android;
 
 [Activity
@@ -27,7 +17,6 @@ public class MainActivity : AvaloniaMainActivity
 }
 
 [Application]
-[UsedImplicitly]
 public class AndroidApp(nint javaReference, JniHandleOwnership transfer) : AvaloniaAndroidApplication<App>(javaReference, transfer)
 {
 	protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)

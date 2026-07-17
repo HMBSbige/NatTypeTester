@@ -1,31 +1,43 @@
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+
 namespace NatTypeTester.Views.Infrastructure;
 
-public static class NotificationExceptionHandler
+internal sealed class NotificationExceptionHandler(
+	INotificationService notificationService,
+	ILogger<NotificationExceptionHandler> logger
+) : IDisposable
 {
-	public static readonly Subject<Exception> ExceptionSubject = new();
+	private IDisposable? _subscription;
 
-	public static void Install(IServiceProvider serviceProvider)
+	public static Subject<Exception> ExceptionSubject { get; } = new();
+
+	public void Install()
 	{
-		INotificationService notificationService = serviceProvider.GetRequiredService<INotificationService>();
-		IStringLocalizer localizer = serviceProvider.GetRequiredService<IStringLocalizer<NatTypeTesterResource>>();
-
-		ExceptionSubject
+		_subscription ??= ExceptionSubject
 			.ObserveOn(RxSchedulers.MainThreadScheduler)
-			.Subscribe
-			(ex =>
-				{
-					string message = FormatMessage(ex);
-					notificationService.Show(localizer["Error"], message, AppNotificationType.Error);
-				}
-			);
+			.Subscribe(Handle);
 	}
 
-	private static string FormatMessage(Exception ex)
+	public void Dispose()
 	{
-		return ex switch
+		_subscription?.Dispose();
+	}
+
+	private void Handle(Exception exception)
+	{
+		if (exception is OperationCanceledException)
 		{
-			AbpValidationException { ValidationErrors.Count: > 0 } ve => string.Join(Environment.NewLine, ve.ValidationErrors.Select(e => e.ErrorMessage)),
-			_ => ex.Message
-		};
+			logger.LogTrace(exception, "The operation was canceled.");
+			return;
+		}
+
+		logger.LogError(exception, "An unhandled exception occurred during a operation.");
+		notificationService.Show
+		(
+			NatTypeTesterLanguage.Current.Error,
+			exception.Message,
+			AppNotificationType.Error
+		);
 	}
 }

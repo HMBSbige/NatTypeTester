@@ -1,40 +1,22 @@
-global using Dns.Net.Abstractions;
-global using Dns.Net.Clients;
-global using JetBrains.Annotations;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.DependencyInjection.Extensions;
-global using NatTypeTester.Application.Contracts;
-global using NatTypeTester.Domain;
-global using Socks5.Models;
-global using STUN;
-global using STUN.Client;
-global using STUN.Enums;
-global using STUN.Proxy;
-global using STUN.StunResult;
-global using System.Net;
-global using System.Net.Http;
-global using System.Net.Sockets;
-global using Volo.Abp.Application;
-global using Volo.Abp.Application.Services;
-global using Volo.Abp.Modularity;
-
 namespace NatTypeTester.Application;
 
-[UsedImplicitly]
-[DependsOn
-(
-	typeof(AbpDddApplicationModule),
-	typeof(NatTypeTesterApplicationContractsModule),
-	typeof(NatTypeTesterDomainModule)
-)]
-public class NatTypeTesterApplicationModule : AbpModule
+public static class NatTypeTesterApplicationServiceCollectionExtensions
 {
-	public override void ConfigureServices(ServiceConfigurationContext context)
+	public static IServiceCollection AddNatTypeTesterApplication(this IServiceCollection services)
 	{
-		context.Services.AddHttpClient();
-		context.Services.TryAddTransient<IDnsClient, DefaultDnsClient>();
-		context.Services.TryAddKeyedTransient<IDnsClient, DefaultAClient>(AddressFamily.InterNetwork);
-		context.Services.TryAddKeyedTransient<IDnsClient, DefaultAAAAClient>(AddressFamily.InterNetworkV6);
-		context.Services.TryAddTransient<StunTestInputResolver>();
+		services.AddNatTypeTesterApplicationContracts();
+		services.AddNatTypeTesterDomain();
+
+		services.AddHttpClient();
+		services.TryAddTransient<IDnsClient, DefaultDnsClient>();
+		services.TryAddKeyedTransient<IDnsClient, DefaultAClient>(AddressFamily.InterNetwork);
+		services.TryAddKeyedTransient<IDnsClient, DefaultAAAAClient>(AddressFamily.InterNetworkV6);
+		services.TryAddTransient<StunTestInputResolver>();
+		services.TryAddTransient<IRfc3489AppService, Rfc3489AppService>();
+		services.TryAddTransient<IRfc5780AppService, Rfc5780AppService>();
+		services.TryAddTransient<IStunServerListAppService, StunServerListAppService>();
+		services.TryAddTransient<IUpdateAppService, UpdateAppService>();
+
+		return services;
 	}
 }

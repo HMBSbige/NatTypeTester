@@ -43,8 +43,6 @@ public class Socks5UdpProxy : IUdpProxy
 	/// <param name="socks5Options">The SOCKS5 connection options.</param>
 	public Socks5UdpProxy(IPEndPoint localEndPoint, Socks5CreateOption socks5Options)
 	{
-		ArgumentNullException.ThrowIfNull(localEndPoint);
-		ArgumentNullException.ThrowIfNull(socks5Options);
 		ArgumentNullException.ThrowIfNull(socks5Options.Address, nameof(socks5Options.Address));
 
 		_localEndPoint = localEndPoint;

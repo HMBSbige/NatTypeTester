@@ -1,8 +1,10 @@
 namespace NatTypeTester.ViewModels;
 
-[UsedImplicitly]
-public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
+public partial class RFC5780ViewModel : ViewModelBase
 {
+	private readonly Dictionary<TransportType, ResultSnapshot> _cachedResults = new();
+	private CancellationTokenSource? _cts;
+
 	[Reactive]
 	public partial BindingTestResult BindingTestResult { get; set; }
 
@@ -24,6 +26,17 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 	[ObservableAsProperty]
 	public partial bool IsTesting { get; }
 
+	public RFC5780ViewModel()
+	{
+		CancelTestCommand.DisposeWith(Disposables);
+		DiscoveryNatTypeCommand.DisposeWith(Disposables);
+		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
+
+		this.WhenAnyValue(static viewModel => viewModel.TransportType)
+			.Subscribe(transportType => ApplySnapshot(_cachedResults.GetValueOrDefault(transportType)))
+			.DisposeWith(Disposables);
+	}
+
 	private readonly record struct ResultSnapshot(
 		BindingTestResult BindingTestResult = default,
 		MappingBehavior MappingBehavior = default,
@@ -31,22 +44,6 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 		string? PublicEndPoint = default,
 		string? LocalEnd = default
 	);
-
-	private readonly Dictionary<TransportType, ResultSnapshot> _cachedResults = new();
-
-	private CancellationTokenSource? _cts;
-
-	public RFC5780ViewModel()
-	{
-		DiscoveryNatTypeCommand.DisposeWith(Disposables);
-		CancelTestCommand.DisposeWith(Disposables);
-
-		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
-
-		this.WhenAnyValue(x => x.TransportType)
-			.Subscribe(transportType => ApplySnapshot(_cachedResults.GetValueOrDefault(transportType)))
-			.DisposeWith(Disposables);
-	}
 
 	[ReactiveCommand]
 	private void CancelTest()
@@ -62,24 +59,13 @@ public partial class RFC5780ViewModel : ViewModelBase, ISingletonDependency
 
 		try
 		{
-			IRfc5780AppService service = TransientCachedServiceProvider.GetRequiredService<IRfc5780AppService>();
-			SettingsViewModel settings = TransientCachedServiceProvider.GetRequiredService<SettingsViewModel>();
-			MainWindowViewModel mainWindowViewModel = TransientCachedServiceProvider.GetRequiredService<MainWindowViewModel>();
+			StunTestInput input = AppLocator.Current.CreateStunTestInput(LocalEnd);
 
+			IRfc5780AppService service = AppLocator.Current.GetRequiredService<IRfc5780AppService>();
 			TransportType transport = TransportType;
 
-			StunTestInput input = new()
-			{
-				StunServer = mainWindowViewModel.CurrentStunServer,
-				ProxyType = settings.ProxyType,
-				ProxyServer = settings.ProxyServer,
-				ProxyUser = settings.ProxyUser,
-				ProxyPassword = settings.ProxyPassword,
-				LocalEndPoint = LocalEnd,
-				SkipCertificateValidation = settings.SkipCertificateValidation
-			};
-
 			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
+						.ObserveOn(RxSchedulers.MainThreadScheduler)
 						.Subscribe
 						(_ =>
 							{
