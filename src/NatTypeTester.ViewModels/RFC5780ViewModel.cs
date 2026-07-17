@@ -64,17 +64,7 @@ public partial class RFC5780ViewModel : ViewModelBase
 			IRfc5780AppService service = AppLocator.Current.GetRequiredService<IRfc5780AppService>();
 			TransportType transport = TransportType;
 
-			using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-						.ObserveOn(RxSchedulers.MainThreadScheduler)
-						.Subscribe
-						(_ =>
-							{
-								if (service.State is { } state)
-								{
-									ApplyAndCacheResult(state, transport, testType);
-								}
-							}
-						))
+			using (PollState(() => service.State, state => ApplyAndCacheResult(state, transport, testType)))
 			{
 				StunResult5389 result = await (testType switch
 				{

@@ -73,7 +73,8 @@ public sealed partial class UpdateSettingsViewModel : ViewModelBase
 			return Task.CompletedTask;
 		}
 
-		if (config.LastUpdateCheckTime is { } lastCheck && DateTimeOffset.Now - lastCheck < config.CheckUpdateInterval)
+		TimeProvider timeProvider = AppLocator.Current.GetRequiredService<TimeProvider>();
+		if (config.LastUpdateCheckTime is { } lastCheck && timeProvider.GetLocalNow() - lastCheck < config.CheckUpdateInterval)
 		{
 			return Task.CompletedTask;
 		}
@@ -120,7 +121,9 @@ public sealed partial class UpdateSettingsViewModel : ViewModelBase
 		}
 
 		IAppConfigManager configManager = AppLocator.Current.GetRequiredService<IAppConfigManager>();
-		await configManager.UpdateAsync(config => config.LastUpdateCheckTime = DateTimeOffset.Now, cancellationToken);
+		TimeProvider timeProvider = AppLocator.Current.GetRequiredService<TimeProvider>();
+		DateTimeOffset lastUpdateCheckTime = timeProvider.GetLocalNow();
+		await configManager.UpdateAsync(config => config.LastUpdateCheckTime = lastUpdateCheckTime, cancellationToken);
 	}
 
 	[ReactiveCommand]

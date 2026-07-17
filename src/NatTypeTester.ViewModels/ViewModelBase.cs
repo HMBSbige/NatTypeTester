@@ -30,6 +30,21 @@ public abstract class ViewModelBase : ReactiveObject, IDisposable
 		HandleErrors(Observable.FromAsync(taskFactory)).Subscribe().DisposeWith(Disposables);
 	}
 
+	protected static IDisposable PollState<T>(Func<T?> getState, Action<T> apply) where T : class
+	{
+		return Observable.Interval(TimeSpan.FromSeconds(0.1), RxSchedulers.TaskpoolScheduler)
+			.ObserveOn(RxSchedulers.MainThreadScheduler)
+			.Subscribe
+			(_ =>
+				{
+					if (getState() is { } state)
+					{
+						apply(state);
+					}
+				}
+			);
+	}
+
 	private static IObservable<T> HandleErrors<T>(IObservable<T> source)
 	{
 		return source

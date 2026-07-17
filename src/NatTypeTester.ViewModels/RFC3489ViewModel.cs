@@ -27,18 +27,7 @@ public partial class RFC3489ViewModel : ViewModelBase
 
 		IRfc3489AppService service = AppLocator.Current.GetRequiredService<IRfc3489AppService>();
 
-		using (Observable.Interval(TimeSpan.FromSeconds(0.1))
-					.ObserveOn(RxSchedulers.MainThreadScheduler)
-					.Subscribe
-					(_ =>
-						{
-							if (service.State is { } state)
-							{
-								ApplyResult(state);
-							}
-						}
-					)
-			)
+		using (PollState(() => service.State, ApplyResult))
 		{
 			ClassicStunResult result = await service.TestAsync(input, cancellationToken);
 			ApplyResult(result);
