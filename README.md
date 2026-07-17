@@ -5,6 +5,30 @@
 | CI       | [![CI](https://github.com/HMBSbige/NatTypeTester/workflows/CI/badge.svg)](https://github.com/HMBSbige/NatTypeTester/actions) |
 | Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)](https://www.nuget.org/packages/Stun.Net/)             |
 
+## Architecture
+
+Arrows represent project references.
+
+```mermaid
+flowchart TD
+    Console["Console"] --> Application["Application"]
+    Desktop["Desktop"] --> Views["Views"]
+    Android["Android"] --> Views
+
+    Views --> Application
+    Views --> Configuration["Configuration"]
+    Views --> ViewModels["ViewModels"]
+
+    Application --> ApplicationContracts["Application.Contracts"]
+    Application --> Domain["Domain"]
+    Configuration --> Domain
+    ViewModels --> ApplicationContracts
+    ViewModels --> Domain
+
+    ApplicationContracts --> DomainShared["Domain.Shared"]
+    Domain --> DomainShared
+```
+
 ## RFC
 
 - [RFC 3489](https://datatracker.ietf.org/doc/html/rfc3489)
