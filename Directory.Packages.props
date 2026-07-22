@@ -9,7 +9,7 @@
     <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.333" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.5" />
+    <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.6" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ReactiveUI" Version="23.2.28" />
@@ -41,6 +41,6 @@
     <PackageVersion Include="ThisAssembly.AssemblyInfo" Version="2.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.61.0" />
+    <PackageVersion Include="TUnit" Version="1.61.29" />
   </ItemGroup>
 </Project>
