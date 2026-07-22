@@ -7,7 +7,6 @@
 
 ## Architecture
 
-Arrows represent project references.
 
 ```mermaid
 flowchart TD
