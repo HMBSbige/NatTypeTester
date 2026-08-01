@@ -1,9 +1,8 @@
 # NatTypeTester
 
-| Channel  | Status                                                                                                                       |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| CI       | [![CI](https://github.com/HMBSbige/NatTypeTester/workflows/CI/badge.svg)](https://github.com/HMBSbige/NatTypeTester/actions) |
-| Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)](https://www.nuget.org/packages/Stun.Net/)             |
+Package | NuGet
+-|-
+Stun.Net | [![NuGet.org](https://img.shields.io/nuget/v/Stun.Net.svg?logo=nuget)](https://www.nuget.org/packages/Stun.Net/)
 
 ## Architecture
 
