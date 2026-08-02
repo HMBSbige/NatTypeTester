@@ -2,7 +2,8 @@ namespace NatTypeTester.ViewModels;
 
 public partial class StunServerSettingsViewModel : ViewModelBase
 {
-	private readonly SourceList<string> _stunServerSource = new();
+	[Reactive]
+	public partial ObservableCollection<string> StunServers { get; private set; } = [];
 
 	[Reactive]
 	public partial string CurrentStunServer { get; set; } = string.Empty;
@@ -13,20 +14,11 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 	[Reactive]
 	public partial bool IsInitialized { get; private set; }
 
-	[BindableDerivedList]
-	private readonly ReadOnlyObservableCollection<string> _stunServers;
-
 	public StunServerSettingsViewModel()
 	{
 		AddStunServerCommand.DisposeWith(Disposables);
 		DeleteStunServerCommand.DisposeWith(Disposables);
 		LoadStunServerListCommand.DisposeWith(Disposables);
-
-		_stunServerSource.DisposeWith(Disposables);
-		_stunServerSource.Connect()
-			.Bind(out _stunServers)
-			.Subscribe()
-			.DisposeWith(Disposables);
 	}
 
 	protected void LoadConfig()
@@ -42,8 +34,8 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 		}
 
 		ReplaceStunServers(config.StunServers);
-		CurrentStunServer = string.IsNullOrEmpty(config.CurrentStunServer) && _stunServerSource.Count > 0
-			? _stunServerSource.Items[0]
+		CurrentStunServer = string.IsNullOrEmpty(config.CurrentStunServer) && StunServers.Count > 0
+			? StunServers[0]
 			: config.CurrentStunServer ?? string.Empty;
 
 		StunServerListUri = config.StunServerListUri;
@@ -67,7 +59,7 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 			return;
 		}
 
-		_stunServerSource.Add(CurrentStunServer);
+		StunServers.Add(CurrentStunServer);
 	}
 
 	[ReactiveCommand]
@@ -80,13 +72,13 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 			return;
 		}
 
-		_stunServerSource.RemoveAt(index);
+		StunServers.RemoveAt(index);
 
-		CurrentStunServer = _stunServerSource.Count switch
+		CurrentStunServer = StunServers.Count switch
 		{
 			0 => string.Empty,
-			_ when index < _stunServerSource.Count => _stunServerSource.Items[index],
-			_ => _stunServerSource.Items[^1]
+			_ when index < StunServers.Count => StunServers[index],
+			_ => StunServers[^1]
 		};
 	}
 
@@ -135,15 +127,14 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 		ApplyConfig(config);
 	}
 
-	private void ReplaceStunServers(IEnumerable<string> servers)
+	private void ReplaceStunServers(IReadOnlyList<string> servers)
 	{
-		_stunServerSource.Edit
-		(list =>
-			{
-				list.Clear();
-				list.AddRange(servers);
-			}
-		);
+		if (StunServers.SequenceEqual(servers))
+		{
+			return;
+		}
+
+		StunServers = [.. servers];
 	}
 
 	private void RegisterPersistence()
@@ -156,8 +147,15 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 
 		PersistToConfig
 		(
-			_stunServerSource.Connect().ToCollection(),
-			static (appConfig, value) => appConfig.StunServers = [.. value]
+			this.WhenAnyValue(static viewModel => viewModel.StunServers)
+				.Map
+				(static servers => servers.ObserveCollectionChanges()
+					.MapWith(servers, static (currentServers, _) => currentServers)
+					.Prepend(servers)
+				)
+				.SwitchTo()
+				.Map(static servers => servers.ToList()),
+			static (appConfig, value) => appConfig.StunServers = value
 		);
 
 		PersistToConfig
@@ -169,6 +167,14 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 
 	private int IndexOfCurrentStunServer()
 	{
-		return _stunServerSource.Items.IndexOf(CurrentStunServer, StringComparer.OrdinalIgnoreCase);
+		for (int index = 0; index < StunServers.Count; index++)
+		{
+			if (StringComparer.OrdinalIgnoreCase.Equals(StunServers[index], CurrentStunServer))
+			{
+				return index;
+			}
+		}
+
+		return -1;
 	}
 }

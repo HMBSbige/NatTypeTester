@@ -3,14 +3,15 @@
   "assignees": [
     "HMBSbige"
   ],
-  "dependencyDashboard": false,
   "extends": [
     "config:recommended",
     ":configMigration",
     ":automergeBranch",
     ":automergeDigest",
-    ":automergeMinor",
-    "schedule:monthly"
+    ":automergeMinor"
+  ],
+  "schedule": [
+    "* 0-3 8-14 * 3"
   ],
   "packageRules": [
     {

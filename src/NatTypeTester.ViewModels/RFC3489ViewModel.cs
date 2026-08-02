@@ -17,7 +17,8 @@ public partial class RFC3489ViewModel : ViewModelBase
 	public RFC3489ViewModel()
 	{
 		TestClassicNatTypeCommand.DisposeWith(Disposables);
-		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
+		_isTestingHelper = TestClassicNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting);
+		_isTestingHelper.DisposeWith(Disposables);
 	}
 
 	[ReactiveCommand]

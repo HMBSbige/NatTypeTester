@@ -30,7 +30,8 @@ public partial class RFC5780ViewModel : ViewModelBase
 	{
 		CancelTestCommand.DisposeWith(Disposables);
 		DiscoveryNatTypeCommand.DisposeWith(Disposables);
-		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting).DisposeWith(Disposables);
+		_isTestingHelper = DiscoveryNatTypeCommand.IsExecuting.ToProperty(this, x => x.IsTesting);
+		_isTestingHelper.DisposeWith(Disposables);
 
 		this.WhenAnyValue(static viewModel => viewModel.TransportType)
 			.Subscribe(transportType => ApplySnapshot(_cachedResults.GetValueOrDefault(transportType)))

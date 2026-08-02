@@ -14,7 +14,7 @@ public static class AppBuilderExtensions
 			},
 			withReactiveUIBuilder: static rxBuilder =>
 			{
-				rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSubject);
+				rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSignal);
 			}
 		);
 	}

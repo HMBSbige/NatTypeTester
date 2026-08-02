@@ -1,5 +1,5 @@
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Signals;
 
 namespace NatTypeTester.Views.Infrastructure;
 
@@ -10,11 +10,11 @@ internal sealed class NotificationExceptionHandler(
 {
 	private IDisposable? _subscription;
 
-	public static Subject<Exception> ExceptionSubject { get; } = new();
+	public static Signal<Exception> ExceptionSignal { get; } = new();
 
 	public void Install()
 	{
-		_subscription ??= ExceptionSubject
+		_subscription ??= ExceptionSignal
 			.ObserveOn(RxSchedulers.MainThreadScheduler)
 			.Subscribe(Handle);
 	}

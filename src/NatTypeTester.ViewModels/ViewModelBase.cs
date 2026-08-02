@@ -2,7 +2,7 @@ namespace NatTypeTester.ViewModels;
 
 public abstract class ViewModelBase : ReactiveObject, IDisposable
 {
-	protected CompositeDisposable Disposables { get; } = new();
+	protected MultipleDisposable Disposables { get; } = new();
 
 	protected void PersistToConfig<T>(
 		IObservable<T> source,
@@ -12,50 +12,61 @@ public abstract class ViewModelBase : ReactiveObject, IDisposable
 
 		source
 			.Skip(1)
-			.DistinctUntilChanged()
-			.Select
+			.Unique()
+			.Map
 			(value => HandleErrors
 				(
-					Observable.FromAsync
-						(ct => configManager.UpdateAsync(config => updateAction(config, value), ct).AsTask())
+					Signal.FromAsync
+					(async cancellationToken =>
+						{
+							await configManager.UpdateAsync(config => updateAction(config, value), cancellationToken);
+							return RxVoid.Default;
+						}
+					)
 				)
 			)
-			.Switch()
+			.SwitchTo()
 			.Subscribe()
 			.DisposeWith(Disposables);
 	}
 
 	protected void Forget(Func<CancellationToken, Task> taskFactory)
 	{
-		HandleErrors(Observable.FromAsync(taskFactory)).Subscribe().DisposeWith(Disposables);
+		HandleErrors
+		(
+			Signal.FromAsync
+			(async cancellationToken =>
+				{
+					await taskFactory(cancellationToken);
+					return RxVoid.Default;
+				}
+			)
+		).Subscribe().DisposeWith(Disposables);
 	}
 
 	protected static IDisposable PollState<T>(Func<T?> getState, Action<T> apply) where T : class
 	{
-		return Observable.Interval(TimeSpan.FromSeconds(0.1), RxSchedulers.TaskpoolScheduler)
+		return Signal.Every(TimeSpan.FromSeconds(0.1), RxSchedulers.TaskpoolScheduler)
 			.ObserveOn(RxSchedulers.MainThreadScheduler)
-			.Subscribe
-			(_ =>
-				{
-					if (getState() is { } state)
-					{
-						apply(state);
-					}
-				}
-			);
+			.Map(_ => getState())
+			.KeepNotNull()
+			.Subscribe(apply);
 	}
 
 	private static IObservable<T> HandleErrors<T>(IObservable<T> source)
 	{
-		return source
-			.Catch<T, OperationCanceledException>(static _ => Observable.Empty<T>())
-			.Catch<T, Exception>
-			(exception =>
+		return source.Recover
+		(
+			static exception =>
+			{
+				if (exception is not OperationCanceledException)
 				{
 					RxState.DefaultExceptionHandler.OnNext(exception);
-					return Observable.Empty<T>();
 				}
-			);
+
+				return Signal.None<T>();
+			}
+		);
 	}
 
 	public virtual void Dispose()

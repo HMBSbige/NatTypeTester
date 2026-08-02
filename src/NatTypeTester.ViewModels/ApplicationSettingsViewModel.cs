@@ -17,7 +17,7 @@ public sealed partial class ApplicationSettingsViewModel : ViewModelBase
 
 		this.WhenAnyValue(static viewModel => viewModel.SelectedLanguage)
 			.Skip(1)
-			.WhereNotNull()
+			.KeepNotNull()
 			.Subscribe
 			(
 				language => ApplyCulture(language.CultureName),
@@ -46,7 +46,7 @@ public sealed partial class ApplicationSettingsViewModel : ViewModelBase
 		PersistToConfig
 		(
 			this.WhenAnyValue(static viewModel => viewModel.SelectedLanguage)
-				.Select(static language => language?.CultureName),
+				.Map(static language => language?.CultureName),
 			static (appConfig, value) => appConfig.Language = value
 		);
 
