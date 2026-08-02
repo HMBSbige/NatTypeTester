@@ -12,7 +12,7 @@
     <PackageVersion Include="ChsBuffer.Avalonia.AppHost" Version="12.0.0-preview.6" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="ReactiveUI" Version="24.0.0" />
+    <PackageVersion Include="ReactiveUI" Version="24.1.0" />
     <PackageVersion Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" Version="12.1.0" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="3.2.0" />
     <PackageVersion Include="Splat.Serilog" Version="20.2.0" />
