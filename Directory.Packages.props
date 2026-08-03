@@ -13,9 +13,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="ReactiveUI" Version="24.1.0" />
-    <PackageVersion Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" Version="12.1.0" />
+    <PackageVersion Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" Version="12.1.1" />
     <PackageVersion Include="ReactiveUI.SourceGenerators" Version="3.2.0" />
-    <PackageVersion Include="Splat.Serilog" Version="20.2.0" />
+    <PackageVersion Include="Splat.Serilog" Version="21.0.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Serilog" Version="4.4.0" />
