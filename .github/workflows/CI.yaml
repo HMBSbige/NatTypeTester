@@ -18,6 +18,7 @@ env:
 jobs:
   check_format:
     name: Check format
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'renovate/') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -29,6 +30,7 @@ jobs:
 
   test:
     name: Run tests
+    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'renovate/') }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
