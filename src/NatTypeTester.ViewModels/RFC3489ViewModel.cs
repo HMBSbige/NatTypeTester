@@ -11,6 +11,8 @@ public partial class RFC3489ViewModel : ViewModelBase
 	[Reactive]
 	public partial string? LocalEnd { get; set; }
 
+	public IReadOnlyList<string> LocalEndPoints => AppLocator.Current.GetRequiredService<ILocalEndPointProvider>().GetLocalEndPoints();
+
 	[ObservableAsProperty]
 	public partial bool IsTesting { get; }
 

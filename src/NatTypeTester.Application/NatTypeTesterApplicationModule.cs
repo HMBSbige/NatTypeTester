@@ -12,6 +12,7 @@ public static class NatTypeTesterApplicationServiceCollectionExtensions
 		services.TryAddKeyedTransient<IDnsClient, DefaultAClient>(AddressFamily.InterNetwork);
 		services.TryAddKeyedTransient<IDnsClient, DefaultAAAAClient>(AddressFamily.InterNetworkV6);
 		services.TryAddTransient<StunTestInputResolver>();
+		services.TryAddSingleton<ILocalEndPointProvider, LocalEndPointProvider>();
 		services.TryAddTransient<IRfc3489AppService, Rfc3489AppService>();
 		services.TryAddTransient<IRfc5780AppService, Rfc5780AppService>();
 		services.TryAddTransient<IStunServerListAppService, StunServerListAppService>();

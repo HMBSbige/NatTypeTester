@@ -20,6 +20,8 @@ public partial class RFC5780ViewModel : ViewModelBase
 	[Reactive]
 	public partial string? LocalEnd { get; set; }
 
+	public IReadOnlyList<string> LocalEndPoints => AppLocator.Current.GetRequiredService<ILocalEndPointProvider>().GetLocalEndPoints();
+
 	[Reactive]
 	public partial TransportType TransportType { get; set; }
 

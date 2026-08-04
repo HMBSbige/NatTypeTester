@@ -57,12 +57,10 @@
                     <TextBlock
                                Text="{Binding LocalEnd, Source={x:Static localization:NatTypeTesterLanguage.Current}}" />
                     <ComboBox IsEditable="True"
+                              ItemsSource="{Binding LocalEndPoints}"
                               PlaceholderText="{Binding LocalEndPlaceholder, Source={x:Static localization:NatTypeTesterLanguage.Current}}"
                               Text="{Binding LocalEnd}"
-                              HorizontalAlignment="Stretch">
-                        <ComboBoxItem Content="0.0.0.0:0" />
-                        <ComboBoxItem Content="[::]:0" />
-                    </ComboBox>
+                              HorizontalAlignment="Stretch" />
                 </StackPanel>
 
                 <StackPanel Spacing="3">
