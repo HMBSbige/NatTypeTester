@@ -14,8 +14,6 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
     <IsAotCompatible>true</IsAotCompatible>
-    <!-- Upstream warnings from ReactiveUI and ReactiveUI.Binding. -->
-    <ReactiveUITrimNoWarn>IL2026;IL2046;IL2104</ReactiveUITrimNoWarn>
   </PropertyGroup>
 
   <PropertyGroup>

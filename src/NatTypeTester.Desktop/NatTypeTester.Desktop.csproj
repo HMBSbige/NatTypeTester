@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
-    <NoWarn>$(NoWarn);$(ReactiveUITrimNoWarn)</NoWarn>
+    <NoWarn>$(NoWarn);IL2046</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
-    <NoWarn>$(NoWarn);IL3051;IL3053</NoWarn>
+    <NoWarn>$(NoWarn);IL3051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
