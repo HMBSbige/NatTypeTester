@@ -29,7 +29,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="DTLS" Version="0.5.0" />
+    <PackageVersion Include="DTLS" Version="0.5.1" />
     <PackageVersion Include="Dns.Net" Version="0.3.0" />
     <PackageVersion Include="dotnetCampus.SourceLocalizations" Version="0.1.1-alpha.5" />
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
