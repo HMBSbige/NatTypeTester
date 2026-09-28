@@ -1,5 +1,3 @@
-using ReactiveUI;
-
 namespace NatTypeTester.ViewModels;
 
 public abstract class ViewModelBase : ReactiveObject, IDisposable

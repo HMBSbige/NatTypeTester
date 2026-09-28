@@ -1,5 +1,3 @@
-using ReactiveUI;
-
 namespace NatTypeTester.ViewModels;
 
 public partial class StunServerSettingsViewModel : ViewModelBase

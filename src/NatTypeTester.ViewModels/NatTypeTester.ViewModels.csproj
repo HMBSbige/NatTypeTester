@@ -2,8 +2,6 @@
 
   <ItemGroup>
     <PackageReference Include="ReactiveUI" />
-    <PackageReference Include="ReactiveUI.Binding" />
-    <PackageReference Include="ReactiveUI.SourceGenerators" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

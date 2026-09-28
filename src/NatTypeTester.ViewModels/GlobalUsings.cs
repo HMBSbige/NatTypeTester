@@ -6,7 +6,7 @@ global using NatTypeTester.Domain.Configuration;
 global using NatTypeTester.Domain.Shared;
 global using NatTypeTester.Domain.Shared.Configuration;
 global using NatTypeTester.Domain.Shared.Localization;
-global using ReactiveUI.Binding;
+global using ReactiveUI;
 global using ReactiveUI.Primitives;
 global using ReactiveUI.Primitives.Disposables;
 global using ReactiveUI.Primitives.Signals;
