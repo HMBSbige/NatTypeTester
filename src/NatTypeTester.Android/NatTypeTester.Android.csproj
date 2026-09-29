@@ -14,10 +14,6 @@
     <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
-    <NoWarn>$(NoWarn);IL2046</NoWarn>
-  </PropertyGroup>
-
   <!-- versionName = MinVer version, versionCode = git commit count (auto-increments with every commit) -->
   <Target Name="SetAndroidVersion" BeforeTargets="_GetAndroidPackageName" DependsOnTargets="MinVer">
     <Exec Command="git rev-list --count HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low">

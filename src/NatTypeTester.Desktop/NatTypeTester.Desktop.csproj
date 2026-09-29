@@ -6,10 +6,6 @@
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
-    <NoWarn>$(NoWarn);IL2046</NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="StaticLink.Avalonia" />
