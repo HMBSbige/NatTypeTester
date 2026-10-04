@@ -4,11 +4,12 @@
     <AssemblyName>NatTypeTester</AssemblyName>
     <ApplicationIcon>..\NatTypeTester.Views\Assets\icon.ico</ApplicationIcon>
     <PublishAot>true</PublishAot>
+    <OptrisStaticGraphicsRequiredBackends>Vulkan;OpenGL;Software</OptrisStaticGraphicsRequiredBackends>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="StaticLink.Avalonia" />
+    <PackageReference Include="Optris.StaticGraphics.Avalonia.Vulkan" />
     <PackageReference Include="StaticLink.Avalonia.Native" />
   </ItemGroup>
 
