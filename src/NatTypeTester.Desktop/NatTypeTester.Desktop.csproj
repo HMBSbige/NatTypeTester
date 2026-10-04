@@ -5,6 +5,7 @@
     <ApplicationIcon>..\NatTypeTester.Views\Assets\icon.ico</ApplicationIcon>
     <PublishAot>true</PublishAot>
     <OptrisStaticGraphicsRequiredBackends>Vulkan;OpenGL;Software</OptrisStaticGraphicsRequiredBackends>
+    <OptrisStaticGraphicsInjectRuntimeGuard>false</OptrisStaticGraphicsInjectRuntimeGuard>
   </PropertyGroup>
 
   <ItemGroup>
