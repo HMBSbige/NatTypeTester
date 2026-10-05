@@ -1,3 +1,6 @@
+using Avalonia.Media;
+using SkiaSharp;
+
 namespace NatTypeTester.Desktop;
 
 internal static class Program
@@ -30,6 +33,23 @@ internal static class Program
 			.UseNatTypeTesterApp()
 			.LogToTrace()
 			.With(new Win32PlatformOptions { RenderingMode = [Win32RenderingMode.AngleEgl, Win32RenderingMode.Vulkan, Win32RenderingMode.Wgl, Win32RenderingMode.Software] })
-			.With(new X11PlatformOptions { RenderingMode = [X11RenderingMode.Vulkan, X11RenderingMode.Egl, X11RenderingMode.Glx, X11RenderingMode.Software] });
+			.With(new X11PlatformOptions { RenderingMode = [X11RenderingMode.Vulkan, X11RenderingMode.Egl, X11RenderingMode.Glx, X11RenderingMode.Software] })
+			.With(new FontManagerOptions { DefaultFamilyName = GetFallbackDefaultFontFamilyName() });
+	}
+
+	/// <summary>
+	/// Skia's fontconfig backend only accepts a match among the first 16 family aliases, so the
+	/// locale-preferred font (e.g. Noto Sans CJK SC under zh_CN) is rejected and SKTypeface.Default
+	/// comes back empty. Avalonia then falls back to the alphabetically first installed family.
+	/// Ask fontconfig for a font covering Latin text instead, which honors the locale.
+	/// </summary>
+	private static string? GetFallbackDefaultFontFamilyName()
+	{
+		if (!string.IsNullOrEmpty(SKTypeface.Default.FamilyName))
+		{
+			return null;
+		}
+
+		return SKFontManager.Default.MatchCharacter('A')?.FamilyName;
 	}
 }
