@@ -22,9 +22,9 @@
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.13" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="DTLS" Version="0.5.1" />
@@ -36,7 +36,7 @@
     <PackageVersion Include="NuGet.Versioning" Version="7.9.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
     <PackageVersion Include="Spectre.Console" Version="0.57.2" />
-    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.13" />
     <PackageVersion Include="ThisAssembly.AssemblyInfo" Version="2.1.6" />
   </ItemGroup>
   <ItemGroup>
