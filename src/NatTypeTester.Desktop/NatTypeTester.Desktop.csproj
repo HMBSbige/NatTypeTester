@@ -4,14 +4,23 @@
     <AssemblyName>NatTypeTester</AssemblyName>
     <ApplicationIcon>..\NatTypeTester.Views\Assets\icon.ico</ApplicationIcon>
     <PublishAot>true</PublishAot>
-    <OptrisStaticGraphicsRequiredBackends>Vulkan;OpenGL;Software</OptrisStaticGraphicsRequiredBackends>
-    <OptrisStaticGraphicsInjectRuntimeGuard>false</OptrisStaticGraphicsInjectRuntimeGuard>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="Optris.StaticGraphics.Avalonia.Vulkan" />
-    <PackageReference Include="StaticLink.Avalonia.Native" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HarfBuzzSharp" />
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(_IsPublishing)' == 'true'">
+    <PackageReference Include="ChsBuffer.Angle.Static" />
+    <PackageReference Include="ChsBuffer.Avalonia.Native.Static" />
+    <PackageReference Include="ChsBuffer.SkiaSharp.Static" />
   </ItemGroup>
 
   <ItemGroup>

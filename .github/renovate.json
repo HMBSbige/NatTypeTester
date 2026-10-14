@@ -20,6 +20,18 @@
       ],
       "groupName": "ReactiveUI",
       "separateMajorMinor": false
+    },
+    {
+      "matchPackageNames": [
+        "ChsBuffer.Avalonia.Native.Static"
+      ],
+      "groupName": "avalonia monorepo"
+    },
+    {
+      "matchPackageNames": [
+        "ChsBuffer.SkiaSharp.Static"
+      ],
+      "groupName": "skiasharp monorepo"
     }
   ],
   "labels": [
