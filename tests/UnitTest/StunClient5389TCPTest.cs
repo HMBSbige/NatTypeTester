@@ -43,12 +43,10 @@ public class StunClient5389TCPTest
 
 		StunResult5389 response = await client.BindingTestAsync(cancellationToken);
 
-		await Assert.That(response.BindingTestResult).IsEqualTo(BindingTestResult.Fail);
-		await Assert.That(response.MappingBehavior).IsEqualTo(MappingBehavior.Unknown);
-		await Assert.That(response.FilteringBehavior).IsEqualTo(FilteringBehavior.Unknown);
-		await Assert.That(response.PublicEndPoint).IsNull();
-		await Assert.That(response.LocalEndPoint).IsNull();
-		await Assert.That(response.OtherEndPoint).IsNull();
+		await Assert.That(response).IsEqualTo(new StunResult5389
+		{
+			BindingTestResult = BindingTestResult.Fail
+		});
 	}
 
 	[Test]
