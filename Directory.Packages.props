@@ -6,7 +6,7 @@
     <PackageVersion Include="Avalonia.Android" Version="12.1.4" />
     <PackageVersion Include="Avalonia.Desktop" Version="12.1.4" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.4" />
-    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.343" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.344" />
     <PackageVersion Include="Optris.StaticGraphics.Avalonia.Vulkan" Version="3.119.4.1" />
     <PackageVersion Include="StaticLink.Avalonia.Native" Version="12.1.3.1" />
   </ItemGroup>
