@@ -3,55 +3,54 @@ await using ServiceProvider serviceProvider = new ServiceCollection()
 	.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
 
 IServiceProvider sp = serviceProvider;
-ILocalizedValues language = NatTypeTesterLanguage.Current;
 
 // Common options
 Option<string> serverOption = new("--server", "-s")
 {
 	Required = true,
 	Recursive = true,
-	Description = language.StunServer.ToString()
+	Description = NatTypeTesterLanguage.Current.StunServer
 };
 Option<string?> localOption = new("--local", "-l")
 {
 	Recursive = true,
-	Description = language.LocalEnd.ToString()
+	Description = NatTypeTesterLanguage.Current.LocalEnd
 };
 Option<string?> proxyOption = new("--proxy")
 {
 	Recursive = true,
-	Description = language.SOCKS5Proxy.ToString()
+	Description = NatTypeTesterLanguage.Current.SOCKS5Proxy
 };
 Option<string?> proxyUserOption = new("--proxy-user")
 {
 	Recursive = true,
-	Description = language.ProxyUsername.ToString()
+	Description = NatTypeTesterLanguage.Current.ProxyUsername
 };
 Option<string?> proxyPasswordOption = new("--proxy-password")
 {
 	Recursive = true,
-	Description = language.ProxyPassword.ToString()
+	Description = NatTypeTesterLanguage.Current.ProxyPassword
 };
 
 // RFC 5780 specific options
 Option<bool> skipCertOption = new("--skip-cert")
 {
-	Description = language.SkipCertificateValidation.ToString(),
+	Description = NatTypeTesterLanguage.Current.SkipCertificateValidation,
 	DefaultValueFactory = _ => false
 };
 Option<TransportType> transportOption = new("--transport", "-t")
 {
-	Description = language.TransportProtocol.ToString(),
+	Description = NatTypeTesterLanguage.Current.TransportProtocol,
 	DefaultValueFactory = _ => TransportType.Udp
 };
 Option<StunTestType> testTypeOption = new("--test-type")
 {
-	Description = language.TestType.ToString(),
+	Description = NatTypeTesterLanguage.Current.TestType,
 	DefaultValueFactory = _ => StunTestType.Combining
 };
 
 // rfc3489 subcommand
-Command rfc3489Command = new("rfc3489", language.RFC3489Description.ToString());
+Command rfc3489Command = new("rfc3489", NatTypeTesterLanguage.Current.RFC3489Description);
 
 rfc3489Command.SetAction
 (async (result, cancellationToken) =>
@@ -61,16 +60,16 @@ rfc3489Command.SetAction
 			StunTestInput input = BuildStunTestInput(result);
 
 			ClassicStunResult result3489 = await AnsiConsole.Status()
-				.StartAsync(language.Testing.ToString(), _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
+				.StartAsync(NatTypeTesterLanguage.Current.Testing, _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
 
 			cancellationToken.ThrowIfCancellationRequested();
 
 			ShowResultTable
 			(
 				[
-					(language.NatType.ToString(), result3489.NatType, "cyan"),
-					(language.PublicEnd.ToString(), result3489.PublicEndPoint, "green"),
-					(language.LocalEnd.ToString(), result3489.LocalEndPoint, "yellow")
+					(NatTypeTesterLanguage.Current.NatType, result3489.NatType, "cyan"),
+					(NatTypeTesterLanguage.Current.PublicEnd, result3489.PublicEndPoint, "green"),
+					(NatTypeTesterLanguage.Current.LocalEnd, result3489.LocalEndPoint, "yellow")
 				]
 			);
 		});
@@ -78,7 +77,7 @@ rfc3489Command.SetAction
 );
 
 // rfc5780 subcommand
-Command rfc5780Command = new("rfc5780", language.RFC5780Description.ToString())
+Command rfc5780Command = new("rfc5780", NatTypeTesterLanguage.Current.RFC5780Description)
 {
 	skipCertOption,
 	transportOption,
@@ -99,7 +98,7 @@ rfc5780Command.SetAction
 			StunResult5389 result5780 = await AnsiConsole.Status()
 				.StartAsync
 				(
-					language.Testing.ToString(),
+					NatTypeTesterLanguage.Current.Testing,
 					_ => testType switch
 					{
 						StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
@@ -118,12 +117,12 @@ rfc5780Command.SetAction
 			{
 				if (testType is StunTestType.Combining or StunTestType.Binding)
 				{
-					yield return (language.BindingTest.ToString(), result5780.BindingTestResult, "cyan");
+					yield return (NatTypeTesterLanguage.Current.BindingTest, result5780.BindingTestResult, "cyan");
 				}
 
 				if (testType is StunTestType.Combining or StunTestType.Mapping)
 				{
-					yield return (language.MappingBehavior.ToString(), result5780.MappingBehavior, "magenta");
+					yield return (NatTypeTesterLanguage.Current.MappingBehavior, result5780.MappingBehavior, "magenta");
 				}
 
 				bool shouldShowFilteringBehavior = testType is StunTestType.Filtering
@@ -131,17 +130,17 @@ rfc5780Command.SetAction
 
 				if (shouldShowFilteringBehavior)
 				{
-					yield return (language.FilteringBehavior.ToString(), result5780.FilteringBehavior, "blue");
+					yield return (NatTypeTesterLanguage.Current.FilteringBehavior, result5780.FilteringBehavior, "blue");
 				}
 
-				yield return (language.PublicEnd.ToString(), result5780.PublicEndPoint, "green");
-				yield return (language.LocalEnd.ToString(), result5780.LocalEndPoint, "yellow");
+				yield return (NatTypeTesterLanguage.Current.PublicEnd, result5780.PublicEndPoint, "green");
+				yield return (NatTypeTesterLanguage.Current.LocalEnd, result5780.LocalEndPoint, "yellow");
 			}
 		});
 	}
 );
 
-RootCommand rootCommand = new(language.AppDescription.ToString())
+RootCommand rootCommand = new(NatTypeTesterLanguage.Current.AppDescription)
 {
 	serverOption,
 	localOption,
@@ -164,7 +163,7 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 
 int ShowError(Exception ex)
 {
-	AnsiConsole.MarkupLineInterpolated($"[red]{language.Error}:[/] {ex.Message}");
+	AnsiConsole.MarkupLineInterpolated($"[red]{NatTypeTesterLanguage.Current.Error}:[/] {ex.Message}");
 	return 1;
 }
 
@@ -177,7 +176,7 @@ async Task<int> ExecuteCommandAsync(Func<Task> action)
 	}
 	catch (OperationCanceledException)
 	{
-		AnsiConsole.MarkupLineInterpolated($"[yellow]{language.Cancelled}[/]");
+		AnsiConsole.MarkupLineInterpolated($"[yellow]{NatTypeTesterLanguage.Current.Cancelled}[/]");
 		return 1;
 	}
 	catch (Exception ex)
@@ -190,8 +189,8 @@ void ShowResultTable(IEnumerable<(string Property, object? Value, string Color)>
 {
 	Table table = new Table()
 		.Border(TableBorder.Rounded)
-		.AddColumn($"[bold]{language.Property.ToString().EscapeMarkup()}[/]")
-		.AddColumn($"[bold]{language.Value.ToString().EscapeMarkup()}[/]");
+		.AddColumn($"[bold]{NatTypeTesterLanguage.Current.Property.ToString().EscapeMarkup()}[/]")
+		.AddColumn($"[bold]{NatTypeTesterLanguage.Current.Value.ToString().EscapeMarkup()}[/]");
 
 	foreach ((string property, object? value, string color) in rows)
 	{

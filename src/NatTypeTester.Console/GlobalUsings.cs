@@ -1,4 +1,3 @@
-global using DotNetCampus.Localizations;
 global using Microsoft.Extensions.DependencyInjection;
 global using NatTypeTester.Application;
 global using NatTypeTester.Application.Contracts;
