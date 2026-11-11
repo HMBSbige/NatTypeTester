@@ -45,6 +45,6 @@
     <PackageVersion Include="ThisAssembly.AssemblyInfo" Version="2.1.6" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.75.0" />
+    <PackageVersion Include="TUnit" Version="1.83.0" />
   </ItemGroup>
 </Project>
