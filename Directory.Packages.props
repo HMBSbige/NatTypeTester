@@ -9,7 +9,7 @@
     <PackageVersion Include="ChsBuffer.Angle.Static" Version="2.1.27548.1" />
     <PackageVersion Include="ChsBuffer.Avalonia.Native.Static" Version="12.1.4.1" />
     <PackageVersion Include="ChsBuffer.SkiaSharp.Static" Version="4.153.1.1" />
-    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.344" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.345" />
     <PackageVersion Include="HarfBuzzSharp" Version="14.2.1.301" />
     <PackageVersion Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.2.1.301" />
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
