@@ -23,15 +23,14 @@ public class XorMappedTest
 	[Test]
 	[Arguments(IpFamily.IPv4, "192.0.2.1", "0001A147E112A643")]
 	[Arguments(IpFamily.IPv6, "2001:db8:1234:5678:11:2233:4455:6677", "0002A1470113A9FAA5D3F179BC25F4B5BED2B9D9")]
-	public async Task TestXorMapped(IpFamily family, string address, string encoded)
+	public async Task TestXorMapped(IpFamily family, IPAddress address, string encoded)
 	{
-		IPAddress expectedAddress = IPAddress.Parse(address);
 		byte[] expectedBytes = Convert.FromHexString(encoded);
 		XorMappedAddressStunAttributeValue value = new(MagicCookieAndTransactionId)
 		{
 			Port = Port,
 			Family = family,
-			Address = expectedAddress
+			Address = address
 		};
 		byte[] buffer = new byte[expectedBytes.Length];
 
@@ -46,7 +45,7 @@ public class XorMappedTest
 		{
 			await Assert.That(value.Port).IsEqualTo(Port);
 			await Assert.That(value.Family).IsEqualTo(family);
-			await Assert.That(value.Address).IsEqualTo(expectedAddress);
+			await Assert.That(value.Address).IsEqualTo(address);
 		}
 
 		buffer.AsSpan().Clear();
