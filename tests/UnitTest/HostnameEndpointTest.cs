@@ -6,8 +6,8 @@ public class HostnameEndpointTest
 {
 	[Test]
 	[Arguments(@"www.google.com", ushort.MinValue)]
-	[Arguments(@"1.1.1.1", (ushort)1)]
-	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]", (ushort)1919)]
+	[Arguments(@"1.1.1.1", 1)]
+	[Arguments(@"[2001:db8:1234:5678:11:2233:4455:6677]", 1919)]
 	public async Task IsTrue(string host, ushort port)
 	{
 		string str = $@"{host}:{port}";
@@ -44,8 +44,8 @@ public class HostnameEndpointTest
 	}
 
 	[Test]
-	[Arguments("stun.example.com", (ushort)5349)]
-	[Arguments("stun.example.com:3478", (ushort)3478)]
+	[Arguments("stun.example.com", 5349)]
+	[Arguments("stun.example.com:3478", 3478)]
 	public async Task TestTlsDefaultPort(string str, ushort expectedPort)
 	{
 		await Assert.That(StunServer.TryParse(str, out StunServer? server, StunServer.DefaultTlsPort)).IsTrue();
