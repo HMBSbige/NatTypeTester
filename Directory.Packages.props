@@ -38,7 +38,7 @@
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
     <PackageVersion Include="HMBSbige.UpdateChecker" Version="11.0.0" />
     <PackageVersion Include="MinVer" Version="8.0.0" />
-    <PackageVersion Include="NuGet.Versioning" Version="7.9.0" />
+    <PackageVersion Include="NuGet.Versioning" Version="8.0.0" />
     <PackageVersion Include="Socks5" Version="1.1.0" />
     <PackageVersion Include="Spectre.Console" Version="0.57.2" />
     <PackageVersion Include="System.CommandLine" Version="2.0.15" />
