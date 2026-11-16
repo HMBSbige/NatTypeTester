@@ -2,7 +2,6 @@ using STUN.Enums;
 using STUN.Messages;
 using STUN.StunResult;
 using STUN.Utils;
-using System.Diagnostics;
 using System.Net;
 
 namespace STUN.Client;
@@ -20,19 +19,20 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 	/// </summary>
 	public ClassicStunResult Result { get; } = new();
 
-	private enum Phase
+	private closed record Phase
 	{
-		Test1,
-		Test2,
-		Test1_2,
-		Test3,
-		Done
+		public sealed record Test1 : Phase;
+
+		public sealed record Test2(IPEndPoint Test1Remote, IPEndPoint MappedAddress1, IPEndPoint ChangedAddress) : Phase;
+
+		public sealed record Test1_2(IPEndPoint Test1Remote, IPEndPoint MappedAddress1) : Phase;
+
+		public sealed record Test3(IPEndPoint Test1Remote, IPEndPoint MappedAddress1) : Phase;
+
+		public sealed record Done : Phase;
 	}
 
-	private Phase _phase;
-	private IPEndPoint? _changedAddress;
-	private IPEndPoint? _mappedAddress1;
-	private IPEndPoint? _test1Remote;
+	private Phase _phase = new Phase.Test1();
 
 	/// <summary>
 	/// Creates the initial query action to begin the RFC 3489 NAT type discovery process.
@@ -40,7 +40,7 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 	/// <returns>The first STUN discovery action to send.</returns>
 	public StunDiscoveryAction CreateQuery()
 	{
-		_phase = Phase.Test1;
+		_phase = new Phase.Test1();
 		return CreateClassicBindingRequest(server);
 	}
 
@@ -54,10 +54,10 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 		return _phase switch
 		{
 			Phase.Test1 => HandleTest1(response),
-			Phase.Test2 => HandleTest2(response),
-			Phase.Test1_2 => HandleTest1_2(response),
-			Phase.Test3 => HandleTest3(response),
-			_ => null
+			Phase.Test2 phase => HandleTest2(phase, response),
+			Phase.Test1_2 phase => HandleTest1_2(phase, response),
+			Phase.Test3 phase => HandleTest3(phase, response),
+			Phase.Done => null
 		};
 	}
 
@@ -66,30 +66,29 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 		if (response is null)
 		{
 			Result.NatType = NatType.UdpBlocked;
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
 		Result.LocalEndPoint = response.Local;
-		_test1Remote = response.Remote;
 
-		_mappedAddress1 = response.Message.GetMappedAddressAttribute();
-		_changedAddress = response.Message.GetChangedAddressAttribute();
+		IPEndPoint? mappedAddress1 = response.Message.GetMappedAddressAttribute();
+		IPEndPoint? changedAddress = response.Message.GetChangedAddressAttribute();
 
-		Result.PublicEndPoint = _mappedAddress1;// 显示 test I 得到的映射地址
+		Result.PublicEndPoint = mappedAddress1;// 显示 test I 得到的映射地址
 
 		// 某些单 IP 服务器的迷惑操作
-		if (_mappedAddress1 is null || _changedAddress is null
-									|| Equals(_changedAddress.Address, response.Remote.Address)
-									|| _changedAddress.Port == response.Remote.Port)
+		if (mappedAddress1 is null || changedAddress is null
+									|| Equals(changedAddress.Address, response.Remote.Address)
+									|| changedAddress.Port == response.Remote.Port)
 		{
 			Result.NatType = NatType.UnsupportedServer;
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
 		// Test II
-		_phase = Phase.Test2;
+		_phase = new Phase.Test2(response.Remote, mappedAddress1, changedAddress);
 		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
@@ -103,35 +102,30 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 		};
 	}
 
-	private StunDiscoveryAction? HandleTest2(StunResponse? response)
+	private StunDiscoveryAction? HandleTest2(Phase.Test2 phase, StunResponse? response)
 	{
-		if (_test1Remote is null || _changedAddress is null)
-		{
-			throw new UnreachableException();
-		}
-
 		IPEndPoint? mappedAddress2 = response?.Message.GetMappedAddressAttribute();
 
 		if (response is not null)
 		{
 			// 有些单 IP 服务器并不能测 NAT 类型
-			if (Equals(_test1Remote.Address, response.Remote.Address) || _test1Remote.Port == response.Remote.Port)
+			if (Equals(phase.Test1Remote.Address, response.Remote.Address) || phase.Test1Remote.Port == response.Remote.Port)
 			{
 				Result.NatType = NatType.UnsupportedServer;
 				Result.PublicEndPoint = mappedAddress2;
-				_phase = Phase.Done;
+				_phase = new Phase.Done();
 				return null;
 			}
 		}
 
 		// is Public IP == link's IP?
-		if (Equals(_mappedAddress1, Result.LocalEndPoint))
+		if (Equals(phase.MappedAddress1, Result.LocalEndPoint))
 		{
 			// No NAT
 			if (response is null)
 			{
 				Result.NatType = NatType.SymmetricUdpFirewall;
-				Result.PublicEndPoint = _mappedAddress1;
+				Result.PublicEndPoint = phase.MappedAddress1;
 			}
 			else
 			{
@@ -139,7 +133,7 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 				Result.PublicEndPoint = mappedAddress2;
 			}
 
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
@@ -148,36 +142,36 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 		{
 			Result.NatType = NatType.FullCone;
 			Result.PublicEndPoint = mappedAddress2;
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
 		// Test I(#2) - send to changedAddress
-		_phase = Phase.Test1_2;
-		return CreateClassicBindingRequest(_changedAddress);
+		_phase = new Phase.Test1_2(phase.Test1Remote, phase.MappedAddress1);
+		return CreateClassicBindingRequest(phase.ChangedAddress);
 	}
 
-	private StunDiscoveryAction? HandleTest1_2(StunResponse? response)
+	private StunDiscoveryAction? HandleTest1_2(Phase.Test1_2 phase, StunResponse? response)
 	{
 		IPEndPoint? mappedAddress12 = response?.Message.GetMappedAddressAttribute();
 
 		if (mappedAddress12 is null)
 		{
 			Result.NatType = NatType.Unknown;
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
-		if (!Equals(mappedAddress12, _mappedAddress1))
+		if (!Equals(mappedAddress12, phase.MappedAddress1))
 		{
 			Result.NatType = NatType.Symmetric;
 			Result.PublicEndPoint = mappedAddress12;
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
 		// Test III
-		_phase = Phase.Test3;
+		_phase = new Phase.Test3(phase.Test1Remote, phase.MappedAddress1);
 		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
@@ -191,26 +185,26 @@ public class Stun3489NatTypeDiscovery(IPEndPoint server)
 		};
 	}
 
-	private StunDiscoveryAction? HandleTest3(StunResponse? response)
+	private StunDiscoveryAction? HandleTest3(Phase.Test3 phase, StunResponse? response)
 	{
 		if (response is not null)
 		{
 			IPEndPoint? mappedAddress3 = response.Message.GetMappedAddressAttribute();
 
 			if (mappedAddress3 is not null
-				&& Equals(response.Remote.Address, _test1Remote?.Address)
-				&& response.Remote.Port != _test1Remote.Port)
+				&& Equals(response.Remote.Address, phase.Test1Remote.Address)
+				&& response.Remote.Port != phase.Test1Remote.Port)
 			{
 				Result.NatType = NatType.RestrictedCone;
 				Result.PublicEndPoint = mappedAddress3;
-				_phase = Phase.Done;
+				_phase = new Phase.Done();
 				return null;
 			}
 		}
 
 		Result.NatType = NatType.PortRestrictedCone;
-		Result.PublicEndPoint = _mappedAddress1;
-		_phase = Phase.Done;
+		Result.PublicEndPoint = phase.MappedAddress1;
+		_phase = new Phase.Done();
 		return null;
 	}
 

@@ -61,18 +61,9 @@ public class HostnameEndpoint
 		string host = s[..hostLength];
 		UriHostNameType type = Uri.CheckHostName(host);
 
-		switch (type)
+		if (type is not (UriHostNameType.Dns or UriHostNameType.IPv4 or UriHostNameType.IPv6))
 		{
-			case UriHostNameType.Dns:
-			case UriHostNameType.IPv4:
-			case UriHostNameType.IPv6:
-			{
-				break;
-			}
-			default:
-			{
-				return false;
-			}
+			return false;
 		}
 
 		if (hostLength == s.Length || ushort.TryParse(s.AsSpan(hostLength + 1), out defaultPort))

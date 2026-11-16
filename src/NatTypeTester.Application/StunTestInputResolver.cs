@@ -65,11 +65,7 @@ internal class StunTestInputResolver(IServiceProvider serviceProvider)
 
 		IPAddress serverIp = await dnsClient.QueryAsync(server.Hostname, cancellationToken);
 
-		localEndPoint ??= new IPEndPoint
-		(
-			serverIp.AddressFamily is AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any,
-			IPEndPoint.MinPort
-		);
+		localEndPoint ??= new IPEndPoint(serverIp.AddressFamily is AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, IPEndPoint.MinPort);
 
 		return (serverIp, localEndPoint);
 	}

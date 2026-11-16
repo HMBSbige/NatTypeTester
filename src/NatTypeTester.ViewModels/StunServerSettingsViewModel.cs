@@ -102,22 +102,12 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 
 		if (validServers.Count is 0)
 		{
-			notificationService.Show
-			(
-				NatTypeTesterLanguage.Current.StunServerList,
-				NatTypeTesterLanguage.Current.StunServerListEmpty,
-				AppNotificationType.Error
-			);
+			notificationService.Show(NatTypeTesterLanguage.Current.StunServerList, NatTypeTesterLanguage.Current.StunServerListEmpty, AppNotificationType.Error);
 			return;
 		}
 
 		ReplaceStunServers(validServers);
-		notificationService.Show
-		(
-			NatTypeTesterLanguage.Current.StunServerList,
-			NatTypeTesterLanguage.Current.StunServerListLoaded.ToString(validServers.Count),
-			AppNotificationType.Success
-		);
+		notificationService.Show(NatTypeTesterLanguage.Current.StunServerList, NatTypeTesterLanguage.Current.StunServerListLoaded.ToString(validServers.Count), AppNotificationType.Success);
 	}
 
 	private async Task LoadConfigAsync(CancellationToken cancellationToken)
@@ -160,7 +150,7 @@ public partial class StunServerSettingsViewModel : ViewModelBase
 
 		PersistToConfig
 		(
-			this.WhenChanged(static viewModel => viewModel.StunServerListUri!),
+			this.WhenChanged(static viewModel => viewModel.StunServerListUri),
 			static (appConfig, value) => appConfig.StunServerListUri = value
 		);
 	}

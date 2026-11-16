@@ -37,9 +37,9 @@ public sealed partial class ConnectionSettingsViewModel : ViewModelBase
 			this.WhenChanged
 			(
 				static viewModel => viewModel.ProxyType,
-				static viewModel => viewModel.ProxyServer!,
-				static viewModel => viewModel.ProxyUser!,
-				static viewModel => viewModel.ProxyPassword!,
+				static viewModel => viewModel.ProxyServer,
+				static viewModel => viewModel.ProxyUser,
+				static viewModel => viewModel.ProxyPassword,
 				static viewModel => viewModel.SkipCertificateValidation
 			),
 			static (appConfig, value) =>

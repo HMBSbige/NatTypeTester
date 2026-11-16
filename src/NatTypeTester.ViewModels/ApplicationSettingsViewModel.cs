@@ -15,7 +15,7 @@ public sealed partial class ApplicationSettingsViewModel : ViewModelBase
 	{
 		OpenConfigDirectoryCommand.DisposeWith(Disposables);
 
-		this.WhenChanged(static viewModel => viewModel.SelectedLanguage!)
+		this.WhenChanged(static viewModel => viewModel.SelectedLanguage)
 			.Skip(1)
 			.KeepNotNull()
 			.Subscribe
@@ -45,7 +45,7 @@ public sealed partial class ApplicationSettingsViewModel : ViewModelBase
 
 		PersistToConfig
 		(
-			this.WhenChanged(static viewModel => viewModel.SelectedLanguage!)
+			this.WhenChanged(static viewModel => viewModel.SelectedLanguage)
 				.Map(static language => language?.CultureName),
 			static (appConfig, value) => appConfig.Language = value
 		);

@@ -54,28 +54,14 @@ public abstract class AddressStunAttributeValue : IStunAttributeValue
 	/// <returns><see langword="true"/> if the value was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public virtual bool TryParse(ReadOnlySpan<byte> buffer)
 	{
-		int length = 4;
-
-		if (buffer.Length < length)
+		if (buffer.Length < 4)
 		{
 			return false;
 		}
 
 		Family = (IpFamily)buffer[1];
 
-		switch (Family)
-		{
-			case IpFamily.IPv4:
-				length += 4;
-				break;
-			case IpFamily.IPv6:
-				length += 16;
-				break;
-			default:
-				return false;
-		}
-
-		if (buffer.Length != length)
+		if ((Family, buffer.Length) is not ((IpFamily.IPv4, 4 + 4) or (IpFamily.IPv6, 4 + 16)))
 		{
 			return false;
 		}

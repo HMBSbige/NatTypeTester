@@ -2,7 +2,6 @@ using STUN.Enums;
 using STUN.Messages;
 using STUN.StunResult;
 using STUN.Utils;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
@@ -29,19 +28,23 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		Full
 	}
 
-	private enum Phase
+	private closed record Phase
 	{
-		BindingTest,
-		FilteringTest2,
-		FilteringTest3,
-		MappingTest2,
-		MappingTest3,
-		Done
+		public sealed record BindingTest : Phase;
+
+		public sealed record FilteringTest2(IPEndPoint OtherEndPoint) : Phase;
+
+		public sealed record FilteringTest3(IPEndPoint OtherEndPoint) : Phase;
+
+		public sealed record MappingTest2(IPEndPoint OtherEndPoint) : Phase;
+
+		public sealed record MappingTest3(IPEndPoint MappingTest2PublicEndPoint) : Phase;
+
+		public sealed record Done : Phase;
 	}
 
 	private Scope _scope;
-	private Phase _phase;
-	private IPEndPoint? _mappingTest2PublicEndPoint;
+	private Phase _phase = new Phase.BindingTest();
 
 	/// <summary>
 	/// Creates the initial query action to perform a full NAT behavior discovery (binding, filtering, and mapping tests).
@@ -50,7 +53,7 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 	public StunDiscoveryAction CreateQuery()
 	{
 		_scope = Scope.Full;
-		_phase = Phase.BindingTest;
+		_phase = new Phase.BindingTest();
 		return CreateBindingRequest(server);
 	}
 
@@ -61,7 +64,7 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 	public StunDiscoveryAction CreateBindingTest()
 	{
 		_scope = Scope.BindingOnly;
-		_phase = Phase.BindingTest;
+		_phase = new Phase.BindingTest();
 		return CreateBindingRequest(server);
 	}
 
@@ -72,7 +75,7 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 	public StunDiscoveryAction CreateMappingBehaviorTest()
 	{
 		_scope = Scope.Mapping;
-		_phase = Phase.BindingTest;
+		_phase = new Phase.BindingTest();
 		return CreateBindingRequest(server);
 	}
 
@@ -83,7 +86,7 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 	public StunDiscoveryAction CreateFilteringBehaviorTest()
 	{
 		_scope = Scope.Filtering;
-		_phase = Phase.BindingTest;
+		_phase = new Phase.BindingTest();
 		return CreateBindingRequest(server);
 	}
 
@@ -97,11 +100,11 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		return _phase switch
 		{
 			Phase.BindingTest => HandleBindingTest(response),
-			Phase.FilteringTest2 => HandleFilteringTest2(response),
-			Phase.FilteringTest3 => HandleFilteringTest3(response),
-			Phase.MappingTest2 => HandleMappingTest2(response),
-			Phase.MappingTest3 => HandleMappingTest3(response),
-			_ => null
+			Phase.FilteringTest2 phase => HandleFilteringTest2(phase.OtherEndPoint, response),
+			Phase.FilteringTest3 phase => HandleFilteringTest3(phase.OtherEndPoint, response),
+			Phase.MappingTest2 phase => HandleMappingTest2(phase.OtherEndPoint, response),
+			Phase.MappingTest3 phase => HandleMappingTest3(phase.MappingTest2PublicEndPoint, response),
+			Phase.Done => null
 		};
 	}
 
@@ -129,10 +132,11 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 
 		if (_scope is Scope.BindingOnly || Result.BindingTestResult is not BindingTestResult.Success)
 		{
-			goto end;
+			_phase = new Phase.Done();
+			return null;
 		}
 
-		if (!HasValidOtherAddress(Result.OtherEndPoint))
+		if (!HasValidOtherAddress(otherAddress))
 		{
 			if (_scope is Scope.Filtering or Scope.Full)
 			{
@@ -144,27 +148,21 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 				Result.MappingBehavior = MappingBehavior.UnsupportedServer;
 			}
 
-			goto end;
+			_phase = new Phase.Done();
+			return null;
 		}
 
 		if (_scope is Scope.Filtering or Scope.Full)
 		{
-			return TransitionToFilteringTest2();
+			return TransitionToFilteringTest2(otherAddress);
 		}
 
-		if (_scope is Scope.Mapping)
-		{
-			return TransitionToMappingOrDone();
-		}
-
-	end:
-		_phase = Phase.Done;
-		return null;
+		return TransitionToMappingOrDone(otherAddress);
 	}
 
-	private StunDiscoveryAction TransitionToFilteringTest2()
+	private StunDiscoveryAction TransitionToFilteringTest2(IPEndPoint otherEndPoint)
 	{
-		_phase = Phase.FilteringTest2;
+		_phase = new Phase.FilteringTest2(otherEndPoint);
 		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
@@ -177,18 +175,18 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		};
 	}
 
-	private StunDiscoveryAction? HandleFilteringTest2(StunResponse? response)
+	private StunDiscoveryAction? HandleFilteringTest2(IPEndPoint otherEndPoint, StunResponse? response)
 	{
 		if (response is not null)
 		{
-			Result.FilteringBehavior = Equals(response.Remote, Result.OtherEndPoint)
+			Result.FilteringBehavior = Equals(response.Remote, otherEndPoint)
 				? FilteringBehavior.EndpointIndependent
 				: FilteringBehavior.UnsupportedServer;
-			return TransitionAfterFiltering();
+			return TransitionAfterFiltering(otherEndPoint);
 		}
 
 		// Test III
-		_phase = Phase.FilteringTest3;
+		_phase = new Phase.FilteringTest3(otherEndPoint);
 		StunMessage5389 message = new()
 		{
 			StunMessageType = StunMessageType.BindingRequest,
@@ -201,7 +199,7 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		};
 	}
 
-	private StunDiscoveryAction? HandleFilteringTest3(StunResponse? response)
+	private StunDiscoveryAction? HandleFilteringTest3(IPEndPoint otherEndPoint, StunResponse? response)
 	{
 		if (response is null)
 		{
@@ -216,69 +214,59 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 			Result.FilteringBehavior = FilteringBehavior.UnsupportedServer;
 		}
 
-		return TransitionAfterFiltering();
+		return TransitionAfterFiltering(otherEndPoint);
 	}
 
-	private StunDiscoveryAction? TransitionAfterFiltering()
+	private StunDiscoveryAction? TransitionAfterFiltering(IPEndPoint otherEndPoint)
 	{
 		if (_scope is Scope.Full && Result.FilteringBehavior is not FilteringBehavior.UnsupportedServer)
 		{
-			return TransitionToMappingOrDone();
+			return TransitionToMappingOrDone(otherEndPoint);
 		}
 
-		_phase = Phase.Done;
+		_phase = new Phase.Done();
 		return null;
 	}
 
-	private StunDiscoveryAction? TransitionToMappingOrDone()
+	private StunDiscoveryAction? TransitionToMappingOrDone(IPEndPoint otherEndPoint)
 	{
 		if (Equals(Result.PublicEndPoint, Result.LocalEndPoint))
 		{
 			Result.MappingBehavior = MappingBehavior.Direct;// or Endpoint-Independent
-			_phase = Phase.Done;
+			_phase = new Phase.Done();
 			return null;
 		}
 
 		// Mapping test II: send to (otherIP, serverPort)
-		_phase = Phase.MappingTest2;
-		Debug.Assert(Result.OtherEndPoint is not null);
-		IPEndPoint target = new(Result.OtherEndPoint.Address, server.Port);
+		_phase = new Phase.MappingTest2(otherEndPoint);
+		IPEndPoint target = new(otherEndPoint.Address, server.Port);
 		return CreateBindingRequest(target);
 	}
 
-	private StunDiscoveryAction? HandleMappingTest2(StunResponse? response)
+	private StunDiscoveryAction? HandleMappingTest2(IPEndPoint otherEndPoint, StunResponse? response)
 	{
 		IPEndPoint? mappedAddress = response?.Message.GetXorMappedAddressAttribute();
 
 		if (mappedAddress is null)
 		{
 			Result.MappingBehavior = MappingBehavior.Fail;
-			goto end;
 		}
-
-		if (Equals(mappedAddress, Result.PublicEndPoint))
+		else if (Equals(mappedAddress, Result.PublicEndPoint))
 		{
 			Result.MappingBehavior = MappingBehavior.EndpointIndependent;
-			goto end;
 		}
-
-		_mappingTest2PublicEndPoint = mappedAddress;
-
-		// Mapping test III: send to otherEndPoint
-		_phase = Phase.MappingTest3;
-		if (Result.OtherEndPoint is null)
+		else
 		{
-			throw new InvalidOperationException("OTHER-ADDRESS is required before mapping test III.");
+			// Mapping test III: send to otherEndPoint
+			_phase = new Phase.MappingTest3(mappedAddress);
+			return CreateBindingRequest(otherEndPoint);
 		}
 
-		return CreateBindingRequest(Result.OtherEndPoint);
-
-	end:
-		_phase = Phase.Done;
+		_phase = new Phase.Done();
 		return null;
 	}
 
-	private StunDiscoveryAction? HandleMappingTest3(StunResponse? response)
+	private StunDiscoveryAction? HandleMappingTest3(IPEndPoint mappingTest2PublicEndPoint, StunResponse? response)
 	{
 		IPEndPoint? mappedAddress = response?.Message.GetXorMappedAddressAttribute();
 
@@ -288,12 +276,12 @@ public class Stun5389NatBehaviorDiscovery(IPEndPoint server)
 		}
 		else
 		{
-			Result.MappingBehavior = Equals(mappedAddress, _mappingTest2PublicEndPoint)
+			Result.MappingBehavior = Equals(mappedAddress, mappingTest2PublicEndPoint)
 				? MappingBehavior.AddressDependent
 				: MappingBehavior.AddressAndPortDependent;
 		}
 
-		_phase = Phase.Done;
+		_phase = new Phase.Done();
 		return null;
 	}
 

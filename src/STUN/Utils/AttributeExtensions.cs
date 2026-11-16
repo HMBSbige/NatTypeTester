@@ -94,8 +94,7 @@ public static class AttributeExtensions
 			return null;
 		}
 
-		MappedAddressStunAttributeValue mapped = (MappedAddressStunAttributeValue)mappedAddressAttribute.Value;
-		return ToEndPoint(mapped);
+		return ToEndPoint<MappedAddressStunAttributeValue>(mappedAddressAttribute);
 	}
 
 	/// <summary>
@@ -112,8 +111,7 @@ public static class AttributeExtensions
 			return null;
 		}
 
-		ChangedAddressStunAttributeValue address = (ChangedAddressStunAttributeValue)changedAddressAttribute.Value;
-		return ToEndPoint(address);
+		return ToEndPoint<ChangedAddressStunAttributeValue>(changedAddressAttribute);
 	}
 
 	/// <summary>
@@ -133,8 +131,7 @@ public static class AttributeExtensions
 			return null;
 		}
 
-		AddressStunAttributeValue mapped = (AddressStunAttributeValue)mappedAddressAttribute.Value;
-		return ToEndPoint(mapped);
+		return ToEndPoint<AddressStunAttributeValue>(mappedAddressAttribute);
 	}
 
 	/// <summary>
@@ -154,14 +151,16 @@ public static class AttributeExtensions
 			return null;
 		}
 
-		AddressStunAttributeValue address = (AddressStunAttributeValue)addressAttribute.Value;
-		return ToEndPoint(address);
+		return ToEndPoint<AddressStunAttributeValue>(addressAttribute);
 	}
 
-	private static IPEndPoint ToEndPoint(AddressStunAttributeValue value)
+	private static IPEndPoint ToEndPoint<T>(StunAttribute attribute) where T : AddressStunAttributeValue
 	{
-		return value.Address is { } address
-			? new IPEndPoint(address, value.Port)
-			: throw new InvalidOperationException(@"STUN address attribute is missing IP address.");
+		return attribute.Value switch
+		{
+			T { Address: { } address } value => new IPEndPoint(address, value.Port),
+			T => throw new InvalidOperationException(@"STUN address attribute is missing IP address."),
+			_ => throw new InvalidOperationException($@"STUN attribute {attribute.Type} has a malformed value.")
+		};
 	}
 }

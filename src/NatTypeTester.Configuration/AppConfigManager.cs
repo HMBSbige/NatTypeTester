@@ -78,12 +78,7 @@ public sealed class AppConfigManager(IOptions<AppConfigStorageOptions> storageOp
 			else
 			{
 				await using FileStream stream = File.OpenRead(_configPath);
-				config = await JsonSerializer.DeserializeAsync
-				(
-					stream,
-					AppConfigJsonContext.Default.AppConfig,
-					cancellationToken
-				) ?? new AppConfig();
+				config = await JsonSerializer.DeserializeAsync(stream, AppConfigJsonContext.Default.AppConfig, cancellationToken) ?? new AppConfig();
 			}
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

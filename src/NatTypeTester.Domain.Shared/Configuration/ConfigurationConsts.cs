@@ -4,11 +4,7 @@ public static class ConfigurationConsts
 {
 	private const string ConfigFileName = "config.json";
 
-	public static string ConfigDirectory => Path.Combine
-	(
-		Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-		nameof(NatTypeTester)
-	);
+	public static string ConfigDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(NatTypeTester));
 
 	public static string ConfigFilePath => Path.Combine(ConfigDirectory, ConfigFileName);
 

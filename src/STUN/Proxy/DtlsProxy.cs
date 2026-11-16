@@ -13,7 +13,7 @@ namespace STUN.Proxy;
 /// <param name="skipCertificateValidation">Whether to skip server certificate validation.</param>
 public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertificateValidation = false) : IUdpProxy
 {
-	private DtlsTransport? _dtlsTransport;
+	private (DtlsTransport Transport, UdpProxyDatagramTransport Datagram)? _dtlsSession;
 
 	/// <inheritdoc />
 	public Socket Client => innerProxy.Client;
@@ -27,7 +27,7 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 	/// <inheritdoc />
 	public async ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 	{
-		if (_dtlsTransport is null)
+		if (_dtlsSession is not { Transport: var transport })
 		{
 			UdpProxyDatagramTransport datagram = new(innerProxy, (IPEndPoint)remoteEP);
 
@@ -39,19 +39,19 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 					: default
 			};
 
-			_dtlsTransport = await DtlsTransport.CreateClientAsync(datagram, options, cancellationToken);
-			await _dtlsTransport.HandshakeAsync(cancellationToken);
+			transport = await DtlsTransport.CreateClientAsync(datagram, options, cancellationToken);
+			_dtlsSession = (transport, datagram);
+			await transport.HandshakeAsync(cancellationToken);
 		}
 
-		await _dtlsTransport.SendAsync(buffer, cancellationToken);
+		await transport.SendAsync(buffer, cancellationToken);
 		return buffer.Length;
 	}
 
 	/// <inheritdoc />
 	public async ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
 	{
-		DtlsTransport session = _dtlsTransport ?? throw new InvalidOperationException("DTLS session has not been established.");
-		UdpProxyDatagramTransport datagram = (UdpProxyDatagramTransport)session.InnerTransport;
+		(DtlsTransport session, UdpProxyDatagramTransport datagram) = _dtlsSession ?? throw new InvalidOperationException("DTLS session has not been established.");
 
 		int received = await session.ReceiveAsync(buffer, cancellationToken);
 
@@ -106,12 +106,12 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 
 	private async ValueTask CloseDtlsTransportAsync(CancellationToken cancellationToken = default)
 	{
-		if (_dtlsTransport is not { } session)
+		if (_dtlsSession is not { Transport: var session })
 		{
 			return;
 		}
 
-		_dtlsTransport = null;
+		_dtlsSession = null;
 
 		try
 		{
@@ -125,12 +125,12 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 
 	private void DisposeDtlsTransport()
 	{
-		if (_dtlsTransport is not { } session)
+		if (_dtlsSession is not { Transport: var session })
 		{
 			return;
 		}
 
-		_dtlsTransport = null;
+		_dtlsSession = null;
 		session.Dispose();
 	}
 

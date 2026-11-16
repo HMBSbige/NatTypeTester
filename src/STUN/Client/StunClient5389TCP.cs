@@ -109,15 +109,10 @@ public class StunClient5389TCP : IStunClient5389
 				StunMessage5389 message = new();
 				bool success = await ReadPipeAsync(message, pipe.Input);
 
-				if (success && message.IsSameTransaction(sendMessage))
+				if (success && message.IsSameTransaction(sendMessage) && _proxy.CurrentLocalEndPoint is { } local)
 				{
-					IPEndPoint? local = _proxy.CurrentLocalEndPoint;
-
-					if (local is not null)
-					{
-						_lastLocalEndPoint = local;
-						return new StunResponse(message, remote, local);
-					}
+					_lastLocalEndPoint = local;
+					return new StunResponse(message, remote, local);
 				}
 			}
 			finally

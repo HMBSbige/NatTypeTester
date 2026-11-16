@@ -4,9 +4,7 @@ public abstract class ViewModelBase : ReactiveObject, IDisposable
 {
 	protected MultipleDisposable Disposables { get; } = new();
 
-	protected void PersistToConfig<T>(
-		IObservable<T> source,
-		Action<AppConfig, T> updateAction)
+	protected void PersistToConfig<T>(IObservable<T> source, Action<AppConfig, T> updateAction)
 	{
 		IAppConfigManager configManager = AppLocator.Current.GetRequiredService<IAppConfigManager>();
 

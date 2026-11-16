@@ -3,10 +3,7 @@ using ReactiveUI.Primitives.Signals;
 
 namespace NatTypeTester.Views.Infrastructure;
 
-internal sealed class NotificationExceptionHandler(
-	INotificationService notificationService,
-	ILogger<NotificationExceptionHandler> logger
-) : IDisposable
+internal sealed class NotificationExceptionHandler(INotificationService notificationService, ILogger<NotificationExceptionHandler> logger) : IDisposable
 {
 	private IDisposable? _subscription;
 
@@ -33,11 +30,6 @@ internal sealed class NotificationExceptionHandler(
 		}
 
 		logger.LogError(exception, "An unhandled exception occurred during a operation.");
-		notificationService.Show
-		(
-			NatTypeTesterLanguage.Current.Error,
-			exception.Message,
-			AppNotificationType.Error
-		);
+		notificationService.Show(NatTypeTesterLanguage.Current.Error, exception.Message, AppNotificationType.Error);
 	}
 }

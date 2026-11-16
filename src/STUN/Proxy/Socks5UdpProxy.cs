@@ -18,16 +18,7 @@ public class Socks5UdpProxy : IUdpProxy
 	public Socket Client
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		get
-		{
-			Socks5Client? socks5Client = _socks5Client;
-			if (socks5Client?.UdpClient is null)
-			{
-				throw new InvalidOperationException(@"Socks5 is not established.");
-			}
-
-			return socks5Client.UdpClient;
-		}
+		get => _socks5Client?.UdpClient ?? throw new InvalidOperationException(@"Socks5 is not established.");
 	}
 
 	private readonly Socks5CreateOption _socks5Options;
@@ -74,9 +65,7 @@ public class Socks5UdpProxy : IUdpProxy
 	/// <inheritdoc />
 	public async ValueTask<SocketReceiveMessageFromResult> ReceiveMessageFromAsync(Memory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEndPoint, CancellationToken cancellationToken = default)
 	{
-		Socks5Client? socks5Client = _socks5Client;
-		Socket? udpClient = socks5Client?.UdpClient;
-		if (socks5Client?.Status is not Status.Established || udpClient is null)
+		if (_socks5Client is not { Status: Status.Established, UdpClient: { } udpClient })
 		{
 			throw new InvalidOperationException(@"Socks5 is not established.");
 		}

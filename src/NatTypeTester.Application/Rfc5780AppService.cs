@@ -66,17 +66,9 @@ internal class Rfc5780AppService(StunTestInputResolver resolver) : IRfc5780AppSe
 		);
 	}
 
-	private async Task<StunResult5389> RunTestAsync(
-		StunTestInput input,
-		TransportType transportType,
-		Func<IStunClient5389, CancellationToken, ValueTask<StunResult5389>> testAction,
-		CancellationToken cancellationToken)
+	private async Task<StunResult5389> RunTestAsync(StunTestInput input, TransportType transportType, Func<IStunClient5389, CancellationToken, ValueTask<StunResult5389>> testAction, CancellationToken cancellationToken)
 	{
-		StunServer server = StunTestInputResolver.ParseStunServer
-		(
-			input.StunServer,
-			transportType is TransportType.Tls or TransportType.Dtls ? StunServer.DefaultTlsPort : StunServer.DefaultPort
-		);
+		StunServer server = StunTestInputResolver.ParseStunServer(input.StunServer, transportType is TransportType.Tls or TransportType.Dtls ? StunServer.DefaultTlsPort : StunServer.DefaultPort);
 
 		(Socks5CreateOption? socks5CreateOption, IPAddress serverIp, IPEndPoint localEndPoint) = await resolver.ResolveAsync(input, server, cancellationToken);
 
@@ -105,7 +97,6 @@ internal class Rfc5780AppService(StunTestInputResolver resolver) : IRfc5780AppSe
 				}
 				case TransportType.Tcp:
 				case TransportType.Tls:
-				default:
 				{
 					using ITcpProxy proxy = ProxyFactory.CreateProxy(transportType, input.Proxy.Type, socks5CreateOption, server.Hostname, input.SkipCertificateValidation);
 					using StunClient5389TCP client = new(new IPEndPoint(serverIp, server.Port), localEndPoint, proxy);
@@ -114,6 +105,8 @@ internal class Rfc5780AppService(StunTestInputResolver resolver) : IRfc5780AppSe
 
 					return await testAction(client, cancellationToken);
 				}
+				default:
+					throw new NotSupportedException();
 			}
 		}
 		finally

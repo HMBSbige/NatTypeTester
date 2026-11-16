@@ -65,11 +65,7 @@ public sealed partial class UpdateSettingsViewModel : ViewModelBase
 	internal Task CheckForUpdateOnStartupAsync(AppConfig config, CancellationToken cancellationToken = default)
 	{
 #if DEBUG
-		AppLocator.Current.GetRequiredService<INotificationService>().Show
-		(
-			NatTypeTesterLanguage.Current.Update,
-			"[DEBUG] Checking for updates on startup."
-		);
+		AppLocator.Current.GetRequiredService<INotificationService>().Show(NatTypeTesterLanguage.Current.Update, "[DEBUG] Checking for updates on startup.");
 #endif
 
 		if (!config.AutoCheckUpdate)
@@ -108,20 +104,11 @@ public sealed partial class UpdateSettingsViewModel : ViewModelBase
 
 		if (result is { HasUpdate: true, LatestVersion: not null })
 		{
-			notificationService.Show
-			(
-				NatTypeTesterLanguage.Current.Update,
-				NatTypeTesterLanguage.Current.NewVersionAvailable.ToString(result.LatestVersion)
-			);
+			notificationService.Show(NatTypeTesterLanguage.Current.Update, NatTypeTesterLanguage.Current.NewVersionAvailable.ToString(result.LatestVersion));
 		}
 		else if (!silentOnSuccess)
 		{
-			notificationService.Show
-			(
-				NatTypeTesterLanguage.Current.Update,
-				NatTypeTesterLanguage.Current.AlreadyLatestVersion,
-				AppNotificationType.Success
-			);
+			notificationService.Show(NatTypeTesterLanguage.Current.Update, NatTypeTesterLanguage.Current.AlreadyLatestVersion, AppNotificationType.Success);
 		}
 
 		IAppConfigManager configManager = AppLocator.Current.GetRequiredService<IAppConfigManager>();
