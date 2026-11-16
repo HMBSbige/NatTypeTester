@@ -2,7 +2,7 @@ namespace NatTypeTester.Application;
 
 internal class UpdateAppService(IHttpClientFactory httpClientFactory) : IUpdateAppService
 {
-	public string CurrentVersion => ResolveCurrentVersion()?.ToNormalizedString() ?? string.Empty;
+	public string CurrentVersion { get; } = Normalize(ThisAssembly.Info.InformationalVersion) ?? string.Empty;
 
 	public async Task<UpdateCheckResult> CheckForUpdateAsync(UpdateCheckInput input, CancellationToken cancellationToken = default)
 	{
@@ -21,40 +21,27 @@ internal class UpdateAppService(IHttpClientFactory httpClientFactory) : IUpdateA
 		GitHubReleasesUpdateChecker checker = new(options);
 
 		bool hasUpdate = await checker.CheckAsync(httpClient, cancellationToken);
-		string? latestVersion = TryParseVersion(checker.LatestVersion)?.ToNormalizedString();
 
-		return new UpdateCheckResult
-		(
-			hasUpdate,
-			latestVersion,
-			checker.LatestVersionUrl
-		);
+		return new UpdateCheckResult(hasUpdate, checker.LatestVersion, checker.LatestVersionUrl);
 	}
 
-	private static NuGetVersion? ResolveCurrentVersion()
+	private static string? Normalize(string value)
 	{
-		return TryParseVersion(ThisAssembly.Info.InformationalVersion);
-	}
-
-	private static NuGetVersion? TryParseVersion(string? value)
-	{
-		return NuGetVersion.TryParse(value, out NuGetVersion? version) ? version : default;
+		return NuGetVersion.TryParse(value, out NuGetVersion? version) ? version.ToNormalizedString() : null;
 	}
 
 	private sealed class NuGetVersionScheme : IVersionScheme
 	{
 		public bool TryParse(string value, out string version)
 		{
-			NuGetVersion? nuGetVersion = TryParseVersion(value);
-			version = nuGetVersion?.ToNormalizedString() ?? string.Empty;
-			return nuGetVersion is not null;
+			string? normalized = Normalize(value);
+			version = normalized ?? string.Empty;
+			return normalized is not null;
 		}
 
 		public int Compare(string x, string y)
 		{
-			NuGetVersion? xVersion = TryParseVersion(x);
-			NuGetVersion? yVersion = TryParseVersion(y);
-			return Comparer<NuGetVersion?>.Default.Compare(xVersion, yVersion);
+			return NuGetVersion.Parse(x).CompareTo(NuGetVersion.Parse(y));
 		}
 	}
 }
