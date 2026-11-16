@@ -35,8 +35,7 @@ Option<string?> proxyPasswordOption = new("--proxy-password")
 // RFC 5780 specific options
 Option<bool> skipCertOption = new("--skip-cert")
 {
-	Description = NatTypeTesterLanguage.Current.SkipCertificateValidation,
-	DefaultValueFactory = _ => false
+	Description = NatTypeTesterLanguage.Current.SkipCertificateValidation
 };
 Option<TransportType> transportOption = new("--transport", "-t")
 {
@@ -55,24 +54,21 @@ Command rfc3489Command = new("rfc3489", NatTypeTesterLanguage.Current.RFC3489Des
 rfc3489Command.SetAction
 (async (result, cancellationToken) =>
 	{
-		return await ExecuteCommandAsync(async () =>
-		{
-			StunTestInput input = BuildStunTestInput(result);
+		StunTestInput input = BuildStunTestInput(result);
 
-			ClassicStunResult result3489 = await AnsiConsole.Status()
-				.StartAsync(NatTypeTesterLanguage.Current.Testing, _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
+		ClassicStunResult result3489 = await AnsiConsole.Status()
+			.StartAsync(NatTypeTesterLanguage.Current.Testing, _ => sp.GetRequiredService<IRfc3489AppService>().TestAsync(input, cancellationToken));
 
-			cancellationToken.ThrowIfCancellationRequested();
+		cancellationToken.ThrowIfCancellationRequested();
 
-			ShowResultTable
-			(
-				[
-					(NatTypeTesterLanguage.Current.NatType, result3489.NatType, "cyan"),
-					(NatTypeTesterLanguage.Current.PublicEnd, result3489.PublicEndPoint, "green"),
-					(NatTypeTesterLanguage.Current.LocalEnd, result3489.LocalEndPoint, "yellow")
-				]
-			);
-		});
+		ShowResultTable
+		(
+			[
+				(NatTypeTesterLanguage.Current.NatType, result3489.NatType, "cyan"),
+				(NatTypeTesterLanguage.Current.PublicEnd, result3489.PublicEndPoint, "green"),
+				(NatTypeTesterLanguage.Current.LocalEnd, result3489.LocalEndPoint, "yellow")
+			]
+		);
 	}
 );
 
@@ -87,56 +83,53 @@ Command rfc5780Command = new("rfc5780", NatTypeTesterLanguage.Current.RFC5780Des
 rfc5780Command.SetAction
 (async (result, cancellationToken) =>
 	{
-		return await ExecuteCommandAsync(async () =>
+		StunTestInput input = BuildStunTestInput(result);
+		TransportType transport = result.GetValue(transportOption);
+		StunTestType testType = result.GetValue(testTypeOption);
+
+		IRfc5780AppService service = sp.GetRequiredService<IRfc5780AppService>();
+
+		StunResult5389 result5780 = await AnsiConsole.Status()
+			.StartAsync
+			(
+				NatTypeTesterLanguage.Current.Testing,
+				_ => testType switch
+				{
+					StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
+					StunTestType.Mapping => service.MappingBehaviorTestAsync(input, transport, cancellationToken),
+					StunTestType.Filtering => service.FilteringBehaviorTestAsync(input, transport, cancellationToken),
+					_ => service.TestAsync(input, transport, cancellationToken)
+				}
+			);
+
+		cancellationToken.ThrowIfCancellationRequested();
+
+		ShowResultTable(GetRows());
+		return;
+
+		IEnumerable<(string, object?, string)> GetRows()
 		{
-			StunTestInput input = BuildStunTestInput(result);
-			TransportType transport = result.GetValue(transportOption);
-			StunTestType testType = result.GetValue(testTypeOption);
-
-			IRfc5780AppService service = sp.GetRequiredService<IRfc5780AppService>();
-
-			StunResult5389 result5780 = await AnsiConsole.Status()
-				.StartAsync
-				(
-					NatTypeTesterLanguage.Current.Testing,
-					_ => testType switch
-					{
-						StunTestType.Binding => service.BindingTestAsync(input, transport, cancellationToken),
-						StunTestType.Mapping => service.MappingBehaviorTestAsync(input, transport, cancellationToken),
-						StunTestType.Filtering => service.FilteringBehaviorTestAsync(input, transport, cancellationToken),
-						_ => service.TestAsync(input, transport, cancellationToken)
-					}
-				);
-
-			cancellationToken.ThrowIfCancellationRequested();
-
-			ShowResultTable(GetRows());
-			return;
-
-			IEnumerable<(string, object?, string)> GetRows()
+			if (testType is StunTestType.Combining or StunTestType.Binding)
 			{
-				if (testType is StunTestType.Combining or StunTestType.Binding)
-				{
-					yield return (NatTypeTesterLanguage.Current.BindingTest, result5780.BindingTestResult, "cyan");
-				}
-
-				if (testType is StunTestType.Combining or StunTestType.Mapping)
-				{
-					yield return (NatTypeTesterLanguage.Current.MappingBehavior, result5780.MappingBehavior, "magenta");
-				}
-
-				bool shouldShowFilteringBehavior = testType is StunTestType.Filtering
-					|| testType is StunTestType.Combining && transport is TransportType.Udp;
-
-				if (shouldShowFilteringBehavior)
-				{
-					yield return (NatTypeTesterLanguage.Current.FilteringBehavior, result5780.FilteringBehavior, "blue");
-				}
-
-				yield return (NatTypeTesterLanguage.Current.PublicEnd, result5780.PublicEndPoint, "green");
-				yield return (NatTypeTesterLanguage.Current.LocalEnd, result5780.LocalEndPoint, "yellow");
+				yield return (NatTypeTesterLanguage.Current.BindingTest, result5780.BindingTestResult, "cyan");
 			}
-		});
+
+			if (testType is StunTestType.Combining or StunTestType.Mapping)
+			{
+				yield return (NatTypeTesterLanguage.Current.MappingBehavior, result5780.MappingBehavior, "magenta");
+			}
+
+			bool shouldShowFilteringBehavior = testType is StunTestType.Filtering
+				|| testType is StunTestType.Combining && transport is TransportType.Udp;
+
+			if (shouldShowFilteringBehavior)
+			{
+				yield return (NatTypeTesterLanguage.Current.FilteringBehavior, result5780.FilteringBehavior, "blue");
+			}
+
+			yield return (NatTypeTesterLanguage.Current.PublicEnd, result5780.PublicEndPoint, "green");
+			yield return (NatTypeTesterLanguage.Current.LocalEnd, result5780.LocalEndPoint, "yellow");
+		}
 	}
 );
 
@@ -153,36 +146,18 @@ RootCommand rootCommand = new(NatTypeTesterLanguage.Current.AppDescription)
 
 try
 {
-	ParseResult parseResult = rootCommand.Parse(args);
-	return await parseResult.InvokeAsync();
+	// Report action failures here: the default handler prints the full stack trace and says nothing on cancellation
+	return await rootCommand.Parse(args).InvokeAsync(new InvocationConfiguration { EnableDefaultExceptionHandler = false });
 }
-catch (Exception ex) when (ex is not OperationCanceledException)
+catch (OperationCanceledException)
 {
-	return ShowError(ex);
+	AnsiConsole.MarkupLineInterpolated($"[yellow]{NatTypeTesterLanguage.Current.Cancelled}[/]");
+	return 1;
 }
-
-int ShowError(Exception ex)
+catch (Exception ex)
 {
 	AnsiConsole.MarkupLineInterpolated($"[red]{NatTypeTesterLanguage.Current.Error}:[/] {ex.Message}");
 	return 1;
-}
-
-async Task<int> ExecuteCommandAsync(Func<Task> action)
-{
-	try
-	{
-		await action();
-		return 0;
-	}
-	catch (OperationCanceledException)
-	{
-		AnsiConsole.MarkupLineInterpolated($"[yellow]{NatTypeTesterLanguage.Current.Cancelled}[/]");
-		return 1;
-	}
-	catch (Exception ex)
-	{
-		return ShowError(ex);
-	}
 }
 
 void ShowResultTable(IEnumerable<(string Property, object? Value, string Color)> rows)
