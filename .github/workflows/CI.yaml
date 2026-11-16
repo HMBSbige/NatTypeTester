@@ -12,8 +12,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_NOLOGO: 1
   DOTNET_GENERATE_ASPNET_CERTIFICATE: false
-  NET_VERSION: 10.0.x
-  NET_TFM: net10.0
+  NET_VERSION: 11.0.x
+  NET_TFM: net11.0
 
 jobs:
   check_format:
@@ -125,7 +125,8 @@ jobs:
 
       - name: Install Android dependencies
         working-directory: src/${{ env.ProjectName }}.Android
-        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
+        # The .NET 11 Android workload defaults to cmdline-tools 21.0, but its installer feed only provides up to 19.0
+        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true -p:AndroidCommandLineToolsVersion=19.0
 
       - name: Decode keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.keystore
@@ -135,6 +136,8 @@ jobs:
         run: >
           dotnet publish
           -r ${{ matrix.rid }}
+          -p:AndroidSdkDirectory=$HOME/android-sdk
+          -p:JavaSdkDirectory=$HOME/jdk
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore=$GITHUB_WORKSPACE/release.keystore
           -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -179,7 +182,8 @@ jobs:
 
       - name: Install Android dependencies
         working-directory: src/${{ env.ProjectName }}.Android
-        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true
+        # The .NET 11 Android workload defaults to cmdline-tools 21.0, but its installer feed only provides up to 19.0
+        run: dotnet build -t:InstallAndroidDependencies -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$HOME/jdk -p:AcceptAndroidSDKLicenses=true -p:AndroidCommandLineToolsVersion=19.0
 
       - name: Decode keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.keystore
@@ -188,6 +192,8 @@ jobs:
         working-directory: src/${{ env.ProjectName }}.Android
         run: >
           dotnet publish
+          -p:AndroidSdkDirectory=$HOME/android-sdk
+          -p:JavaSdkDirectory=$HOME/jdk
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore=$GITHUB_WORKSPACE/release.keystore
           -p:AndroidSigningStorePass=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
