@@ -1,10 +1,7 @@
 using STUN.Messages;
 using STUN.Proxy;
 using STUN.StunResult;
-using System.Buffers;
-using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 
 namespace STUN.Client;
 
@@ -118,40 +115,9 @@ public class StunClient5389UDP : IStunClient5389, IUdpStunClient, IAsyncDisposab
 		}
 	}
 
-	private async ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, CancellationToken cancellationToken)
+	private ValueTask<StunResponse?> RequestAsync(StunMessage5389 sendMessage, IPEndPoint remote, CancellationToken cancellationToken)
 	{
-		try
-		{
-			using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
-			Memory<byte> buffer = memoryOwner.Memory;
-			int length = sendMessage.WriteTo(buffer.Span);
-
-			await _proxy.SendToAsync(buffer.Slice(0, length), SocketFlags.None, remote, cancellationToken);
-
-			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			cts.CancelAfter(ReceiveTimeout);
-			// remote 仅用于提供 AddressFamily，UDP 下不过滤来源
-			SocketReceiveMessageFromResult r = await _proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, remote, cts.Token);
-
-			StunMessage5389 message = new();
-
-			if (message.TryParse(buffer.Slice(0, r.ReceivedBytes)) && message.IsSameTransaction(sendMessage))
-			{
-				return new StunResponse(message, (IPEndPoint)r.RemoteEndPoint, new IPEndPoint(r.PacketInformation.Address, GetClientLocalEndPoint().Port));
-			}
-		}
-		catch (OperationCanceledException ex)
-		{
-			Debug.WriteLine(ex);
-		}
-
-		return default;
-	}
-
-	private IPEndPoint GetClientLocalEndPoint()
-	{
-		return _proxy.Client.LocalEndPoint as IPEndPoint
-				?? throw new InvalidOperationException(@"UDP client local endpoint is unavailable.");
+		return _proxy.RequestAsync(sendMessage, remote, ReceiveTimeout, cancellationToken);
 	}
 
 	/// <inheritdoc />

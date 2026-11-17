@@ -37,6 +37,11 @@ public static class RawStunMessage
 		0xfa, 0x87, 0xdf, 0xae
 	];
 
+	/// <summary>
+	/// A header-sized run of 0xFF bytes. Its message type 0x3FFF is undefined, so it never parses as a STUN message.
+	/// </summary>
+	public static ReadOnlyMemory<byte> NotStun { get; } = Enumerable.Repeat(byte.MaxValue, StunMessage5389.HeaderLength).ToArray();
+
 	public static StunMessage5389 Parse(params ReadOnlySpan<(AttributeType Type, string Value)> attributes)
 	{
 		byte[] buffer = Build(attributes);

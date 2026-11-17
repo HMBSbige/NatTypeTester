@@ -1,0 +1,69 @@
+using STUN.Messages;
+using STUN.Proxy;
+using System.Buffers;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
+
+namespace STUN.Client;
+
+internal static class UdpProxyExtensions
+{
+	public static async ValueTask<StunResponse?> RequestAsync(this IUdpProxy proxy, StunMessage5389 request, IPEndPoint remote, TimeSpan timeout, CancellationToken cancellationToken)
+	{
+		try
+		{
+			using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(0x10000);
+			Memory<byte> buffer = memoryOwner.Memory;
+			int length = request.WriteTo(buffer.Span);
+
+			await proxy.SendToAsync(buffer.Slice(0, length), SocketFlags.None, remote, cancellationToken);
+
+			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+			// 接收只计时这一次，跳过的数据报不会延长等待
+			cts.CancelAfter(timeout);
+			return await ReceiveResponseAsync(proxy, buffer, request, remote, cts.Token);
+		}
+		catch (OperationCanceledException ex)
+		{
+			Debug.WriteLine(ex);
+		}
+
+		return default;
+	}
+
+	private static async ValueTask<StunResponse> ReceiveResponseAsync(IUdpProxy proxy, Memory<byte> buffer, StunMessage5389 request, IPEndPoint remote, CancellationToken cancellationToken)
+	{
+		while (true)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			SocketReceiveMessageFromResult result;
+
+			try
+			{
+				// remote 仅用于提供 AddressFamily，UDP 下不过滤来源
+				result = await proxy.ReceiveMessageFromAsync(buffer, SocketFlags.None, remote, cancellationToken);
+			}
+			catch (SocketException ex) when (ex.SocketErrorCode is SocketError.ConnectionReset)
+			{
+				// Windows 上之前某个数据报引发的 ICMP 端口不可达，与跳过的数据报一样处理
+				Debug.WriteLine(ex);
+				continue;
+			}
+
+			StunMessage5389 response = new();
+
+			if (response.TryParse(buffer.Slice(0, result.ReceivedBytes)) && response.IsSameTransaction(request))
+			{
+				return new StunResponse(response, (IPEndPoint)result.RemoteEndPoint, new IPEndPoint(result.PacketInformation.Address, GetLocalEndPoint(proxy).Port));
+			}
+		}
+	}
+
+	private static IPEndPoint GetLocalEndPoint(IUdpProxy proxy)
+	{
+		return proxy.Client.LocalEndPoint as IPEndPoint
+				?? throw new InvalidOperationException(@"UDP client local endpoint is unavailable.");
+	}
+}
