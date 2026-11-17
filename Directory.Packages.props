@@ -3,22 +3,22 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Avalonia.Android" Version="12.1.4" />
-    <PackageVersion Include="Avalonia.Desktop" Version="12.1.4" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Android" Version="12.1.6" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.6" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.6" />
     <PackageVersion Include="ChsBuffer.Angle.Static" Version="2.1.27548.1" />
-    <PackageVersion Include="ChsBuffer.Avalonia.Native.Static" Version="12.1.4.1" />
-    <PackageVersion Include="ChsBuffer.SkiaSharp.Static" Version="4.153.1.1" />
+    <PackageVersion Include="ChsBuffer.Avalonia.Native.Static" Version="12.1.6.1" />
+    <PackageVersion Include="ChsBuffer.SkiaSharp.Static" Version="4.156.1.1" />
     <PackageVersion Include="FluentIcons.Avalonia" Version="2.1.345" />
-    <PackageVersion Include="HarfBuzzSharp" Version="14.2.1.301" />
-    <PackageVersion Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.2.1.301" />
-    <PackageVersion Include="SkiaSharp" Version="4.153.1" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="4.153.1" />
+    <PackageVersion Include="HarfBuzzSharp" Version="14.4.0.101" />
+    <PackageVersion Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.4.0.101" />
+    <PackageVersion Include="SkiaSharp" Version="4.156.1" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="4.156.1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="ReactiveUI" Version="26.0.1" />
-    <PackageVersion Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" Version="12.1.6" />
-    <PackageVersion Include="Splat.Serilog" Version="21.0.0" />
+    <PackageVersion Include="ReactiveUI" Version="27.0.1" />
+    <PackageVersion Include="ReactiveUI.Avalonia.Microsoft.Extensions.DependencyInjection" Version="12.1.7" />
+    <PackageVersion Include="Splat.Serilog" Version="22.0.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Serilog" Version="4.4.0" />
@@ -43,6 +43,6 @@
     <PackageVersion Include="ThisAssembly.AssemblyInfo" Version="2.1.6" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.85.0" />
+    <PackageVersion Include="TUnit" Version="1.86.0" />
   </ItemGroup>
 </Project>
