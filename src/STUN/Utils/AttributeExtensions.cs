@@ -84,83 +84,52 @@ public static class AttributeExtensions
 	/// Extracts the MAPPED-ADDRESS attribute from a STUN response as an <see cref="IPEndPoint"/>.
 	/// </summary>
 	/// <param name="response">The STUN response message to extract from.</param>
-	/// <returns>The mapped address endpoint, or <see langword="null"/> if the attribute is not present.</returns>
+	/// <returns>The mapped address endpoint, or <see langword="null"/> if the attribute is not present or invalid.</returns>
 	public static IPEndPoint? GetMappedAddressAttribute(this StunMessage5389 response)
 	{
-		StunAttribute? mappedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
-
-		if (mappedAddressAttribute is null)
-		{
-			return null;
-		}
-
-		return ToEndPoint<MappedAddressStunAttributeValue>(mappedAddressAttribute);
+		return GetAddress<MappedAddressStunAttributeValue>(response, AttributeType.MappedAddress);
 	}
 
 	/// <summary>
 	/// Extracts the CHANGED-ADDRESS attribute from a STUN response as an <see cref="IPEndPoint"/>.
 	/// </summary>
 	/// <param name="response">The STUN response message to extract from.</param>
-	/// <returns>The changed address endpoint, or <see langword="null"/> if the attribute is not present.</returns>
+	/// <returns>The changed address endpoint, or <see langword="null"/> if the attribute is not present or invalid.</returns>
 	public static IPEndPoint? GetChangedAddressAttribute(this StunMessage5389 response)
 	{
-		StunAttribute? changedAddressAttribute = response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
-
-		if (changedAddressAttribute is null)
-		{
-			return null;
-		}
-
-		return ToEndPoint<ChangedAddressStunAttributeValue>(changedAddressAttribute);
+		return GetAddress<ChangedAddressStunAttributeValue>(response, AttributeType.ChangedAddress);
 	}
 
 	/// <summary>
 	/// Extracts the XOR-MAPPED-ADDRESS attribute from a STUN response as an <see cref="IPEndPoint"/>.
-	/// Falls back to MAPPED-ADDRESS if XOR-MAPPED-ADDRESS is not present.
+	/// Falls back to MAPPED-ADDRESS if XOR-MAPPED-ADDRESS is not present or invalid.
 	/// </summary>
 	/// <param name="response">The STUN response message to extract from.</param>
-	/// <returns>The XOR-mapped or mapped address endpoint, or <see langword="null"/> if neither attribute is present.</returns>
+	/// <returns>The XOR-mapped or mapped address endpoint, or <see langword="null"/> if neither attribute is present and valid.</returns>
 	public static IPEndPoint? GetXorMappedAddressAttribute(this StunMessage5389 response)
 	{
-		StunAttribute? mappedAddressAttribute =
-			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.XorMappedAddress) ??
-			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.MappedAddress);
-
-		if (mappedAddressAttribute is null)
-		{
-			return null;
-		}
-
-		return ToEndPoint<AddressStunAttributeValue>(mappedAddressAttribute);
+		return GetAddress<AddressStunAttributeValue>(response, AttributeType.XorMappedAddress)
+			?? GetAddress<AddressStunAttributeValue>(response, AttributeType.MappedAddress);
 	}
 
 	/// <summary>
 	/// Extracts the OTHER-ADDRESS attribute from a STUN response as an <see cref="IPEndPoint"/>.
-	/// Falls back to CHANGED-ADDRESS if OTHER-ADDRESS is not present.
+	/// Falls back to CHANGED-ADDRESS if OTHER-ADDRESS is not present or invalid.
 	/// </summary>
 	/// <param name="response">The STUN response message to extract from.</param>
-	/// <returns>The other address endpoint, or <see langword="null"/> if neither attribute is present.</returns>
+	/// <returns>The other address endpoint, or <see langword="null"/> if neither attribute is present and valid.</returns>
 	public static IPEndPoint? GetOtherAddressAttribute(this StunMessage5389 response)
 	{
-		StunAttribute? addressAttribute =
-			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.OtherAddress) ??
-			response.Attributes.FirstOrDefault(t => t.Type == AttributeType.ChangedAddress);
-
-		if (addressAttribute is null)
-		{
-			return null;
-		}
-
-		return ToEndPoint<AddressStunAttributeValue>(addressAttribute);
+		return GetAddress<AddressStunAttributeValue>(response, AttributeType.OtherAddress)
+			?? GetAddress<AddressStunAttributeValue>(response, AttributeType.ChangedAddress);
 	}
 
-	private static IPEndPoint ToEndPoint<T>(StunAttribute attribute) where T : AddressStunAttributeValue
+	// Only the first attribute of a type is processed (RFC 5389 §15), and it is ignored
+	// when its value is not a usable address, e.g. an unsupported address family (RFC 5389 §7.3.3)
+	private static IPEndPoint? GetAddress<T>(StunMessage5389 response, AttributeType type) where T : AddressStunAttributeValue
 	{
-		return attribute.Value switch
-		{
-			T { Address: { } address } value => new IPEndPoint(address, value.Port),
-			T => throw new InvalidOperationException(@"STUN address attribute is missing IP address."),
-			_ => throw new InvalidOperationException($@"STUN attribute {attribute.Type} has a malformed value.")
-		};
+		return response.Attributes.FirstOrDefault(t => t.Type == type)?.Value is T { Address: { } address } value
+			? new IPEndPoint(address, value.Port)
+			: null;
 	}
 }

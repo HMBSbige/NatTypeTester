@@ -106,6 +106,10 @@ public class StunMessage5389
 	/// <summary>
 	/// Attempts to parse a STUN message from the specified byte sequence, advancing the sequence past the consumed bytes on success.
 	/// </summary>
+	/// <remarks>
+	/// A message whose length is not a multiple of 4 (RFC 5389 §6), or whose attributes and their padding
+	/// do not fit exactly within that length (RFC 5389 §15), is rejected. This message is left unchanged on failure.
+	/// </remarks>
 	/// <param name="sequence">The byte sequence to parse from. On success, it is advanced past the consumed bytes.</param>
 	/// <returns><see langword="true"/> if the message was parsed successfully; otherwise, <see langword="false"/>.</returns>
 	public bool TryParse(ref ReadOnlySequence<byte> sequence)
@@ -129,8 +133,6 @@ public class StunMessage5389
 			return false;
 		}
 
-		StunMessageType = type;
-
 		if (!reader.TryReadBigEndian(out short lengthValue))
 		{
 			throw new UnreachableException();
@@ -138,7 +140,7 @@ public class StunMessage5389
 
 		ushort length = (ushort)lengthValue;
 
-		if (sequence.Length - HeaderLength < length)
+		if (length % 4 is not 0 || sequence.Length - HeaderLength < length)
 		{
 			return false; // Check length
 		}
@@ -148,9 +150,6 @@ public class StunMessage5389
 			throw new UnreachableException();
 		}
 
-		MagicCookie = (uint)magicCookie;
-
-		reader.UnreadSequence.Slice(0, SizeOfTransactionId).CopyTo(TransactionId);
 		reader.Advance(SizeOfTransactionId);
 
 		byte[] tempBuffer = ArrayPool<byte>.Shared.Rent(length + SizeOfMagicCookie + SizeOfTransactionId);
@@ -165,20 +164,23 @@ public class StunMessage5389
 			Span<byte> attributeBuffer = tempBuffer.AsSpan(0, length);
 			ReadOnlySpan<byte> magicCookieAndTransactionId = tempBuffer.AsSpan(length, SizeOfMagicCookie + SizeOfTransactionId);
 
-			while (attributeBuffer.Length > 0)
+			while (!attributeBuffer.IsEmpty)
 			{
 				StunAttribute attribute = new();
 				int offset = attribute.TryParse(attributeBuffer, magicCookieAndTransactionId);
+
 				if (offset <= 0)
 				{
-					Debug.WriteLine($@"[Warning] Ignore wrong attribute: {Convert.ToHexString(attributeBuffer)}");
-					break;
+					return false;
 				}
 
 				list.Add(attribute);
 				attributeBuffer = attributeBuffer.Slice(offset);
 			}
 
+			StunMessageType = type;
+			MagicCookie = (uint)magicCookie;
+			magicCookieAndTransactionId.Slice(SizeOfMagicCookie).CopyTo(TransactionId);
 			Attributes = list;
 		}
 		finally

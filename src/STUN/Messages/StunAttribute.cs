@@ -76,7 +76,7 @@ public class StunAttribute
 	/// <param name="buffer">The buffer containing the raw attribute bytes.</param>
 	/// <param name="magicCookieAndTransactionId">The magic cookie and transaction ID bytes used for XOR-based attribute decoding.</param>
 	/// <returns>
-	/// Parse 成功字节，0 则表示 Parse 失败
+	/// Parse 成功的字节数（包括填充），0 则表示 Parse 失败
 	/// </returns>
 	public int TryParse(ReadOnlySpan<byte> buffer, ReadOnlySpan<byte> magicCookieAndTransactionId)
 	{
@@ -89,7 +89,9 @@ public class StunAttribute
 
 		Length = BinaryPrimitives.ReadUInt16BigEndian(buffer.Slice(2));
 
-		if (buffer.Length < 4 + Length)
+		int realLength = 4 + Length + (4 - Length % 4) % 4; // 对齐
+
+		if (buffer.Length < realLength)
 		{
 			return default;
 		}
@@ -114,6 +116,6 @@ public class StunAttribute
 			Value = t;
 		}
 
-		return 4 + Length + (4 - Length % 4) % 4; // 对齐
+		return realLength;
 	}
 }
