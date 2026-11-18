@@ -1,3 +1,5 @@
+using Socks5.Enums;
+using Socks5.Exceptions;
 using STUN.Enums;
 using STUN.Messages;
 using STUN.Proxy;
@@ -6,6 +8,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Net;
+using System.Net.Sockets;
 
 namespace STUN.Client;
 
@@ -13,12 +16,27 @@ namespace STUN.Client;
 /// A TCP-based STUN client implementing RFC 5389/5780 NAT behavior discovery.
 /// Filtering behavior tests are not supported over TCP.
 /// </summary>
+/// <remarks>
+/// A request to a STUN server that refuses the connection gets no response, as one to a closed UDP port does:
+/// either a direct connection, with or without TLS, is refused, or a SOCKS5 proxy replies that the server refused it.
+/// Other connection failures, such as an unreachable proxy or a failed TLS handshake, are thrown.
+/// </remarks>
 public class StunClient5389TCP : IStunClient5389
 {
 	/// <summary>
 	/// Gets or sets the timeout duration for establishing TCP connections to the STUN server.
 	/// </summary>
 	public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
+	/// <summary>
+	/// Gets or sets the timeout duration for each STUN request once its TCP connection is established,
+	/// covering the time from sending the request until the response is received.
+	/// </summary>
+	/// <remarks>
+	/// A request that times out is treated as having received no response.
+	/// Establishing the connection, including any proxy or TLS handshake, is limited separately by <see cref="ConnectTimeout"/>.
+	/// </remarks>
+	public TimeSpan ReceiveTimeout { get; set; } = TimeSpan.FromSeconds(3);
 
 	private readonly IPEndPoint _remoteEndPoint;
 	private IPEndPoint _lastLocalEndPoint;
@@ -101,13 +119,17 @@ public class StunClient5389TCP : IStunClient5389
 
 			try
 			{
+				// Calling CancelAfter again restarts the timer. Sending and the whole read loop share this one deadline,
+				// so incoming data that never parses cannot extend it
+				cts.CancelAfter(ReceiveTimeout);
+
 				int length = sendMessage.WriteTo(pipe.Output.GetSpan(sendMessage.Length));
 
 				pipe.Output.Advance(length);
-				await pipe.Output.FlushAsync(cancellationToken);
+				await pipe.Output.FlushAsync(cts.Token);
 
 				StunMessage5389 message = new();
-				bool success = await ReadPipeAsync(message, pipe.Input);
+				bool success = await ReadPipeAsync(message, pipe.Input, cts.Token);
 
 				if (success && message.IsSameTransaction(sendMessage) && _proxy.CurrentLocalEndPoint is { } local)
 				{
@@ -124,10 +146,14 @@ public class StunClient5389TCP : IStunClient5389
 		{
 			Debug.WriteLine(ex);
 		}
+		catch (Exception ex) when (IsRefusedByServer(ex))
+		{
+			Debug.WriteLine(ex);
+		}
 
 		return default;
 
-		async ValueTask<bool> ReadPipeAsync(StunMessage5389 message, PipeReader reader)
+		static async ValueTask<bool> ReadPipeAsync(StunMessage5389 message, PipeReader reader, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -163,6 +189,18 @@ public class StunClient5389TCP : IStunClient5389
 				await reader.CompleteAsync();
 			}
 		}
+	}
+
+	private bool IsRefusedByServer(Exception ex)
+	{
+		return ex switch
+		{
+			// Only a direct connection reaches the server itself; through SOCKS5, this is the proxy refusing
+			SocketException { SocketErrorCode: SocketError.ConnectionRefused } => _proxy is DirectTcpProxy,
+			// The SOCKS5 proxy reached the server, which refused the connection
+			Socks5ProtocolErrorException { Socks5Reply: Socks5Reply.ConnectionRefused } => true,
+			_ => false
+		};
 	}
 
 	/// <inheritdoc />
