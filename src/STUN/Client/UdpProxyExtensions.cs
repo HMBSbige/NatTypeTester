@@ -17,10 +17,13 @@ internal static class UdpProxyExtensions
 			Memory<byte> buffer = memoryOwner.Memory;
 			int length = request.WriteTo(buffer.Span);
 
-			await proxy.SendToAsync(buffer.Slice(0, length), SocketFlags.None, remote, cancellationToken);
-
 			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			// 接收只计时这一次，跳过的数据报不会延长等待
+
+			// DTLS 代理在发送时握手，发送也要计时
+			cts.CancelAfter(timeout);
+			await proxy.SendToAsync(buffer.Slice(0, length), SocketFlags.None, remote, cts.Token);
+
+			// 再次调用 CancelAfter 会重新计时；接收只计时这一次，跳过的数据报不会延长等待
 			cts.CancelAfter(timeout);
 			return await ReceiveResponseAsync(proxy, buffer, request, remote, cts.Token);
 		}

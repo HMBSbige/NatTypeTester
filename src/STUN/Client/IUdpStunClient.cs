@@ -8,6 +8,10 @@ public interface IUdpStunClient : IStunClient
 	/// <summary>
 	/// Gets or sets the timeout duration for receiving STUN responses.
 	/// </summary>
+	/// <remarks>
+	/// Sending each request is limited to the same duration, timed separately,
+	/// which also bounds the handshake when the proxy is a <see cref="Proxy.DtlsProxy"/>.
+	/// </remarks>
 	TimeSpan ReceiveTimeout { get; set; }
 
 	/// <summary>

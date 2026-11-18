@@ -25,27 +25,51 @@ public class DtlsProxy(IUdpProxy innerProxy, string serverName, bool skipCertifi
 	}
 
 	/// <inheritdoc />
+	/// <remarks>
+	/// Each call discards the current DTLS session and performs a new handshake with <paramref name="remoteEP"/>
+	/// over the same inner proxy, so that every request reaches the endpoint it is addressed to.
+	/// </remarks>
 	public async ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP, CancellationToken cancellationToken = default)
 	{
-		if (_dtlsSession is not { Transport: var transport })
+		if (remoteEP is not IPEndPoint remote)
 		{
-			UdpProxyDatagramTransport datagram = new(innerProxy, (IPEndPoint)remoteEP);
+			ThrowNotSupportedException();
+		}
 
-			DtlsClientOptions options = new()
-			{
-				ServerName = serverName,
-				RemoteCertificateValidation = skipCertificateValidation
-					? static (_, _, _) => true
-					: default
-			};
+		// 旧会话只释放、不发 close_notify：DTLS 1.2 对端会回复 close_notify，回复会落入新会话的握手并使其失败
+		DisposeDtlsTransport();
 
-			transport = await DtlsTransport.CreateClientAsync(datagram, options, cancellationToken);
-			_dtlsSession = (transport, datagram);
+		UdpProxyDatagramTransport datagram = new(innerProxy, remote);
+
+		DtlsClientOptions options = new()
+		{
+			ServerName = serverName,
+			RemoteCertificateValidation = skipCertificateValidation
+				? static (_, _, _) => true
+				: default
+		};
+
+		DtlsTransport transport = await DtlsTransport.CreateClientAsync(datagram, options, cancellationToken);
+
+		try
+		{
 			await transport.HandshakeAsync(cancellationToken);
 		}
+		catch
+		{
+			transport.Dispose();
+			throw;
+		}
+
+		_dtlsSession = (transport, datagram);
 
 		await transport.SendAsync(buffer, cancellationToken);
 		return buffer.Length;
+
+		static void ThrowNotSupportedException()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	/// <inheritdoc />
