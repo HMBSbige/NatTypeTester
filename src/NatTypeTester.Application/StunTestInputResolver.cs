@@ -29,14 +29,11 @@ internal class StunTestInputResolver(IServiceProvider serviceProvider)
 
 	private async Task<Socks5CreateOption?> ResolveSocks5OptionAsync(ProxyOptions proxyOptions, CancellationToken cancellationToken = default)
 	{
-		if (proxyOptions.Type is ProxyType.Plain)
+		HostnameEndpoint? proxyEndpoint = proxyOptions.GetSocks5Endpoint();
+
+		if (proxyEndpoint is null)
 		{
 			return null;
-		}
-
-		if (!HostnameEndpoint.TryParse(proxyOptions.Server ?? string.Empty, out HostnameEndpoint? proxyEndpoint, NatTypeTesterConsts.DefaultSocks5Port))
-		{
-			throw new ArgumentException(NatTypeTesterLanguage.Current.UnknownProxyAddress);
 		}
 
 		return new Socks5CreateOption
