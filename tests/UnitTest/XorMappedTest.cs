@@ -1,20 +1,11 @@
 using STUN.Enums;
 using STUN.Messages.StunAttributeValues;
 using System.Net;
-using TUnit.Assertions.Enums;
 
 namespace UnitTest;
 
 public class XorMappedTest
 {
-	private static ReadOnlySpan<byte> MagicCookieAndTransactionId =>
-	[
-		0x21, 0x12, 0xa4, 0x42,
-		0xb7, 0xe7, 0xa7, 0x01,
-		0xbc, 0x34, 0xd6, 0x86,
-		0xfa, 0x87, 0xdf, 0xae
-	];
-
 	private const ushort Port = 32853;
 
 	/// <summary>
@@ -25,32 +16,26 @@ public class XorMappedTest
 	[Arguments(IpFamily.IPv6, "2001:db8:1234:5678:11:2233:4455:6677", "0002A1470113A9FAA5D3F179BC25F4B5BED2B9D9")]
 	public async Task TestXorMapped(IpFamily family, IPAddress address, string encoded)
 	{
-		byte[] expectedBytes = Convert.FromHexString(encoded);
-		XorMappedAddressStunAttributeValue value = new(MagicCookieAndTransactionId)
+		XorMappedAddressStunAttributeValue value = new(RawStunMessage.MagicCookieAndTransactionId)
 		{
 			Port = Port,
 			Family = family,
 			Address = address
 		};
-		byte[] buffer = new byte[expectedBytes.Length];
+		// Room for the longest value, an IPv6 address, so that a wrong length shows up in the comparison
+		byte[] buffer = new byte[4 + 16];
 
 		int length = value.WriteTo(buffer);
-		await Assert.That(length).IsEqualTo(expectedBytes.Length);
-		await Assert.That(buffer.AsMemory(0, length)).IsEquivalentTo(expectedBytes, EqualityComparer<byte>.Default, CollectionOrdering.Matching);
+		await Assert.That(Convert.ToHexString(buffer, 0, length)).IsEqualTo(encoded);
 
-		value = new XorMappedAddressStunAttributeValue(MagicCookieAndTransactionId);
-		await Assert.That(value.TryParse(expectedBytes)).IsTrue();
+		XorMappedAddressStunAttributeValue parsed = new(RawStunMessage.MagicCookieAndTransactionId);
+		await Assert.That(parsed.TryParse(Convert.FromHexString(encoded))).IsTrue();
 
 		using (Assert.Multiple())
 		{
-			await Assert.That(value.Port).IsEqualTo(Port);
-			await Assert.That(value.Family).IsEqualTo(family);
-			await Assert.That(value.Address).IsEqualTo(address);
+			await Assert.That(parsed.Port).IsEqualTo(Port);
+			await Assert.That(parsed.Family).IsEqualTo(family);
+			await Assert.That(parsed.Address).IsEqualTo(address);
 		}
-
-		buffer.AsSpan().Clear();
-		int roundTripLength = value.WriteTo(buffer);
-		await Assert.That(roundTripLength).IsEqualTo(expectedBytes.Length);
-		await Assert.That(buffer.AsMemory(0, roundTripLength)).IsEquivalentTo(expectedBytes, EqualityComparer<byte>.Default, CollectionOrdering.Matching);
 	}
 }

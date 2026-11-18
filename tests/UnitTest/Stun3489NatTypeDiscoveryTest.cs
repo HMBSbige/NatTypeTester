@@ -16,50 +16,43 @@ public class Stun3489NatTypeDiscoveryTest
 	private static readonly IPEndPoint ChangedAddress1 = IPEndPoint.Parse(@"3.3.3.3:23333");
 	private static readonly IPEndPoint ChangedAddress2 = IPEndPoint.Parse(@"2.2.2.2:810");
 
+	/// <summary>
+	/// The test I response through a NAT from a server whose CHANGED-ADDRESS is <see cref="ChangedAddress1"/>.
+	/// </summary>
+	private static StunResponse Test1Response => Response(ServerAddress, MappedAddress1, ChangedAddress1);
+
 	private static ClassicStunResult Test1Succeeded => new()
 	{
 		PublicEndPoint = MappedAddress1,
 		LocalEndPoint = LocalAddress1
 	};
 
-	private static StunResponse CreateTest1Response(IPEndPoint mapped, IPEndPoint changed, IPEndPoint remote, IPEndPoint local)
+	/// <summary>
+	/// Creates a response from <paramref name="remote"/> to <paramref name="local"/>, or <see cref="LocalAddress1"/> by default,
+	/// with MAPPED-ADDRESS <paramref name="mapped"/> and CHANGED-ADDRESS <paramref name="changed"/> when they are given.
+	/// </summary>
+	private static StunResponse Response(IPEndPoint remote, IPEndPoint? mapped = null, IPEndPoint? changed = null, IPEndPoint? local = null)
 	{
-		return new StunResponse
-		(
-			new StunMessage5389
-			{
-				Attributes =
-				[
-					BuildMapping(IpFamily.IPv4, mapped.Address, (ushort)mapped.Port),
-					BuildChangeAddress(IpFamily.IPv4, changed.Address, (ushort)changed.Port)
-				]
-			},
-			remote,
-			local
-		);
-	}
+		List<StunAttribute> attributes = [];
 
-	private static StunResponse CreateMappedResponse(IPEndPoint mapped, IPEndPoint remote, IPEndPoint local)
-	{
-		return new StunResponse
-		(
-			new StunMessage5389
-			{
-				Attributes =
-				[
-					BuildMapping(IpFamily.IPv4, mapped.Address, (ushort)mapped.Port)
-				]
-			},
-			remote,
-			local
-		);
+		if (mapped is not null)
+		{
+			attributes.Add(BuildMapping(IpFamily.IPv4, mapped.Address, (ushort)mapped.Port));
+		}
+
+		if (changed is not null)
+		{
+			attributes.Add(BuildChangeAddress(IpFamily.IPv4, changed.Address, (ushort)changed.Port));
+		}
+
+		return new StunResponse(new StunMessage5389 { Attributes = attributes }, remote, local ?? LocalAddress1);
 	}
 
 	[Test]
 	public async Task UdpBlocked()
 	{
 		Stun3489NatTypeDiscovery session = new(ServerAddress);
-		await Assert.That(session.CreateQuery()).IsNotNull();
+		_ = session.CreateQuery();
 
 		await Assert.That(session.GotResponse(null)).IsNull();
 		await Assert.That(session.Result).IsEqualTo(new ClassicStunResult
@@ -77,24 +70,13 @@ public class Stun3489NatTypeDiscoveryTest
 		Stun3489NatTypeDiscovery session = new(ServerAddress);
 		_ = session.CreateQuery();
 
-		List<StunAttribute> attributes = [];
-
-		if (includeMappedAddress)
-		{
-			attributes.Add(BuildMapping(IpFamily.IPv4, MappedAddress1.Address, (ushort)MappedAddress1.Port));
-		}
-
-		if (includeChangedAddress)
-		{
-			attributes.Add(BuildChangeAddress(IpFamily.IPv4, ChangedAddress1.Address, (ushort)ChangedAddress1.Port));
-		}
-
-		StunResponse response = new(new StunMessage5389 { Attributes = attributes }, ServerAddress, LocalAddress1);
+		IPEndPoint? mapped = includeMappedAddress ? MappedAddress1 : null;
+		StunResponse response = Response(ServerAddress, mapped, includeChangedAddress ? ChangedAddress1 : null);
 		await Assert.That(session.GotResponse(response)).IsNull();
 		await Assert.That(session.Result).IsEqualTo(new ClassicStunResult
 		{
 			NatType = NatType.UnsupportedServer,
-			PublicEndPoint = includeMappedAddress ? MappedAddress1 : null,
+			PublicEndPoint = mapped,
 			LocalEndPoint = LocalAddress1
 		});
 	}
@@ -108,8 +90,7 @@ public class Stun3489NatTypeDiscoveryTest
 		_ = session.CreateQuery();
 
 		IPEndPoint changed = new(sameIp ? ServerAddress.Address : ChangedAddress1.Address, samePort ? ServerAddress.Port : ChangedAddress1.Port);
-		StunResponse response = CreateTest1Response(MappedAddress1, changed, ServerAddress, LocalAddress1);
-		await Assert.That(session.GotResponse(response)).IsNull();
+		await Assert.That(session.GotResponse(Response(ServerAddress, MappedAddress1, changed))).IsNull();
 		await Assert.That(session.Result).IsEqualTo(Test1Succeeded with { NatType = NatType.UnsupportedServer });
 	}
 
@@ -122,14 +103,11 @@ public class Stun3489NatTypeDiscoveryTest
 		Stun3489NatTypeDiscovery session = new(ServerAddress);
 		_ = session.CreateQuery();
 
-		// Test I
-		StunResponse r1 = CreateTest1Response(MappedAddress1, ChangedAddress1, ServerAddress, LocalAddress1);
-		await Assert.That(session.GotResponse(r1)).IsNotNull();
+		await Assert.That(session.GotResponse(Test1Response)).IsNotNull();
 
 		// Test II: the server must change both IP and port
 		IPEndPoint remote = new(sameIp ? ServerAddress.Address : ChangedAddress1.Address, samePort ? ServerAddress.Port : ChangedAddress1.Port);
-		StunResponse r2 = CreateMappedResponse(MappedAddress1, remote, LocalAddress1);
-		await Assert.That(session.GotResponse(r2)).IsNull();
+		await Assert.That(session.GotResponse(Response(remote, MappedAddress1))).IsNull();
 		await Assert.That(session.Result).IsEqualTo(Test1Succeeded with { NatType = NatType.UnsupportedServer });
 	}
 
@@ -142,11 +120,9 @@ public class Stun3489NatTypeDiscoveryTest
 		_ = session.CreateQuery();
 
 		// Test I: mapped == local
-		StunResponse r1 = CreateTest1Response(MappedAddress1, ChangedAddress1, ServerAddress, MappedAddress1);
-		await Assert.That(session.GotResponse(r1)).IsNotNull();
+		await Assert.That(session.GotResponse(Response(ServerAddress, MappedAddress1, ChangedAddress1, local: MappedAddress1))).IsNotNull();
 
-		// Test II
-		StunResponse? r2 = receiveResponse ? CreateMappedResponse(MappedAddress1, ChangedAddress1, MappedAddress1) : null;
+		StunResponse? r2 = receiveResponse ? Response(ChangedAddress1, MappedAddress1, local: MappedAddress1) : null;
 		await Assert.That(session.GotResponse(r2)).IsNull();
 		await Assert.That(session.Result).IsEqualTo(new ClassicStunResult
 		{
@@ -163,12 +139,10 @@ public class Stun3489NatTypeDiscoveryTest
 		_ = session.CreateQuery();
 
 		// Test I: mapped != local (NAT detected)
-		StunResponse r1 = CreateTest1Response(MappedAddress1, ChangedAddress1, ServerAddress, LocalAddress1);
-		await Assert.That(session.GotResponse(r1)).IsNotNull();
+		await Assert.That(session.GotResponse(Test1Response)).IsNotNull();
 
 		// Test II: response received from changed address
-		StunResponse r2 = CreateMappedResponse(MappedAddress1, ChangedAddress1, LocalAddress1);
-		await Assert.That(session.GotResponse(r2)).IsNull();
+		await Assert.That(session.GotResponse(Response(ChangedAddress1, MappedAddress1))).IsNull();
 		await Assert.That(session.Result).IsEqualTo(Test1Succeeded with { NatType = NatType.FullCone });
 	}
 
@@ -180,15 +154,13 @@ public class Stun3489NatTypeDiscoveryTest
 		Stun3489NatTypeDiscovery session = new(ServerAddress);
 		_ = session.CreateQuery();
 
-		// Test I
-		StunResponse r1 = CreateTest1Response(MappedAddress1, ChangedAddress1, ServerAddress, LocalAddress1);
-		await Assert.That(session.GotResponse(r1)).IsNotNull();
+		await Assert.That(session.GotResponse(Test1Response)).IsNotNull();
 
 		// Test II: no response
 		await Assert.That(session.GotResponse(null)).IsNotNull();
 
 		// Test I(#2): different mapped address or no response
-		StunResponse? r12 = receiveResponse ? CreateMappedResponse(MappedAddress2, ChangedAddress1, LocalAddress1) : null;
+		StunResponse? r12 = receiveResponse ? Response(ChangedAddress1, MappedAddress2) : null;
 		await Assert.That(session.GotResponse(r12)).IsNull();
 		await Assert.That(session.Result).IsEqualTo(Test1Succeeded with { NatType = expected, PublicEndPoint = receiveResponse ? MappedAddress2 : MappedAddress1 });
 	}
@@ -202,20 +174,35 @@ public class Stun3489NatTypeDiscoveryTest
 		Stun3489NatTypeDiscovery session = new(ServerAddress);
 		_ = session.CreateQuery();
 
-		// Test I
-		StunResponse r1 = CreateTest1Response(MappedAddress1, ChangedAddress1, ServerAddress, LocalAddress1);
-		await Assert.That(session.GotResponse(r1)).IsNotNull();
+		await Assert.That(session.GotResponse(Test1Response)).IsNotNull();
 
 		// Test II: no response
 		await Assert.That(session.GotResponse(null)).IsNotNull();
 
 		// Test I(#2): same mapped address
-		StunResponse r12 = CreateMappedResponse(MappedAddress1, ChangedAddress1, LocalAddress1);
-		await Assert.That(session.GotResponse(r12)).IsNotNull();
+		await Assert.That(session.GotResponse(Response(ChangedAddress1, MappedAddress1))).IsNotNull();
 
 		// Test III: response must come from the same IP and a different port
-		StunResponse? r3 = receiveResponse ? CreateMappedResponse(MappedAddress1, changedPort ? ChangedAddress2 : ServerAddress, LocalAddress1) : null;
+		StunResponse? r3 = receiveResponse ? Response(changedPort ? ChangedAddress2 : ServerAddress, MappedAddress1) : null;
 		await Assert.That(session.GotResponse(r3)).IsNull();
 		await Assert.That(session.Result).IsEqualTo(Test1Succeeded with { NatType = expected });
+	}
+
+	/// <summary>
+	/// Walks through every request the discovery can send and checks its target and CHANGE-REQUEST flags against RFC 3489 §10.1.
+	/// </summary>
+	[Test]
+	public async Task RequestSequence()
+	{
+		Stun3489NatTypeDiscovery session = new(ServerAddress);
+
+		// Test I: no flags
+		await Assert.That(DiscoveryRequest.From(session.CreateQuery())).IsEqualTo(new DiscoveryRequest(ServerAddress));
+		// Test II: changing both IP and port
+		await Assert.That(DiscoveryRequest.From(session.GotResponse(Test1Response))).IsEqualTo(new DiscoveryRequest(ServerAddress, ChangeIp: true, ChangePort: true));
+		// Test I again, after test II gets no response: to CHANGED-ADDRESS
+		await Assert.That(DiscoveryRequest.From(session.GotResponse(null))).IsEqualTo(new DiscoveryRequest(ChangedAddress1));
+		// Test III, after test I gets the same mapping again: changing only the port
+		await Assert.That(DiscoveryRequest.From(session.GotResponse(Response(ChangedAddress1, MappedAddress1)))).IsEqualTo(new DiscoveryRequest(ServerAddress, ChangePort: true));
 	}
 }

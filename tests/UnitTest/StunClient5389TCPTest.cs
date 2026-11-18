@@ -23,7 +23,7 @@ public class StunClient5389TCPTest
 
 	private static readonly IPEndPoint Unreached = new(IPAddress.Loopback, StunServer.DefaultPort);
 
-	private static readonly TimeSpan ShortReceiveTimeout = TimeSpan.FromMilliseconds(500);
+	private static readonly TimeSpan ShortTimeout = TimeSpan.FromMilliseconds(500);
 
 	[Test]
 	[MatrixDataSource]
@@ -47,17 +47,24 @@ public class StunClient5389TCPTest
 	}
 
 	[Test]
-	public async Task BindingTestFailAsync(CancellationToken cancellationToken)
+	[Timeout(10_000)]
+	public async Task BindingTestFailsAtConnectTimeoutAsync(CancellationToken cancellationToken)
 	{
-		IPAddress ip = IPAddress.Parse(@"1.1.1.1");
-		using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(ip, StunServer.DefaultPort), Any);
+		// The listener completes the TCP handshake but never accepts the connection, so the TLS handshake gets no reply
+		using TcpListener server = new(IPAddress.Loopback, 0);
+		server.Start();
+		using IStunClient5389 client = new StunClient5389TCP((IPEndPoint)server.LocalEndpoint, Loopback, new TlsProxy(@"localhost")) { ConnectTimeout = ShortTimeout };
 
+		long start = Stopwatch.GetTimestamp();
 		StunResult5389 response = await client.BindingTestAsync(cancellationToken);
+		TimeSpan elapsed = Stopwatch.GetElapsedTime(start);
 
 		await Assert.That(response).IsEqualTo(new StunResult5389
 		{
 			BindingTestResult = BindingTestResult.Fail
 		});
+		// Only the connect timeout can end the TLS handshake, and not before it elapses (with slack for coarse timers)
+		await Assert.That(elapsed).IsGreaterThanOrEqualTo(ShortTimeout / 2);
 	}
 
 	[Test]
@@ -66,7 +73,7 @@ public class StunClient5389TCPTest
 	public async Task BindingTestReceiveTimeoutAsync([Matrix] bool sendGarbage, CancellationToken cancellationToken)
 	{
 		await using UnresponsiveTcpServer server = new(sendGarbage);
-		using IStunClient5389 client = new StunClient5389TCP(server.EndPoint, Loopback) { ReceiveTimeout = ShortReceiveTimeout };
+		using IStunClient5389 client = new StunClient5389TCP(server.EndPoint, Loopback) { ReceiveTimeout = ShortTimeout };
 
 		long start = Stopwatch.GetTimestamp();
 		StunResult5389 response = await client.BindingTestAsync(cancellationToken);
@@ -78,7 +85,7 @@ public class StunClient5389TCPTest
 		});
 		// The server keeps the connection open, so only the receive timeout can end the request,
 		// and not before it elapses (with slack for coarse timers)
-		await Assert.That(elapsed).IsGreaterThanOrEqualTo(ShortReceiveTimeout / 2);
+		await Assert.That(elapsed).IsGreaterThanOrEqualTo(ShortTimeout / 2);
 		await Assert.That(() => server.ClientClosed).CompletesWithin(TimeSpan.FromSeconds(5));
 	}
 
@@ -170,13 +177,9 @@ public class StunClient5389TCPTest
 	[Test]
 	public async Task FilteringBehaviorTestAsync(CancellationToken cancellationToken)
 	{
-		await Assert.That
-		(async () =>
-			{
-				using IStunClient5389 client = new StunClient5389TCP(new IPEndPoint(IPAddress.Loopback, StunServer.DefaultPort), Any);
-				await client.FilteringBehaviorTestAsync(cancellationToken);
-			}
-		).Throws<NotSupportedException>();
+		using IStunClient5389 client = new StunClient5389TCP(Unreached, Loopback);
+
+		await Assert.That(async () => await client.FilteringBehaviorTestAsync(cancellationToken)).Throws<NotSupportedException>();
 	}
 
 	private static IPEndPoint GetClosedEndPoint()

@@ -40,20 +40,6 @@ public class StunClient5389UDPTest
 	}
 
 	[Test]
-	public async Task BindingTestFailAsync(CancellationToken cancellationToken)
-	{
-		IPAddress ip = IPAddress.Parse(@"1.1.1.1");
-		await using StunClient5389UDP client = new(new IPEndPoint(ip, StunServer.DefaultPort), Any);
-
-		StunResult5389 response = await client.BindingTestAsync(cancellationToken);
-
-		await Assert.That(response).IsEqualTo(new StunResult5389
-		{
-			BindingTestResult = BindingTestResult.Fail
-		});
-	}
-
-	[Test]
 	[Timeout(10_000)]
 	[Arguments(Interference.StrayResponse)]
 	[Arguments(Interference.NotStun)]
@@ -73,9 +59,11 @@ public class StunClient5389UDPTest
 
 	[Test]
 	[Timeout(10_000)]
-	public async Task BindingTestFailsAtReceiveTimeoutWhileOtherDatagramsKeepArrivingAsync(CancellationToken cancellationToken)
+	[Arguments(Interference.None)]
+	[Arguments(Interference.StrayResponse)]
+	public async Task BindingTestFailsAtReceiveTimeoutAsync(Interference interference, CancellationToken cancellationToken)
 	{
-		await using UdpStunServer server = UdpStunServer.Unresponsive(Interference.StrayResponse);
+		await using UdpStunServer server = UdpStunServer.Unresponsive(interference);
 		await using StunClient5389UDP client = new(server.EndPoint, Loopback) { ReceiveTimeout = ShortReceiveTimeout };
 
 		long start = Stopwatch.GetTimestamp();
@@ -84,8 +72,11 @@ public class StunClient5389UDPTest
 
 		using (Assert.Multiple())
 		{
-			await Assert.That(result.BindingTestResult).IsEqualTo(BindingTestResult.Fail);
-			// Unrelated datagrams do not end the wait early (with slack for coarse timers), and restarting it would trip [Timeout]
+			await Assert.That(result).IsEqualTo(new StunResult5389
+			{
+				BindingTestResult = BindingTestResult.Fail
+			});
+			// The wait does not end early (with slack for coarse timers), and unrelated datagrams restarting it would trip [Timeout]
 			await Assert.That(elapsed).IsGreaterThanOrEqualTo(ShortReceiveTimeout / 2);
 		}
 	}

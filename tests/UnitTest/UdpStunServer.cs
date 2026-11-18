@@ -76,7 +76,8 @@ internal sealed class UdpStunServer : IAsyncDisposable
 	}
 
 	/// <summary>
-	/// Never responds. After receiving a request, sends <paramref name="interference"/> every <see cref="RepeatInterval"/> until the server is disposed.
+	/// Never responds. After receiving a request, sends <paramref name="interference"/>, unless it is <see cref="Interference.None"/>,
+	/// every <see cref="RepeatInterval"/> until the server is disposed.
 	/// </summary>
 	public static UdpStunServer Unresponsive(Interference interference)
 	{
@@ -99,6 +100,11 @@ internal sealed class UdpStunServer : IAsyncDisposable
 
 			if (mappedAddress is null)
 			{
+				if (interference is Interference.None)
+				{
+					continue;
+				}
+
 				while (true)
 				{
 					await _socket.SendToAsync(CreateInterference(request, interference), SocketFlags.None, received.RemoteEndPoint, cancellationToken);
