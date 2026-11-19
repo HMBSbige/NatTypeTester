@@ -12,20 +12,15 @@ insert_final_newline = true
 # ReSharper properties
 resharper_blank_lines_around_single_line_auto_property = 1
 resharper_blank_lines_before_block_statements = 1
-resharper_braces_for_ifelse = not_required
 resharper_braces_redundant = false
 resharper_csharp_alignment_tab_fill_style = use_tabs_only
 resharper_csharp_extra_spaces = leave_all
-resharper_csharp_indent_style = tab
-resharper_csharp_insert_final_newline = true
 resharper_csharp_keep_existing_enum_arrangement = false
 resharper_csharp_space_before_trailing_comment = false
 resharper_csharp_wrap_arguments_style = wrap_if_long
 resharper_csharp_wrap_lines = false
 resharper_csharp_wrap_multiple_declaration_style = wrap_if_long
 resharper_for_simple_types = use_explicit_type
-resharper_fsharp_insert_final_newline = false
-resharper_html_insert_final_newline = false
 resharper_instance_members_qualify_declared_in =
 resharper_keep_existing_attribute_arrangement = true
 resharper_keep_existing_initializer_arrangement = false
@@ -33,16 +28,9 @@ resharper_max_initializer_elements_on_line = 1
 resharper_place_accessorholder_attribute_on_same_line = false
 resharper_place_expr_property_on_single_line = true
 resharper_place_field_attribute_on_same_line = false
-resharper_resx_insert_final_newline = false
-resharper_shaderlab_insert_final_newline = false
 resharper_space_within_single_line_array_initializer_braces = true
-resharper_t4_insert_final_newline = false
-resharper_vb_insert_final_newline = false
-resharper_wrap_arguments_style = wrap_if_long
 resharper_wrap_object_and_collection_initializer_style = wrap_if_long
 resharper_xmldoc_indent_text = ZeroIndent
-resharper_xmldoc_insert_final_newline = false
-resharper_xml_insert_final_newline = false
 
 [*.csproj]
 indent_size = 2
@@ -372,6 +360,13 @@ dotnet_naming_style.underscore_camel_case.required_prefix = _
 dotnet_naming_style.underscore_camel_case.required_suffix =
 dotnet_naming_style.underscore_camel_case.word_separator =
 dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+
+#### ReSharper 检查 ####
+
+# 命名由 IDE1006 检查，ReSharper 更严，会误报
+resharper_inconsistent_naming_highlighting = none
+# 与 CA1857 重复
+resharper_constant_expected_highlighting = none
 
 # 不需要的 using 指令。命令行构建只在生成 XML 文档的项目中检查它，没生成文档的项目启用它会报 EnableGenerateDocumentationFile，所以只对 STUN 库启用
 [src/STUN/**.cs]
