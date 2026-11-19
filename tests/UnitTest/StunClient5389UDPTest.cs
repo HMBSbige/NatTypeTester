@@ -96,4 +96,22 @@ public class StunClient5389UDPTest
 			await Assert.That(result.PublicEndPoint).IsEqualTo(Mapped);
 		}
 	}
+
+	[Test]
+	[Timeout(10_000)]
+	public async Task BindingTestAcceptsResponseThatArrivesBeforeReceiveAsync(CancellationToken cancellationToken)
+	{
+		await using UdpStunServer server = UdpStunServer.Responding(Mapped, Interference.None);
+		LateReceiveProxy proxy = new(new NoneUdpProxy(Loopback));
+		await using StunClient5389UDP client = new(server.EndPoint, Loopback, proxy);
+
+		StunResult5389 result = await client.BindingTestAsync(cancellationToken);
+
+		using (Assert.Multiple())
+		{
+			await Assert.That(result.BindingTestResult).IsEqualTo(BindingTestResult.Success);
+			await Assert.That(result.PublicEndPoint).IsEqualTo(Mapped);
+			await Assert.That(result.LocalEndPoint).IsEqualTo(UdpSockets.GetLocalEndPoint(proxy.Client));
+		}
+	}
 }

@@ -19,6 +19,9 @@ internal static class UdpProxyExtensions
 
 			using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+			// .NET 第一次接收时才开启包信息，之前到达的响应没有目的地址，所以在发送前开启
+			EnablePacketInformation(proxy.Client);
+
 			// DTLS 代理在发送时握手，发送也要计时
 			cts.CancelAfter(timeout);
 			await proxy.SendToAsync(buffer.Slice(0, length), SocketFlags.None, remote, cts.Token);
@@ -33,6 +36,12 @@ internal static class UdpProxyExtensions
 		}
 
 		return default;
+	}
+
+	private static void EnablePacketInformation(Socket socket)
+	{
+		SocketOptionLevel level = socket.AddressFamily is AddressFamily.InterNetworkV6 ? SocketOptionLevel.IPv6 : SocketOptionLevel.IP;
+		socket.SetSocketOption(level, SocketOptionName.PacketInformation, true);
 	}
 
 	private static async ValueTask<StunResponse> ReceiveResponseAsync(IUdpProxy proxy, Memory<byte> buffer, StunMessage5389 request, IPEndPoint remote, CancellationToken cancellationToken)
