@@ -55,5 +55,4 @@ public class TlsOverSocks5Proxy(Socks5CreateOption socks5Options, string targetH
 			base.CloseClient();
 		}
 	}
-
 }

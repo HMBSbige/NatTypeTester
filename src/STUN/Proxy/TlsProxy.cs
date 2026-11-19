@@ -59,5 +59,4 @@ public class TlsProxy(string targetHost, bool skipCertificateValidation = false)
 			base.CloseClient();
 		}
 	}
-
 }

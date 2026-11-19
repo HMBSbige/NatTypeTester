@@ -12,10 +12,7 @@ public static class AppBuilderExtensions
 				ArgumentNullException.ThrowIfNull(provider);
 				provider.GetRequiredService<NotificationExceptionHandler>().Install();
 			},
-			withReactiveUIBuilder: static rxBuilder =>
-			{
-				rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSignal);
-			}
+			withReactiveUIBuilder: static rxBuilder => rxBuilder.WithExceptionHandler(NotificationExceptionHandler.ExceptionSignal)
 		);
 	}
 }

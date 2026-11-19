@@ -43,15 +43,13 @@ public sealed partial class ConnectionSettingsViewModel : ViewModelBase
 				static viewModel => viewModel.SkipCertificateValidation
 			),
 			static (appConfig, value) =>
-			{
 				(
 					appConfig.ProxyType,
 					appConfig.ProxyServer,
 					appConfig.ProxyUser,
 					appConfig.ProxyPassword,
 					appConfig.SkipCertificateValidation
-				) = value;
-			}
+				) = value
 		);
 
 		_isInitialized = true;
