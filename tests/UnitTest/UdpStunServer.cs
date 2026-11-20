@@ -88,7 +88,7 @@ internal sealed class UdpStunServer : IAsyncDisposable
 	{
 		byte[] buffer = new byte[0x10000];
 
-		while (true)
+		while (!cancellationToken.IsCancellationRequested)
 		{
 			SocketReceiveFromResult received = await _socket.ReceiveFromAsync(buffer, SocketFlags.None, Any, cancellationToken);
 			StunMessage5389 request = new();

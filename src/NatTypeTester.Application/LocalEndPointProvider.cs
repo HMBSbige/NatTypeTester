@@ -13,7 +13,7 @@ internal sealed class LocalEndPointProvider : ILocalEndPointProvider
 			ToEndPointString(IPAddress.IPv6Any),
 			.. GetLocalAddresses()
 				.OrderBy(static address => address.AddressFamily is AddressFamily.InterNetwork ? 0 : 1)
-				.ThenBy(static address => Convert.ToHexString(address.GetAddressBytes()))
+				.ThenBy(static address => Convert.ToHexString(address.GetAddressBytes()), StringComparer.Ordinal)
 				.Where(uniqueAddresses.Add)
 				.Select(ToEndPointString)
 		];
