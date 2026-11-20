@@ -368,6 +368,10 @@ resharper_inconsistent_naming_highlighting = none
 # 与 CA1857 重复
 resharper_constant_expected_highlighting = none
 
+# TUnit 的 Assert.That 在 await 时运行委托，那时测试的 using 变量还没释放，这项检查在测试中都是误报
+[tests/**.cs]
+resharper_access_to_disposed_closure_highlighting = none
+
 # 不需要的 using 指令。命令行构建只在生成 XML 文档的项目中检查它，没生成文档的项目启用它会报 EnableGenerateDocumentationFile，所以只对 STUN 库启用
 [src/STUN/**.cs]
 dotnet_diagnostic.IDE0005.severity = warning
